@@ -2,6 +2,7 @@
  * UndeadInvasion re-spawn system
  * 
  * Author: ANybakk
+ * Based on previous work by: Eanmig
  */
 
 #include "RulesCore.as";
@@ -203,19 +204,19 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
     CMap@ map = getMap();
     
     //Create an array of handles for survivor spawns
-    CBlob@[] mSurvivorSpawns;
+    CBlob@[] survivorSpawns;
   
     //Check that we have a valid map object reference
     if(map !is null) {
     
       //Retrieve a reference to any survivor spawn blobs
-      getBlobsByTag("survivor_spawn", @mSurvivorSpawns);
+      getBlobsByTag("survivor_spawn", @survivorSpawns);
       
       //Check if at least one spawn exist
-      if(mSurvivorSpawns.length > 0) {
+      if(survivorSpawns.length > 0) {
     
         //Retrieve the location of a random survivor spawn
-        location = mSurvivorSpawns[XORRandom(mSurvivorSpawns.length)].getPosition();
+        location = survivorSpawns[XORRandom(survivorSpawns.length)].getPosition();
       
       }
       

@@ -5,6 +5,7 @@
  * TODO: Spawn additional types of undead?
  * 
  * Author: ANybakk
+ * Based on previous work by: Eanmig
  */
  
 #include "RulesCore.as";

@@ -2,6 +2,7 @@
  * UndeadInvasion mode script
  * 
  * Author: ANybakk
+ * Based on previous work by: Eanmig
  */
 #define SERVER_ONLY
 

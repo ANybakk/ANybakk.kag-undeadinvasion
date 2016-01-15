@@ -15,7 +15,7 @@ const SColor color_player_spawn(255, 211, 249, 193);  //Player spawn (#D3F9C1, s
 
 //Additional stuff to keep track of using offset references
 enum UndeadInvasionPNGLoaderOffset {
-	zombie_poi = offsets_count, //Point of interest (not used)
+  zombie_poi = offsets_count, //Point of interest (not used)
   zombie_offsets_count        //End reference
 };
 
@@ -31,18 +31,18 @@ class UndeadInvasionPNGLoader : PNGLoader {
   /**
    * Constructor
    */
-	UndeadInvasionPNGLoader()	{
+  UndeadInvasionPNGLoader()	{
   
-		super();
+    super();
     
-		//Extend super class' offset reference array with any custom ones
-		int offsetsCountDiff = zombie_offsets_count - offsets_count;
-		while (offsetsCountDiff -- > 0) {
-			offsets.push_back(array<int>(0));
-		}
-    
+    //Extend super class' offset reference array with any custom ones
+    int offsetsCountDiff = zombie_offsets_count - offsets_count;
+    while (offsetsCountDiff -- > 0) {
+      offsets.push_back(array<int>(0));
+    }
+
     //Finished
-    
+
 	}
   
   
