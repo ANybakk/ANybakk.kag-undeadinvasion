@@ -135,7 +135,7 @@ shared class UndeadInvasionRulesCore : RulesCore {
       mUndeadAvailable = mUndeadCountLimit;
       
       //Store maximum portal health
-      mPortalMaxHealth = mPortals[0].health;
+      mPortalMaxHealth = mPortals[0].getHealth();
       
     }
     
@@ -149,7 +149,7 @@ shared class UndeadInvasionRulesCore : RulesCore {
         CBlob@ portal;
       
         //Iterate over all portals
-        for(var i=0; i<mPortals.length; i++) {
+        for(int i=0; i<mPortals.length; i++) {
           
           //Check whether there are any undead available for spawning
           if(mUndeadAvailable <= 0) {
@@ -159,12 +159,12 @@ shared class UndeadInvasionRulesCore : RulesCore {
           } else {
       
             //Keep a reference to the portal blob object
-            portal = mPortals[i];
+            @portal = mPortals[i];
             
             //Every 4th second, check whether the portal's health is 3/4 - 4/4
             if(
                 lapsedTime % (getTicksASecond() * 4) == 0 
-                && portal.health >=(mPortalMaxHealth * 3/4)) {
+                && portal.getHealth() >=(mPortalMaxHealth * 3/4)) {
               
               //Spawn undead
               server_CreateBlob( "Zombie", -1, portal.getPosition());
@@ -180,8 +180,8 @@ shared class UndeadInvasionRulesCore : RulesCore {
             //Every 3rd second, check whether the portal's health is 2/4 - 3/4
             else if(
                 lapsedTime % (getTicksASecond() * 3) == 0 
-                && portal.health >=(mPortalMaxHealth * 2/4)
-                && portal.health < (mPortalMaxHealth * 3/4)) {
+                && portal.getHealth() >=(mPortalMaxHealth * 2/4)
+                && portal.getHealth() < (mPortalMaxHealth * 3/4)) {
               
               //Spawn undead
               server_CreateBlob( "Zombie", -1, portal.getPosition());
@@ -197,8 +197,8 @@ shared class UndeadInvasionRulesCore : RulesCore {
             //Every 2nd second, check whether the portal's health is 1/4 - 2/4
             else if(
                 lapsedTime % (getTicksASecond() * 2) == 0 
-                && portal.health >=(mPortalMaxHealth * 1/4)
-                && portal.health < (mPortalMaxHealth * 2/4)) {
+                && portal.getHealth() >=(mPortalMaxHealth * 1/4)
+                && portal.getHealth() < (mPortalMaxHealth * 2/4)) {
               
               //Spawn undead
               server_CreateBlob( "Zombie", -1, portal.getPosition());
@@ -212,7 +212,7 @@ shared class UndeadInvasionRulesCore : RulesCore {
             }
             
             //Every second, check whether the portal's health is below 2/4
-            else if(portal.health < (mPortalMaxHealth * 1/4)) {
+            else if(portal.getHealth() < (mPortalMaxHealth * 1/4)) {
             
               //Spawn undead
               server_CreateBlob( "Zombie", -1, portal.getPosition());
@@ -242,3 +242,5 @@ shared class UndeadInvasionRulesCore : RulesCore {
     //Finished
 
   }
+
+}

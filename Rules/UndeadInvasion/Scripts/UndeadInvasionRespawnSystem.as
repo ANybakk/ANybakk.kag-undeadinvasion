@@ -1,6 +1,12 @@
 /*
  * UndeadInvasion re-spawn system
  * 
+ * This script handles anything related to player/survivor spawning.
+ * Players are spawned at survivor spawns, or in the middle of the map if no
+ * spawn exists. Players are kept in a simple queue until they can spawn, which 
+ * is during day-time. If the game is in warm-up mode, the game will start when 
+ * a player/survivor is spawned.
+ * 
  * Author: ANybakk
  * Based on previous work by: Eanmig
  */
@@ -15,8 +21,8 @@
  * Represents the re-spawn functionality
  */
 shared class UndeadInvasionRespawnSystem : RespawnSystem {
-	
-  
+
+
   
   //Keep a record of info objects for players waiting to spawn
   PlayerInfo@[] mPlayerInfoSpawnQueue;
@@ -42,14 +48,14 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
    */
   void Update() {
       
-    //Create a handle to player info
+    //Create a handle to player info object
     PlayerInfo@ playerInfo;
-      
+    
     //Iterate through all team spawns
-    for (int i = 0; i < core.players.length; i++) {
+    for (int i = 0; i < mPlayerInfoSpawnQueue.length; i++) {
     
       //Save reference to player info
-      playerInfo = core.players.spawns[i];
+      playerInfo = mPlayerInfoSpawnQueue[i];
       
       //Spawn player
       DoSpawnPlayer(playerInfo);
@@ -169,7 +175,7 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
     }
     
     //Calculate lapsed time since game started
-    int lapsedTime = core.mCurrentTime - core.mStartTime;
+    int lapsedTime = cast<UndeadInvasionRulesCore@>(core).mCurrentTime - cast<UndeadInvasionRulesCore@>(core).mStartTime;
     
     //Determine day cycle time
     int dayCycleTime = core.rules.daycycle_speed * 60 * getTicksASecond();
@@ -221,7 +227,7 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
       }
       
       //Check if no spawns exists
-      else if {
+      else {
       
         //Calculate the x-coordinate for the middle of the map
         f32 xLocation = map.tilemapwidth * map.tilesize / 2;
@@ -239,4 +245,4 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
     
   }
   
-};
+}

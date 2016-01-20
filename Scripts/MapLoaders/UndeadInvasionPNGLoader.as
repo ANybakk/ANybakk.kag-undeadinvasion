@@ -1,6 +1,9 @@
 /*
  * UndeadInvasion map loader
  * 
+ * This script takes care of loading UndeadInvasion maps. What makes the maps 
+ * different is that they can contain survivor spawns and undead spawns.
+ * 
  * Author: ANybakk
  */
 
@@ -8,8 +11,8 @@
 
 
 
-const SColor color_zombie_spawn(255, 113,  13, 113);  //Zombie spawn (#710D71)
-const SColor color_player_spawn(255, 211, 249, 193);  //Player spawn (#D3F9C1, same as WAR hall)
+const SColor color_undead_spawn  (255, 113,  13, 113);  //Zombie spawn (#710D71)
+const SColor color_survivor_spawn(255, 211, 249, 193);  //Player spawn (#D3F9C1, same as WAR hall)
 
 
 
@@ -58,24 +61,23 @@ class UndeadInvasionPNGLoader : PNGLoader {
     //Keep a handle for any blob that might be spawned
     CBlob@ spawnedBlob;
     
-    //Compare the color value of the map for possible matches, and do the appropriate thing
-    switch(color_pixel) {
-    
-      case color_zombie_spawn:
+    //Check if the color value of the map matches undead spawn
+    if(color_pixel == color_undead_spawn) {
       
-        spawnedBlob = spawnBlob(map, "zombie_spawn", offset, -1); //Spawn blob
-				//spawnedBlob.AddScript("abc.as");                          //Add behaviour through a script
-				//spawnedBlob.Tag("script added");
+        @spawnedBlob = spawnBlob(map, "zombie_spawn", offset, -1); //Spawn blob
+				//@spawnedBlob.AddScript("abc.as");                          //Add behaviour through a script
+				//@spawnedBlob.Tag("script added");
         offsets[autotile_offset].push_back(offset);               //Store offset reference, generic
-        break;
         
-      case color_player_spawn:
+    }
+    
+    //Check if the color value of the map matches survivor spawn
+    else if(color_pixel == color_survivor_spawn) {
       
-        spawnedBlob = spawnBlob(map, "hall", offset, -1);         //Spawn blob
-				//spawnedBlob.AddScript("abc.as");                          //Add behaviour through a script
-				//spawnedBlob.Tag("script added");
+        @spawnedBlob = spawnBlob(map, "hall", offset, -1);         //Spawn blob
+				//@spawnedBlob.AddScript("abc.as");                          //Add behaviour through a script
+				//@spawnedBlob.Tag("script added");
         offsets[autotile_offset].push_back(offset);               //Store offset reference, generic
-        break;
         
     }
     
@@ -104,16 +106,3 @@ class UndeadInvasionPNGLoader : PNGLoader {
   
   
 }
-
-
-
-/*
-bool LoadMap(CMap@ map, const string& in fileName)
-{
-	print("LOADING WAR PNG MAP " + fileName);
-
-	WarPNGLoader loader();
-
-	return loader.loadMap(map , fileName);
-}
-*/

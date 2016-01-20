@@ -1,6 +1,8 @@
 /*
  * UndeadInvasion Zombie brain modes
  * 
+ * Defines a brain mode enumeration used by the brain.
+ * 
  * Author: ANybakk
  */
 

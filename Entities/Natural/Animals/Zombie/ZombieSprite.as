@@ -1,5 +1,7 @@
 /*
- * UndeadInvasion Zombie sprite (and sounds)
+ * UndeadInvasion Zombie sprite
+ * 
+ * This scripts handles anything to do with sprites, gibs and sounds.
  * 
  * Author: ANybakk
  * Based on previous work by: Eanmig
@@ -60,6 +62,7 @@ void onTick(CSprite@ this) {
       
     }
     
+    /*
     //Check if climb variable is set higher than 1
     else if(blob.get_s32("climb") > 1 ) {
     
@@ -71,9 +74,10 @@ void onTick(CSprite@ this) {
       }
       
     }
+    */
     
-    //Check if blob object has "chomping" tag and biting animation is not active
-    else if( blob.hasTag("chomping") && !this.isAnimation("bite")) {
+    //Check if blob object has "biting" tag and biting animation is not active
+    else if(blob.hasTag("biting") && !this.isAnimation("bite")) {
     
       //Play biting sound
       this.PlaySound("/ZombieBite");
@@ -84,8 +88,6 @@ void onTick(CSprite@ this) {
       return;
       
     }
-    
-    
     
     //Check if horizontal velocity surpasses 0.1
     else if(Maths::Abs(x) > 0.1f) {
@@ -112,6 +114,39 @@ void onTick(CSprite@ this) {
         
       }
       
+      //Check if currently on the ground and moving either left or right
+      //COMMENT: Instead of checking for key presses, perhaps it would be possible to interact with the CMovement object, but it's undocumented
+      if(blob.isOnGround() && (blob.isKeyPressed(key_left) || blob.isKeyPressed(key_right)) ) {
+      
+        //Every 9th frame (network id dependant offset)
+        if((blob.getNetworkID() + getGameTime()) % 9 == 0) {
+          
+          //Determine sound volume based on current horizontal velocity (maximum 1.0)
+          f32 soundVolume = Maths::Min( 0.1f + Maths::Abs(blob.getVelocity().x)*0.1f, 1.0f );
+          
+          //Retrieve a tile object for the tile below (vertical distance 4.0)
+          TileType tile = blob.getMap().getTile( blob.getPosition() + Vec2f( 0.0f, blob.getRadius() + 4.0f )).type;
+          
+          //Check if tile is considered the ground
+          if(blob.getMap().isTileGroundStuff(tile)) {
+          
+            //Play earth step sound
+            this.PlaySound("/EarthStep", soundVolume, 0.75f );
+            
+          }
+          
+          //Otherwise, when tile is not the ground
+          else {
+          
+            //Play stone step sound
+            this.PlaySound("/StoneStep", soundVolume, 0.75f );
+            
+          }
+          
+        }
+          
+      }
+
       //Check if idle animation is not active
       if(!this.isAnimation("idle")) {
       
@@ -135,12 +170,6 @@ void onTick(CSprite@ this) {
       
       //Play death sound
       this.PlaySound( "/ZombieDie" );
-      
-      //Set shape friction to 0.75
-      blob.getShape().setFriction( 0.75f );
-      
-      //Set shape elasticity to 0.2
-      blob.getShape().setElasticity( 0.2f );
       
     }
     

@@ -1,136 +1,204 @@
-
-//script for a LandCritter - attach to:
-// blob
-// movement
-// 		vars:		f32 swimspeed f32 swimforce
-
+/*
+ * UndeadInvasion Zombie movement
+ * 
+ * This script handles anything to do with movement. A zombie will move either 
+ * left or right, and if an obstacle is found, a jump is performed.
+ * 
+ * Author: ANybakk
+ * Based on previous work by: Eanmig
+ */
 
 #define SERVER_ONLY
 
-#include "Hitters.as";
 
-shared class CritterVars
-{
+
+const f32 movement_factor_water_x = 0.23f;
+const f32 movement_factor_water_y = 0.23f;
+
+
+
+/**
+ * Variable collection class
+ */
+shared class ZombieMovementVariables {
 	Vec2f walkForce;  
-	Vec2f runForce;
-	Vec2f slowForce;
-	Vec2f jumpForce;
+	Vec2f runAcceleration;
+	Vec2f slowFactor;
+	Vec2f jumpAcceleration;
 	f32 maxVelocity;
 };
 
-//blob
-void onInit(CBlob@ this)
-{
-	CritterVars vars;
-	//walking vars
-	float difficulty = getRules().get_f32("difficulty")/4.0;
-	if (difficulty<1.0) difficulty=1.0;
-	if (difficulty>3.0) difficulty=3.0;
-	vars.walkForce.Set(difficulty*4.0f,0.0f);
-	vars.runForce.Set(difficulty*4.0f,0.0f);
-	vars.slowForce.Set(difficulty*2.0f,0.0f);
-	vars.jumpForce.Set(0.0f,-1.6f);
-	vars.maxVelocity = difficulty*0.5f;
-	this.set( "vars", vars );
 
-	// force no team
-	this.server_setTeamNum(-1);
 
-	this.getCurrentScript().runFlags |= Script::tick_not_attached;
-	this.getCurrentScript().removeIfTag	= "dead";
-	this.set_s32("climb",0);
-}
+/**
+ * Initialization event funcion
+ */
+void onInit(CMovement@ this) {
 
-//movement
-void onInit( CMovement@ this )
-{
-	//this.getCurrentScript().runFlags |= Script::tick_blob_in_proximity;
-	this.getCurrentScript().runFlags |= Script::tick_not_attached;
-	//this.getCurrentScript().runProximityTag = "player";
-	//this.getCurrentScript().runProximityRadius = 120.0f;
-	this.getCurrentScript().removeIfTag	= "dead";   
-}
+  //Obtain a reference to the blob object
+  CBlob@ blob = this.getBlob();
 
-void onTick( CMovement@ this )
-{
-    CBlob@ blob = this.getBlob();
-	int difficulty = getRules().get_f32("difficulty")*4.0;
-	CritterVars@ vars;
-	if (!blob.get( "vars", @vars ))
-		return;
-	if (blob.getHealth() <= 0.0) return; // dead
-	const bool left = blob.isKeyPressed(key_left);
-	const bool right = blob.isKeyPressed(key_right);
-	bool up = blob.isKeyPressed(key_up);
+  //Create variable collection
+	ZombieMovementVariables movementVariables;
+  
+  //Set walking force variable 
+  movementVariables.walkForce.Set( 4.0f, 0.0f  );
 
-	Vec2f vel = blob.getVelocity();
-	if (left) {
-		//warn("Force"+vars.walkForce.x);
-		blob.AddForce(Vec2f( -1.0f * vars.walkForce.x, vars.walkForce.y));
-	}
-	if (right) {
-		blob.AddForce(Vec2f( 1.0f * vars.walkForce.x, vars.walkForce.y));
-	}
+  //Set running force variable 
+  movementVariables.runAcceleration.Set(  4.0f, 0.0f  );
 
-	// jump if blocked
+  //Set slowing force variable 
+  movementVariables.slowFactor.Set( 2.0f, 0.0f  );
 
-	if (left || right || up)
-	{
-		Vec2f pos = blob.getPosition();
-		CMap@ map = blob.getMap();
-		const f32 radius = blob.getRadius();
-		
-		if (blob.isOnGround()) blob.set_s32("climb",1);
-		
-		if (
-		(blob.isOnGround() || blob.isInWater()) && 
-		(up || (right && map.isTileSolid( Vec2f( pos.x + (radius+1.0f), pos.y ))) || (left && map.isTileSolid( Vec2f( pos.x - (radius+1.0f), pos.y )))))
-		{ 
-			f32 mod = blob.isInWater() ? 0.23f : 1.0f;
-			blob.AddForce(Vec2f( mod*vars.jumpForce.x*blob.getMass(), mod*vars.jumpForce.y*blob.getMass()));
-			blob.set_s32("climb",1);
-		} else
-		if (( (right && map.isTileSolid( Vec2f( pos.x + (radius+1.0f), pos.y ))) || (left && map.isTileSolid( Vec2f( pos.x - (radius+1.0f), pos.y )))))
-		{
-			s32 climb = blob.get_s32("climb");
-			if ((climb>0))
-			{
-				f32 mod = blob.isInWater() ? 0.23f : 1.0f;
-				blob.AddForce(Vec2f( mod*vars.jumpForce.x*blob.getMass()/2.2, mod*vars.jumpForce.y*blob.getMass()/2.2));
-				climb++;
-				if (XORRandom(10+difficulty) == 0) climb=0;
-				blob.set_s32("climb",climb);
-				
-			}
-		}
-		blob.Sync("climb",true);
-	}
+  //Set jumping force variable 
+  movementVariables.jumpAcceleration.Set( 0.0f, -1.6f );
 
-	CShape@ shape = blob.getShape();
+  //Set maximum force variable 
+  movementVariables.maxVelocity =  0.5f;
+  
+  //Store variable collection
+	blob.set("movement-variables", movementVariables);
+  
+  //Store climbing counting variable to 0
+	//this.set_s32("movement-climb", 0);
 
-	// too fast - slow down
-	if (shape.vellen > vars.maxVelocity)
-	{		  
-		Vec2f vel = blob.getVelocity();
-		blob.AddForce( Vec2f(-vel.x * vars.slowForce.x, -vel.y * vars.slowForce.y) );
-	}
+  //Set tick not attached flag
+  this.getCurrentScript().runFlags |= Script::tick_not_attached;
+  
+  //Set remove on "dead" tag
+  this.getCurrentScript().removeIfTag	= "dead";
+  
 }
 
 
 
-//Footstep sounds ("this" is the blob object:)
-	if (this.isOnGround() && (this.isKeyPressed(key_left) || this.isKeyPressed(key_right)) )
-	{
-		if ((this.getNetworkID() + getGameTime()) % 9 == 0)
-		{
-			f32 volume = Maths::Min( 0.1f + Maths::Abs(this.getVelocity().x)*0.1f, 1.0f );
-			TileType tile = this.getMap().getTile( this.getPosition() + Vec2f( 0.0f, this.getRadius() + 4.0f )).type;
+/**
+ * Tick event function
+ */
+void onTick(CMovement@ this) {
 
-			if (this.getMap().isTileGroundStuff( tile )) {
-				this.getSprite().PlaySound("/EarthStep", volume, 0.75f );
-			}
-			else {
-				this.getSprite().PlaySound("/StoneStep", volume, 0.75f );
-			}
-		}
-	}
+  //Retrieve blob object reference
+  CBlob@ blob = this.getBlob();
+  
+  //Retrieve movement variable collection
+  ZombieMovementVariables@ movementVariables;
+  
+  //Check that movement variables can be retrieved
+  if (!blob.get( "movement-variables", @movementVariables )) {
+  
+    //Stop (does not have the necessary variables)
+    return;
+    
+  }
+  
+  //Check if health is depleted
+  //TODO: Isn't this redundant?
+  if (blob.getHealth() <= 0.0) {
+  
+    //Stop (dead)
+    return;
+    
+  }
+  
+  //Retrieve left key action
+  const bool leftAction = blob.isKeyPressed(key_left);
+  
+  //Retrieve right key action
+  const bool rightAction = blob.isKeyPressed(key_right);
+  
+  //Retrieve up key action
+  bool upAction = blob.isKeyPressed(key_up);
+
+  //Retrieve velocity
+  Vec2f vel = blob.getVelocity();
+  
+  //Check if left key action
+  if(leftAction) {
+  
+    //Add a force to the left
+    blob.AddForce(Vec2f( -1.0f * movementVariables.walkForce.x, movementVariables.walkForce.y));
+    
+  }
+  
+  //Check if right key action
+  if(rightAction) {
+  
+    //Add a force to the right
+    blob.AddForce(Vec2f( 1.0f * movementVariables.walkForce.x, movementVariables.walkForce.y));
+    
+  }
+
+  // jump if blocked
+
+  //Check if either left, right or up action
+  if (leftAction || rightAction || upAction) {
+  
+    //Retrieve current position
+    Vec2f currentPosition = blob.getPosition();
+    
+    //Retrieve map object reference
+    CMap@ map = blob.getMap();
+    
+    //Retrieve radius
+    const f32 radius = blob.getRadius();
+    
+    //
+    //if (blob.isOnGround()) blob.set_s32("climb",1);
+    
+    //Check if currently on ground or in water
+    if((blob.isOnGround() || blob.isInWater())) {
+    
+      //Determine left blocked status
+      bool leftBlocked = map.isTileSolid( Vec2f( currentPosition.x - (radius+1.0f), currentPosition.y ));
+      
+      //Determine right blocked status
+      bool rightBlocked = map.isTileSolid( Vec2f( currentPosition.x + (radius+1.0f), currentPosition.y ));
+      
+      //Check if action is up or action is blocked by a solid object
+      if(upAction || (leftAction && leftBlocked) || (rightAction && rightBlocked)) {
+      
+        //Create a environmental factor
+        Vec2f environmentalFactor(1.0f, 1.0f);
+        
+        //Check if currently in water
+        if(blob.isInWater()) {
+        
+          //Set environmental factor
+          environmentalFactor.Set(movement_factor_water_x, movement_factor_water_y);
+        }
+        
+        //Calculate horizontal force
+        f32 horizontalForce = blob.getMass() * movementVariables.jumpAcceleration.x * environmentalFactor.x;
+        
+        //Calculate vertical force
+        f32 verticalForce = blob.getMass() * movementVariables.jumpAcceleration.y * environmentalFactor.y;
+        
+        //Add a jumping force
+        blob.AddForce(Vec2f( horizontalForce, verticalForce));
+        
+        //blob.set_s32("climb",1);
+      
+      }
+    
+    }
+    
+  }
+  
+  //Retrieve a reference to the shape object
+  CShape@ shape = blob.getShape();
+
+  //Check if velocity exceeds the maximum velocity variable
+  //COMMENT: Why not blob.getVelocity()? CShape is undocumented.
+  if(shape.vellen > movementVariables.maxVelocity) {
+  
+    //Retrieve current velocity
+    Vec2f velocity = blob.getVelocity();
+    
+    //Add a slowing-down force
+    blob.AddForce( Vec2f(-velocity.x * movementVariables.slowFactor.x, -velocity.y * movementVariables.slowFactor.y) );
+    
+  }
+  
+  //Finished
+  
+}

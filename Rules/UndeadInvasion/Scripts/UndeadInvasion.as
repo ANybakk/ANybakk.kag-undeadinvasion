@@ -20,7 +20,7 @@ void onRestart(CRules@ rules) {
   UndeadInvasionRespawnSystem respawnSystem();
   
   //Initialize the rules core
-  UndeadInvasionRulesCore rulesCore(rules, respawnSystem());
+  UndeadInvasionRulesCore rulesCore(rules, respawnSystem);
   
   //Generate a string path to the configuration file
   string configPath = "../Mods/" + sv_gamemode + "/Rules/" + sv_gamemode + "/vars.cfg";
@@ -35,7 +35,7 @@ void onRestart(CRules@ rules) {
   if (gameDuration <= 0) {
     
     //Register zero duration
-    rulesCore.mGameDuration = 0;
+    //rulesCore.mGameDuration = 0;
     
     //Set no timer flag
     rules.set_bool("no timer", true);
@@ -43,7 +43,7 @@ void onRestart(CRules@ rules) {
   } else {
   
     //Calculate game duration
-    rulesCore.mGameDuration = (getTicksASecond() * 60 * gameDuration); //TODO: Is this variable ever read?
+    //rulesCore.mGameDuration = (getTicksASecond() * 60 * gameDuration); //TODO: Is this variable ever read?
     
   }
 	
@@ -51,16 +51,16 @@ void onRestart(CRules@ rules) {
   rules.set_s32("undead_count_limit", cfg.read_s32("undead_count_limit",125));
   
   //Register player spawn time
-  rulesCore.mSpawnTime = (getTicksASecond() * cfg.read_s32("spawn_time", 30)); //TODO: Is this variable ever read?
+  //rulesCore.mSpawnTime = (getTicksASecond() * cfg.read_s32("spawn_time", 30)); //TODO: Is this variable ever read?
   
   //Connect rules core
   rules.set("core", @rulesCore);
   
   //Set new start time
-  rules.set("start_gametime", getGameTime() + rulesCore.mWarmUpTime);
+  //rules.set("start_gametime", getGameTime() + rulesCore.mWarmUpTime);
   
   //Set new end time
-  rules.set_u32("game_end_time", getGameTime() + rulesCore.mGameDuration); //for TimeToEnd.as
+  rules.set_u32("game_end_time", getGameTime() + gameDuration); //for TimeToEnd.as
   
 }
 
