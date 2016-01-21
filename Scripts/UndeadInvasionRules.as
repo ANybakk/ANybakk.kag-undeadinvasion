@@ -1,5 +1,5 @@
 /*
- * UndeadInvasion mode script
+ * UndeadInvasion rules script
  * 
  * Should replace KAG.as
  * 
@@ -20,10 +20,10 @@
  */
 void onInit(CRules@ this) {
 
-  print("[UndeadInvasion:onInit] Registering map loading script.");
+  print("[UndeadInvasion:onInit]");
 
   //Register custom script for loading PNG map files
-  RegisterFileExtensionScript("Scripts/MapLoaders/UndeadInvasionMap.as", "png");
+  RegisterFileExtensionScript("Scripts/UndeadInvasionMap.as", "png");
   
   LoadDefaultGUI();
   
@@ -44,12 +44,16 @@ void onInit(CRules@ this) {
   driver.AddShader("hq2x", 1.0f);
   driver.SetShader("hq2x", true);
   
+  //Add team commands
+  //this.addCommandID("pick default");
+  //this.addCommandID("pick spawn");
+  
 }
 
 
 
 /*
- * Restart function (hook?)
+ * Restart event function
  */
 void onRestart(CRules@ rules) {
   
@@ -100,11 +104,3 @@ void onRestart(CRules@ rules) {
   rules.set_u32("game_end_time", getGameTime() + gameDuration); //for TimeToEnd.as
   
 }
-
-
-/*
-void spawnPortal(Vec2f pos)
-{
-	server_CreateBlob("ZombiePortal",-1,pos+Vec2f(0,-24.0));
-}
-*/

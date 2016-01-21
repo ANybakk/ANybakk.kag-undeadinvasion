@@ -15,7 +15,7 @@
  */
 bool LoadMap(CMap@ map, const string& in fileName) {
 
-  print("[UndeadInvasionMap:LoadMap] Loading map " + fileName);
+  print("[UndeadInvasionMap:LoadMap] fileName=" + fileName);
 
   UndeadInvasionPNGLoader loader();
 
