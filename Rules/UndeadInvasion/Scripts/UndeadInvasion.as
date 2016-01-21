@@ -1,6 +1,8 @@
 /*
  * UndeadInvasion mode script
  * 
+ * Should replace KAG.as
+ * 
  * Author: ANybakk
  * Based on previous work by: Eanmig
  */
@@ -8,6 +10,41 @@
 
 #include "UndeadInvasionRulesCore.as";
 #include "UndeadInvasionRespawnSystem.as";
+
+#include "Default/DefaultGUI.as"
+
+
+
+/**
+ * Initialization event function. Copied from KAG.as, but with custom map loader
+ */
+void onInit(CRules@ this) {
+
+  print("[UndeadInvasion:onInit] Registering map loading script.");
+
+  //Register custom script for loading PNG map files
+  RegisterFileExtensionScript("Scripts/MapLoaders/UndeadInvasionMap.as", "png");
+  
+  LoadDefaultGUI();
+  
+  sv_gravity = 9.81f;
+  particles_gravity.y = 0.25f;
+  v_camera_ints = true;
+  sv_visiblity_scale = 1.25f;
+  cc_halign = 2;
+  cc_valign = 2;
+
+  s_effects = false;
+
+  sv_max_localplayers = 1;
+
+  //smooth shader
+  Driver@ driver = getDriver();
+
+  driver.AddShader("hq2x", 1.0f);
+  driver.SetShader("hq2x", true);
+  
+}
 
 
 
