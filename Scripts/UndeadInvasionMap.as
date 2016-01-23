@@ -13,12 +13,12 @@
 /**
  * Loading function
  */
-bool LoadMap(CMap@ map, const string& in fileName) {
+bool LoadMap(CMap@ this, const string& in fileName) {
 
   print("[UndeadInvasionMap:LoadMap] fileName=" + fileName);
 
   UndeadInvasionPNGLoader loader();
 
-  return loader.loadMap(map, fileName);
+  return loader.loadMap(this, fileName);
   
 }

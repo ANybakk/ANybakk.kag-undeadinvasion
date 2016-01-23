@@ -10,10 +10,7 @@
 
 #define SERVER_ONLY
 
-
-
-const f32 movement_factor_water_x = 0.23f;
-const f32 movement_factor_water_y = 0.23f;
+#include "ZombieVariables.as";
 
 
 
@@ -164,7 +161,7 @@ void onTick(CMovement@ this) {
         if(blob.isInWater()) {
         
           //Set environmental factor
-          environmentalFactor.Set(movement_factor_water_x, movement_factor_water_y);
+          environmentalFactor.Set(ZombieVariables::MOVEMENT_FACTOR_WATER_X, ZombieVariables::MOVEMENT_FACTOR_WATER_Y);
         }
         
         //Calculate horizontal force

@@ -7,16 +7,15 @@
  * Author: ANybakk
  */
 
+
+#include "UndeadInvasionPNGLoaderVariables.as";
+
 #include "BasePNGLoader.as";
 
 
 
-const SColor color_undead_spawn  (255, 113,  13, 113);  //Zombie spawn (#710D71)
-const SColor color_survivor_spawn(255, 211, 249, 193);  //Player spawn (#D3F9C1, same as WAR hall)
-
-
-
 //Additional stuff to keep track of using offset references
+//Kept here because it needs to extend offset enumeration in BasePNGLoader.as
 enum UndeadInvasionPNGLoaderOffset {
   zombie_poi = offsets_count, //Point of interest (not used)
   zombie_offsets_count        //End reference
@@ -29,6 +28,7 @@ enum UndeadInvasionPNGLoaderOffset {
  * Loads maps for Zombie mode
  */
 class UndeadInvasionPNGLoader : PNGLoader {
+
 
 
   /**
@@ -62,9 +62,9 @@ class UndeadInvasionPNGLoader : PNGLoader {
     CBlob@ spawnedBlob;
     
     //Check if the color value of the map matches undead spawn
-    if(color_pixel == color_undead_spawn) {
+    if(color_pixel == UndeadInvasionPNGLoaderVariables::COLOR_UNDEAD_SPAWN) {
       
-        @spawnedBlob = spawnBlob(map, "zombie_spawn", offset, -1); //Spawn blob
+        @spawnedBlob = spawnBlob(map, "UndeadSpawn", offset, -1); //Spawn blob
 				//@spawnedBlob.AddScript("abc.as");                          //Add behaviour through a script
 				//@spawnedBlob.Tag("script added");
         offsets[autotile_offset].push_back(offset);               //Store offset reference, generic
@@ -72,9 +72,9 @@ class UndeadInvasionPNGLoader : PNGLoader {
     }
     
     //Check if the color value of the map matches survivor spawn
-    else if(color_pixel == color_survivor_spawn) {
+    else if(color_pixel == UndeadInvasionPNGLoaderVariables::COLOR_SURVIVOR_CAMP) {
       
-        @spawnedBlob = spawnBlob(map, "hall", offset, -1);         //Spawn blob
+        @spawnedBlob = spawnBlob(map, "SurvivorCamp", offset, -1);         //Spawn blob
 				//@spawnedBlob.AddScript("abc.as");                          //Add behaviour through a script
 				//@spawnedBlob.Tag("script added");
         offsets[autotile_offset].push_back(offset);               //Store offset reference, generic
@@ -102,7 +102,5 @@ class UndeadInvasionPNGLoader : PNGLoader {
   
   
   //Class declaration done
-  
-  
   
 }

@@ -6,10 +6,15 @@
  * Author: ANybakk
  */
 
-/**
- * Enumeration for a zombie's mode
- */
-enum ZombieBrainMode {
-	BRAINMODE_INVADING = 0,
-	BRAINMODE_TARGETING
+namespace ZombieBrainMode {
+
+
+  /**
+   * Enumeration for a zombie's mode
+   */
+  enum Mode {
+    MODE_INVADING = 0,
+    MODE_TARGETING
+  }
+
 }

@@ -20,19 +20,10 @@
 
 #define SERVER_ONLY
 
+#include "ZombieVariables.as";
 #include "ZombieBrainMode.as";
+
 #include "Hitters.as";
-
-
-
-//Define a delay of 5 frames
-const u8 brain_delay = 5; //TODO: Define in terms of seconds (float)
-
-//Define a target radius of 32.0
-const f32 brain_target_radius = 32.0f;
-
-//Define an attack frequency of 2 seconds
-const u8 brain_attack_frequency = 2;
 
 
 
@@ -45,16 +36,16 @@ void onInit(CBrain@ this) {
   CBlob@ blob = this.getBlob();
   
   //Set delay variable
-  blob.set_u8("brain_delay", brain_delay);
+  blob.set_u8("brain_delay", ZombieVariables::BRAIN_DELAY);
   
   //Set mode variable to invading
-  blob.set_u8("brain_mode", BRAINMODE_INVADING);
+  blob.set_u8("brain_mode", ZombieBrainMode::MODE_INVADING);
   
   //Set targeting radius variable
-  blob.set_u8("brain_target_radius", brain_target_radius);
+  blob.set_u8("brain_target_radius", ZombieVariables::BRAIN_TARGET_RADIUS);
   
   //Set attack frequency variable
-  blob.set_u8("brain_attack_frequency", brain_attack_frequency*getTicksASecond());
+  blob.set_u8("brain_attack_frequency", ZombieVariables::BRAIN_ATTACK_FREQUENCY*getTicksASecond());
   
   //Set attack time tracking variable to current time
   blob.set_u16("brain_attack_time", getGameTime());
@@ -103,7 +94,7 @@ void onTick(CBrain@ this) {
   if(brainDelay == 0) {
     
     //Reset delay tracker
-    brainDelay = brain_delay;
+    brainDelay = ZombieVariables::BRAIN_DELAY;
     
     //Reset biting status tag
     blob.Untag("biting");
@@ -115,7 +106,7 @@ void onTick(CBrain@ this) {
     u8 brainMode = blob.get_u8("brain_mode");
     
     //Check if mode is invading mode
-    if(brainMode == BRAINMODE_INVADING) {
+    if(brainMode == ZombieBrainMode::MODE_INVADING) {
     
       //Create an array of blob target references
       CBlob@[] potentialTargets;
@@ -147,7 +138,7 @@ void onTick(CBrain@ this) {
         if(potentialTarget.getTeamNum() != blob.getTeamNum() && potentialTarget.hasTag("flesh")) {
         
           //Set mode variable to targeting mode
-          blob.set_u8("brain_mode", BRAINMODE_TARGETING);
+          blob.set_u8("brain_mode", ZombieBrainMode::MODE_TARGETING);
           
           //Store target id
           blob.set_netid("brain_target_id", potentialTarget.getNetworkID());
@@ -206,7 +197,7 @@ void onTick(CBrain@ this) {
     }
     
     //Check if mode is targeting mode
-    else if(brainMode == BRAINMODE_TARGETING) {
+    else if(brainMode == ZombieBrainMode::MODE_TARGETING) {
     
       //Retrieve a reference to the target blob object
       @target = getBlobByNetworkID(blob.get_netid("brain_target_id"));
@@ -287,7 +278,7 @@ void onTick(CBrain@ this) {
       else {
       
         //Set mode variable to invading mode
-        blob.set_u8("brain_mode", BRAINMODE_INVADING);
+        blob.set_u8("brain_mode", ZombieBrainMode::MODE_INVADING);
         
       }
   

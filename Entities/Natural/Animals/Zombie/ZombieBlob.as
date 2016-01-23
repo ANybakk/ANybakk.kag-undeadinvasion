@@ -11,12 +11,9 @@
  * TODO:  Set mode to warm-up when last player leaves (Spawn system's job?)
  */
 
+#include "ZombieVariables.as";
+
 #include "Hitters.as";
-
-
-
-//Define a rotting time of 5 seconds
-const u8 zombie_rotting_time = 5;
 
 
 
@@ -27,7 +24,7 @@ const u8 zombie_rotting_time = 5;
 void onInit(CBlob@ this) {
   
   //Set rotting time variable
-  //this.set_u8("zombie_rotting_time", zombie_rotting_time*getTicksASecond());
+  //this.set_u8("zombie_rotting_time", ZombieVariables::ROTTING_TIME*getTicksASecond());
   
   //Set time of death variable
   //this.set_u16("time_of_death", 0);

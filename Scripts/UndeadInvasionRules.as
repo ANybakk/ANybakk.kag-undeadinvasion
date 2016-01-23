@@ -24,9 +24,9 @@ void onInit(CRules@ this) {
 
   //Register custom script for loading PNG map files
   RegisterFileExtensionScript("Scripts/UndeadInvasionMap.as", "png");
-  
+
   LoadDefaultGUI();
-  
+
   sv_gravity = 9.81f;
   particles_gravity.y = 0.25f;
   v_camera_ints = true;
@@ -43,10 +43,12 @@ void onInit(CRules@ this) {
 
   driver.AddShader("hq2x", 1.0f);
   driver.SetShader("hq2x", true);
-  
+
   //Add team commands
   //this.addCommandID("pick default");
   //this.addCommandID("pick spawn");
+
+  //Finished
   
 }
 
