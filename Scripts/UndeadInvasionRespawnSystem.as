@@ -38,6 +38,7 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
 		RespawnSystem::SetCore(rulesCore);
     
     //Finished
+    return;
     
 	}
   
@@ -47,6 +48,8 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
    * Performs an update
    */
   void Update() {
+
+    //print("[UndeadInvasionRespawnSystem:Update]");
       
     //Create a handle to player info object
     PlayerInfo@ playerInfo;
@@ -55,14 +58,15 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
     for (int i = 0; i < mPlayerInfoSpawnQueue.length; i++) {
     
       //Save reference to player info
-      playerInfo = mPlayerInfoSpawnQueue[i];
+      @playerInfo = mPlayerInfoSpawnQueue[i];
       
       //Spawn player
-      DoSpawnPlayer(playerInfo);
+      DoSpawnPlayer(@playerInfo);
       
     }
     
     //Finished
+    return;
     
   }
   
@@ -72,6 +76,8 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
    * Adds a player to the spawn queue
    */
   void AddPlayerToSpawn(CPlayer@ player) {
+
+    print("[UndeadInvasionRespawnSystem:AddPlayerToSpawn]");
     
     //Retrieve a reference to the info object for the player
     PlayerInfo@ playerInfo = core.getInfoFromPlayer(player);
@@ -87,6 +93,7 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
     mPlayerInfoSpawnQueue.push_back(playerInfo);
     
     //Finished
+    return;
     
   }
   
@@ -96,6 +103,8 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
    * Adds a player to the spawn queue
    */
 	void RemovePlayerFromSpawn(CPlayer@ player) {
+
+    print("[UndeadInvasionRespawnSystem:RemovePlayerFromSpawn]");
     
     //Retrieve a reference to the info object for the player
     PlayerInfo@ playerInfo = core.getInfoFromPlayer(player);
@@ -119,6 +128,7 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
 		}
     
     //Finished
+    return;
   
   }
   
@@ -127,7 +137,7 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
   /**
    * Checks whether a player is in the spawn queue or not
    */
-  bool isSpawning(CPlayer@ player) {
+  /*bool isSpawning(CPlayer@ player) {
     
     //Retrieve a reference to the info object for the player
     PlayerInfo@ playerInfo = core.getInfoFromPlayer(player);
@@ -136,7 +146,7 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
     
     //Finished
     
-	}
+	}*/
   
   
   
@@ -144,6 +154,11 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
    * Spawns a player
    */
   void DoSpawnPlayer( PlayerInfo@ playerInfo ) {
+
+    print("[UndeadInvasionRespawnSystem:DoSpawnPlayer]");
+    
+    //Set blob type to be builder
+    playerInfo.blob_name = "builder";
   
     //Call super class' version of this method
     RespawnSystem::DoSpawnPlayer(playerInfo);
@@ -157,6 +172,7 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
     }
     
     //Finished
+    return;
   
   }
   
@@ -165,7 +181,7 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
   /**
    * Checks if a player can be spawned
    */
-  bool canSpawnPlayer(PlayerInfo@ playerInfo) {
+  /*bool canSpawnPlayer(PlayerInfo@ playerInfo) {
   
     //Check if player info is not valid
     if(playerInfo is null) {
@@ -190,11 +206,10 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
       
     }
     
+    //Finished
     return true;
     
-    //Finished
-    
-  }
+  }*/
   
   
   
@@ -202,9 +217,6 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
    * Provides a spawn location
    */
   Vec2f getSpawnLocation(PlayerInfo@ playerInfo) {
-  
-    //Create a location vector
-    Vec2f location();
     
     //Retrieve a reference to the map object
     CMap@ map = getMap();
@@ -214,15 +226,15 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
   
     //Check that we have a valid map object reference
     if(map !is null) {
-    
+   
       //Retrieve a reference to any survivor spawn blobs
-      getBlobsByTag("survivor_spawn", @survivorSpawns);
+      getBlobsByTag("SurvivorCamp", @survivorSpawns);
       
       //Check if at least one spawn exist
       if(survivorSpawns.length > 0) {
-    
-        //Retrieve the location of a random survivor spawn
-        location = survivorSpawns[XORRandom(survivorSpawns.length)].getPosition();
+      
+        //Return the location of a random survivor spawn
+        return survivorSpawns[XORRandom(survivorSpawns.length)].getPosition();
       
       }
       
@@ -230,18 +242,20 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
       else {
       
         //Calculate the x-coordinate for the middle of the map
-        f32 xLocation = map.tilemapwidth * map.tilesize / 2;
-      
-        //Keep location
-        location = Vec2f(xLocation, map.getLandYAtX(xLocation));
+        f32 xLocation = map.tilemapwidth * map.tilesize - 32.0f;
+        
+        //Get the y-coordinate
+        f32 yLocation = map.getLandYAtX(s32(x/map.tilesize)) * map.tilesize - 16.0f;
+        
+        //Return location
+        return Vec2f(xLocation, yLocation);
         
       }
       
     }
     
-    return location;
-    
     //Finished
+    return Vec2f(0,0);
     
   }
   

@@ -11,62 +11,23 @@
 #include "UndeadInvasionRulesCore.as";
 #include "UndeadInvasionRespawnSystem.as";
 
-#include "Default/DefaultGUI.as"
-
 
 
 /**
- * Initialization event function. Copied from KAG.as, but with custom map loader
+ * Initialization event function.
  */
 void onInit(CRules@ this) {
 
-  print("[UndeadInvasion:onInit]");
-
-  //Register custom script for loading PNG map files
-  RegisterFileExtensionScript("Scripts/UndeadInvasionMap.as", "png");
-
-  LoadDefaultGUI();
-
-  sv_gravity = 9.81f;
-  particles_gravity.y = 0.25f;
-  v_camera_ints = true;
-  sv_visiblity_scale = 1.25f;
-  cc_halign = 2;
-  cc_valign = 2;
-
-  s_effects = false;
-
-  sv_max_localplayers = 1;
-
-  //smooth shader
-  Driver@ driver = getDriver();
-
-  driver.AddShader("hq2x", 1.0f);
-  driver.SetShader("hq2x", true);
-
-  //Add team commands
-  //this.addCommandID("pick default");
-  //this.addCommandID("pick spawn");
-
-  //Finished
-  
-}
-
-
-
-/*
- * Restart event function
- */
-void onRestart(CRules@ rules) {
+  print("[UndeadInvasionRules:onInit]");
   
   //Initialize the re-spawn system
   UndeadInvasionRespawnSystem respawnSystem();
   
   //Initialize the rules core
-  UndeadInvasionRulesCore rulesCore(rules, respawnSystem);
+  UndeadInvasionRulesCore rulesCore(this, respawnSystem);
   
   //Generate a string path to the configuration file
-  string configPath = "../Mods/" + sv_gamemode + "/Rules/" + sv_gamemode + "/vars.cfg";
+  string configPath = "../Mods/ANybakk.kag-undeadinvasion/Rules/UndeadInvasion/vars.cfg";
   
   //Load configuration file
 	ConfigFile cfg = ConfigFile( configPath );
@@ -81,7 +42,7 @@ void onRestart(CRules@ rules) {
     //rulesCore.mGameDuration = 0;
     
     //Set no timer flag
-    rules.set_bool("no timer", true);
+    this.set_bool("no timer", true);
     
   } else {
   
@@ -91,18 +52,32 @@ void onRestart(CRules@ rules) {
   }
 	
 	//Set maximum number of zombies
-  rules.set_s32("undead_count_limit", cfg.read_s32("undead_count_limit",125));
+  this.set_s32("undead_count_limit", cfg.read_s32("undead_count_limit",125));
   
   //Register player spawn time
   //rulesCore.mSpawnTime = (getTicksASecond() * cfg.read_s32("spawn_time", 30)); //TODO: Is this variable ever read?
   
   //Connect rules core
-  rules.set("core", @rulesCore);
+  this.set("core", @rulesCore);
   
   //Set new start time
-  //rules.set("start_gametime", getGameTime() + rulesCore.mWarmUpTime);
+  //this.set("start_gametime", getGameTime() + rulesCore.mWarmUpTime);
   
   //Set new end time
-  rules.set_u32("game_end_time", getGameTime() + gameDuration); //for TimeToEnd.as
+  this.set_u32("game_end_time", getGameTime() + gameDuration); //for TimeToEnd.as
+  
+  //Finished
+  return;
+  
+}
+
+
+
+/*
+ * Restart event function
+ */
+void onRestart(CRules@ this) {
+
+  print("[UndeadInvasionRules:onRestart]");
   
 }

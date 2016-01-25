@@ -96,7 +96,8 @@ shared class UndeadInvasionRulesCore : RulesCore {
     rules.SetCurrentState(WARMUP);
     
     //Finished
-        
+    return;
+    
   }
   
   
@@ -134,8 +135,17 @@ shared class UndeadInvasionRulesCore : RulesCore {
       //Initialize the amount of undead available for spawning
       mUndeadAvailable = mUndeadCountLimit;
       
-      //Store maximum portal health
-      mPortalMaxHealth = mPortals[0].getHealth();
+      //Check if any portals exists
+      if(mPortals.length > 0) {
+      
+        //Store maximum portal health to be like the first portal
+        mPortalMaxHealth = mPortals[0].getHealth();
+      
+      }
+      
+      //Store a default maximum portal health
+      //TODO: Turn this into a variable
+      mPortalMaxHealth = 50;
       
     }
     
@@ -170,7 +180,7 @@ shared class UndeadInvasionRulesCore : RulesCore {
               server_CreateBlob( "Zombie", -1, portal.getPosition());
       
               //Retrieve references to all undead
-              getBlobsByTag("zombie", @mUndead );
+              getBlobsByTag("Zombie", @mUndead );
               
               //Reduce available undead for spawning
               mUndeadAvailable--;
@@ -187,7 +197,7 @@ shared class UndeadInvasionRulesCore : RulesCore {
               server_CreateBlob( "Zombie", -1, portal.getPosition());
       
               //Retrieve references to all undead
-              getBlobsByTag("zombie", @mUndead );
+              getBlobsByTag("Zombie", @mUndead );
               
               //Reduce available undead for spawning
               mUndeadAvailable--;
@@ -204,7 +214,7 @@ shared class UndeadInvasionRulesCore : RulesCore {
               server_CreateBlob( "Zombie", -1, portal.getPosition());
       
               //Retrieve references to all undead
-              getBlobsByTag("zombie", @mUndead );
+              getBlobsByTag("Zombie", @mUndead );
               
               //Reduce available undead for spawning
               mUndeadAvailable--;
@@ -218,7 +228,7 @@ shared class UndeadInvasionRulesCore : RulesCore {
               server_CreateBlob( "Zombie", -1, portal.getPosition());
       
               //Retrieve references to all undead
-              getBlobsByTag("zombie", @mUndead );
+              getBlobsByTag("Zombie", @mUndead );
               
               //Reduce available undead for spawning
               mUndeadAvailable--;
