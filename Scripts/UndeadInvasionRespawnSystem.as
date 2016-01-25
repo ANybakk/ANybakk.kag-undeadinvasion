@@ -38,7 +38,6 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
 		RespawnSystem::SetCore(rulesCore);
     
     //Finished
-    return;
     
 	}
   
@@ -66,7 +65,6 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
     }
     
     //Finished
-    return;
     
   }
   
@@ -93,7 +91,6 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
     mPlayerInfoSpawnQueue.push_back(playerInfo);
     
     //Finished
-    return;
     
   }
   
@@ -128,7 +125,6 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
 		}
     
     //Finished
-    return;
   
   }
   
@@ -137,7 +133,7 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
   /**
    * Checks whether a player is in the spawn queue or not
    */
-  /*bool isSpawning(CPlayer@ player) {
+  bool isSpawning(CPlayer@ player) {
     
     //Retrieve a reference to the info object for the player
     PlayerInfo@ playerInfo = core.getInfoFromPlayer(player);
@@ -146,7 +142,7 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
     
     //Finished
     
-	}*/
+	}
   
   
   
@@ -172,7 +168,6 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
     }
     
     //Finished
-    return;
   
   }
   
@@ -223,17 +218,17 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
     
     //Create an array of handles for survivor spawns
     CBlob@[] survivorSpawns;
-  
+    
     //Check that we have a valid map object reference
     if(map !is null) {
    
       //Retrieve a reference to any survivor spawn blobs
-      getBlobsByTag("SurvivorCamp", @survivorSpawns);
+      getBlobsByName("SurvivorCamp", @survivorSpawns);
       
       //Check if at least one spawn exist
       if(survivorSpawns.length > 0) {
       
-        //Return the location of a random survivor spawn
+        //Return the location of a random survivor spawn (assumed game time dependant)
         return survivorSpawns[XORRandom(survivorSpawns.length)].getPosition();
       
       }
@@ -242,10 +237,10 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
       else {
       
         //Calculate the x-coordinate for the middle of the map
-        f32 xLocation = map.tilemapwidth * map.tilesize - 32.0f;
+        f32 xLocation = map.tilemapwidth * map.tilesize / 2;
         
         //Get the y-coordinate
-        f32 yLocation = map.getLandYAtX(s32(x/map.tilesize)) * map.tilesize - 16.0f;
+        f32 yLocation = map.getLandYAtX(s32(xLocation/map.tilesize)) * map.tilesize - 16.0f;
         
         //Return location
         return Vec2f(xLocation, yLocation);

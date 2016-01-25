@@ -96,8 +96,7 @@ shared class UndeadInvasionRulesCore : RulesCore {
     rules.SetCurrentState(WARMUP);
     
     //Finished
-    return;
-    
+        
   }
   
   
@@ -180,7 +179,7 @@ shared class UndeadInvasionRulesCore : RulesCore {
               server_CreateBlob( "Zombie", -1, portal.getPosition());
       
               //Retrieve references to all undead
-              getBlobsByTag("Zombie", @mUndead );
+              getBlobsByTag("zombie", @mUndead );
               
               //Reduce available undead for spawning
               mUndeadAvailable--;
@@ -197,7 +196,7 @@ shared class UndeadInvasionRulesCore : RulesCore {
               server_CreateBlob( "Zombie", -1, portal.getPosition());
       
               //Retrieve references to all undead
-              getBlobsByTag("Zombie", @mUndead );
+              getBlobsByTag("zombie", @mUndead );
               
               //Reduce available undead for spawning
               mUndeadAvailable--;
@@ -214,7 +213,7 @@ shared class UndeadInvasionRulesCore : RulesCore {
               server_CreateBlob( "Zombie", -1, portal.getPosition());
       
               //Retrieve references to all undead
-              getBlobsByTag("Zombie", @mUndead );
+              getBlobsByTag("zombie", @mUndead );
               
               //Reduce available undead for spawning
               mUndeadAvailable--;
@@ -228,7 +227,7 @@ shared class UndeadInvasionRulesCore : RulesCore {
               server_CreateBlob( "Zombie", -1, portal.getPosition());
       
               //Retrieve references to all undead
-              getBlobsByTag("Zombie", @mUndead );
+              getBlobsByTag("zombie", @mUndead );
               
               //Reduce available undead for spawning
               mUndeadAvailable--;
