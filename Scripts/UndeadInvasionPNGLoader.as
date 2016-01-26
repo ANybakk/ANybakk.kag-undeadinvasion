@@ -62,9 +62,9 @@ class UndeadInvasionPNGLoader : PNGLoader {
     CBlob@ spawnedBlob;
     
     //Check if the color value of the map matches undead spawn
-    if(color_pixel == UndeadInvasionPNGLoaderVariables::COLOR_UNDEAD_SPAWN) {
+    if(color_pixel == UndeadInvasionPNGLoaderVariables::COLOR_MAUSOLEUM) {
       
-        @spawnedBlob = spawnBlob(map, "UndeadSpawn", offset, -1); //Spawn blob
+        @spawnedBlob = spawnBlob(map, "Mausoleum", offset, -1); //Spawn blob
 				//@spawnedBlob.AddScript("abc.as");                          //Add behaviour through a script
 				//@spawnedBlob.Tag("script added");
         offsets[autotile_offset].push_back(offset);               //Store offset reference, generic

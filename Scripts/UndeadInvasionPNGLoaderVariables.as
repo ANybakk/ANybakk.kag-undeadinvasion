@@ -11,8 +11,8 @@
 
 namespace UndeadInvasionPNGLoaderVariables {
   
-  //Define undead spawn map color as RGB 113,13,113 (#710D71)
-  const SColor COLOR_UNDEAD_SPAWN (255, 113,  13, 113);
+  //Define undead spawn map color as RGB 255,0,125 (#ff007d)
+  const SColor COLOR_MAUSOLEUM (255, 255,  0, 125);
   
   //Define survivor camp map color as RGB 211,249,193 (#D3F9C1) (same as WAR hall)
   const SColor COLOR_SURVIVOR_CAMP(255, 211, 249, 193);

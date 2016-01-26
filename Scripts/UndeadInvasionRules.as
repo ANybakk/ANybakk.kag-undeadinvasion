@@ -52,7 +52,7 @@ void onInit(CRules@ this) {
   }
 	
 	//Set maximum number of zombies
-  this.set_s32("undead_count_limit", cfg.read_s32("undead_count_limit",125));
+  this.set_u8("undead_count_limit", 125);//cfg.read_s32("undead_count_limit",125));
   
   //Register player spawn time
   //rulesCore.mSpawnTime = (getTicksASecond() * cfg.read_s32("spawn_time", 30)); //TODO: Is this variable ever read?
