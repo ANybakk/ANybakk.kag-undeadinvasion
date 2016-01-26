@@ -15,52 +15,18 @@
 
 
 /**
- * Variable collection class
- */
-shared class ZombieMovementVariables {
-	Vec2f walkForce;  
-	Vec2f runAcceleration;
-	Vec2f slowFactor;
-	Vec2f jumpAcceleration;
-	f32 maxVelocity;
-};
-
-
-
-/**
  * Initialization event funcion
  */
 void onInit(CMovement@ this) {
 
   //Obtain a reference to the blob object
   CBlob@ blob = this.getBlob();
-
-  //Create variable collection
-	ZombieMovementVariables movementVariables;
-  
-  //Set walking force variable 
-  movementVariables.walkForce.Set( 4.0f, 0.0f  );
-
-  //Set running force variable 
-  movementVariables.runAcceleration.Set(  4.0f, 0.0f  );
-
-  //Set slowing force variable 
-  movementVariables.slowFactor.Set( 2.0f, 0.0f  );
-
-  //Set jumping force variable 
-  movementVariables.jumpAcceleration.Set( 0.0f, -1.6f );
-
-  //Set maximum force variable 
-  movementVariables.maxVelocity =  0.5f;
-  
-  //Store variable collection
-	blob.set("movement-variables", movementVariables);
   
   //Store climbing counting variable to 0
 	//this.set_s32("movement-climb", 0);
 
   //Set tick not attached flag
-  this.getCurrentScript().runFlags |= Script::tick_not_attached;
+  //this.getCurrentScript().runFlags |= Script::tick_not_attached;
   
   //Set remove on "dead" tag
   this.getCurrentScript().removeIfTag	= "dead";
@@ -76,17 +42,6 @@ void onTick(CMovement@ this) {
 
   //Retrieve blob object reference
   CBlob@ blob = this.getBlob();
-  
-  //Retrieve movement variable collection
-  ZombieMovementVariables@ movementVariables;
-  
-  //Check that movement variables can be retrieved
-  if (!blob.get( "movement-variables", @movementVariables )) {
-  
-    //Stop (does not have the necessary variables)
-    return;
-    
-  }
   
   //Check if health is depleted
   //TODO: Isn't this redundant?
@@ -112,16 +67,22 @@ void onTick(CMovement@ this) {
   //Check if left key action
   if(leftAction) {
   
+    //Set facing direction to left
+    blob.SetFacingLeft(true);
+    
     //Add a force to the left
-    blob.AddForce(Vec2f( -1.0f * movementVariables.walkForce.x, movementVariables.walkForce.y));
+    blob.AddForce(Vec2f( -1.0f * ZombieVariables::MOVEMENT_WALK_ACCELERATION.x, ZombieVariables::MOVEMENT_WALK_ACCELERATION.y));
     
   }
   
   //Check if right key action
   if(rightAction) {
   
+    //Set facing direction to right
+    blob.SetFacingLeft(false);
+  
     //Add a force to the right
-    blob.AddForce(Vec2f( 1.0f * movementVariables.walkForce.x, movementVariables.walkForce.y));
+    blob.AddForce(Vec2f( 1.0f * ZombieVariables::MOVEMENT_WALK_ACCELERATION.x, ZombieVariables::MOVEMENT_WALK_ACCELERATION.y));
     
   }
 
@@ -161,14 +122,15 @@ void onTick(CMovement@ this) {
         if(blob.isInWater()) {
         
           //Set environmental factor
-          environmentalFactor.Set(ZombieVariables::MOVEMENT_FACTOR_WATER_X, ZombieVariables::MOVEMENT_FACTOR_WATER_Y);
+          environmentalFactor.Set(ZombieVariables::MOVEMENT_FACTOR_WATER.x, ZombieVariables::MOVEMENT_FACTOR_WATER.y);
+          
         }
         
         //Calculate horizontal force
-        f32 horizontalForce = blob.getMass() * movementVariables.jumpAcceleration.x * environmentalFactor.x;
+        f32 horizontalForce = blob.getMass() * ZombieVariables::MOVEMENT_JUMP_ACCELERATION.x * environmentalFactor.x;
         
         //Calculate vertical force
-        f32 verticalForce = blob.getMass() * movementVariables.jumpAcceleration.y * environmentalFactor.y;
+        f32 verticalForce = blob.getMass() * ZombieVariables::MOVEMENT_JUMP_ACCELERATION.y * environmentalFactor.y;
         
         //Add a jumping force
         blob.AddForce(Vec2f( horizontalForce, verticalForce));
@@ -186,13 +148,13 @@ void onTick(CMovement@ this) {
 
   //Check if velocity exceeds the maximum velocity variable
   //COMMENT: Why not blob.getVelocity()? CShape is undocumented.
-  if(shape.vellen > movementVariables.maxVelocity) {
+  if(shape.vellen > ZombieVariables::MOVEMENT_MAX_VELOCITY) {
   
     //Retrieve current velocity
     Vec2f velocity = blob.getVelocity();
     
     //Add a slowing-down force
-    blob.AddForce( Vec2f(-velocity.x * movementVariables.slowFactor.x, -velocity.y * movementVariables.slowFactor.y) );
+    blob.AddForce( Vec2f(-velocity.x * ZombieVariables::MOVEMENT_FACTOR_SLOWDOWN.x, -velocity.y * ZombieVariables::MOVEMENT_FACTOR_SLOWDOWN.y) );
     
   }
   

@@ -23,6 +23,7 @@
 #include "ZombieVariables.as";
 #include "ZombieBrainMode.as";
 
+#include "PressOldKeys.as";
 #include "Hitters.as";
 
 
@@ -35,35 +36,29 @@ void onInit(CBrain@ this) {
   //Obtain a reference to the blob object
   CBlob@ blob = this.getBlob();
   
-  //Set delay variable
+  //Set delay count variable
   blob.set_u8("brain_delay", ZombieVariables::BRAIN_DELAY);
   
   //Set mode variable to invading
-  blob.set_u8("brain_mode", ZombieBrainMode::MODE_INVADING);
-  
-  //Set targeting radius variable
-  blob.set_u8("brain_target_radius", ZombieVariables::BRAIN_TARGET_RADIUS);
-  
-  //Set attack frequency variable
-  blob.set_u8("brain_attack_frequency", ZombieVariables::BRAIN_ATTACK_FREQUENCY*getTicksASecond());
+  blob.set_u8("brainMode", ZombieBrainMode::MODE_INVADING);
   
   //Set attack time tracking variable to current time
-  blob.set_u16("brain_attack_time", getGameTime());
+  blob.set_u16("lastAttackTime", getGameTime());
   
   //Tell script to be removed if tagged dead
   this.getCurrentScript().removeIfTag	= "dead";
   
   //Set script flag for blob proximity
-  this.getCurrentScript().runFlags |= Script::tick_blob_in_proximity;
+  //this.getCurrentScript().runFlags |= Script::tick_blob_in_proximity;
 
   //Set script flag for tick not attached
-  this.getCurrentScript().runFlags |= Script::tick_not_attached;
+  //this.getCurrentScript().runFlags |= Script::tick_not_attached;
   
   //Tell script to use players for proximity
-  this.getCurrentScript().runProximityTag = "player";
+  //this.getCurrentScript().runProximityTag = "player";
   
   //Tell script to use a proximity radius of 200.0
-  this.getCurrentScript().runProximityRadius = 200.0f; //TODO: Why 200?
+  //this.getCurrentScript().runProximityRadius = 200.0f; //TODO: Why 200?
   
   //Finished
   
@@ -92,18 +87,15 @@ void onTick(CBrain@ this) {
   
   //Check if delay tracker has reach zero
   if(brainDelay == 0) {
-    
+  
     //Reset delay tracker
     brainDelay = ZombieVariables::BRAIN_DELAY;
-    
-    //Reset biting status tag
-    blob.Untag("biting");
   
     //Create a handle for a target blob object
     CBlob@ target;
   
     //Retrieve mode variable
-    u8 brainMode = blob.get_u8("brain_mode");
+    u8 brainMode = blob.get_u8("brainMode");
     
     //Check if mode is invading mode
     if(brainMode == ZombieBrainMode::MODE_INVADING) {
@@ -118,7 +110,7 @@ void onTick(CBrain@ this) {
       bool targetFound = false;
       
       //Use the map to find nearby blobs
-      blob.getMap().getBlobsInRadius(blob.getPosition(), blob.get_f32("brain_target_radius"), @potentialTargets);
+      blob.getMap().getBlobsInRadius(blob.getPosition(), ZombieVariables::BRAIN_TARGET_RADIUS, @potentialTargets);
       
       //Iterate through possible targets
       for(uint i = 0; i < potentialTargets.length; i++) {
@@ -138,10 +130,10 @@ void onTick(CBrain@ this) {
         if(potentialTarget.getTeamNum() != blob.getTeamNum() && potentialTarget.hasTag("flesh")) {
         
           //Set mode variable to targeting mode
-          blob.set_u8("brain_mode", ZombieBrainMode::MODE_TARGETING);
+          blob.set_u8("brainMode", ZombieBrainMode::MODE_TARGETING);
           
           //Store target id
-          blob.set_netid("brain_target_id", potentialTarget.getNetworkID());
+          blob.set_netid("brainTargetID", potentialTarget.getNetworkID());
           
           //Note that a target was found
           targetFound = true;
@@ -155,18 +147,22 @@ void onTick(CBrain@ this) {
       
       //Recall if a target wasn't found
       if(!targetFound) {
-        
+    
+        //Create an array of blob target references
+        CBlob@[] potentialSpawnSites;
+      
         //Keep track of shortest distance
         f32 shortestDistance = 0.0f;
 
         //Retrieve a reference to any survivor spawn blobs
-        getBlobsByTag("survivor_spawn", @potentialTargets);
+        //TODO: Generalize for any kind of Survivor Spawn Site, using tag
+        getBlobsByName("SurvivorCamp", @potentialSpawnSites);
         
         //Iterate through all survivor spawns
-        for(uint i = 0; i < potentialTargets.length; i++) {
+        for(uint i = 0; i < potentialSpawnSites.length; i++) {
           
           //Store a reference to this spawn blob object
-          @potentialTarget = potentialTargets[i];
+          @potentialTarget = potentialSpawnSites[i];
           
           //Determine the distance
           f32 distance = (potentialTarget.getPosition() - blob.getPosition()).getLength();
@@ -200,19 +196,19 @@ void onTick(CBrain@ this) {
     else if(brainMode == ZombieBrainMode::MODE_TARGETING) {
     
       //Retrieve a reference to the target blob object
-      @target = getBlobByNetworkID(blob.get_netid("brain_target_id"));
+      @target = getBlobByNetworkID(blob.get_netid("brainTargetID"));
         
       //Check if target is still within range
-      if (target !is null && (target.getPosition() - blob.getPosition()).getLength() >= blob.get_f32("brain_target_radius")) {
+      if (target !is null && (target.getPosition() - blob.getPosition()).getLength() >= ZombieVariables::BRAIN_TARGET_RADIUS) {
       
-        //Retrieve attack frequency variable
-        u8 attackFrequency = blob.get_u8("brain_attack_frequency");
+        //Determine attack frequency
+        u8 attackFrequency = ZombieVariables::BRAIN_ATTACK_FREQUENCY * getTicksASecond();
         
         //Retrieve attack time variable
-        u16 attackTime = blob.get_u16("brain_attack_time");
+        u16 attackTime = blob.get_u16("lastAttackTime");
       
         //Check if it's time to attack, and if target is within attack range (shape's radius)
-        if((getGameTime()-attackTime) >= attackFrequency && (target.getPosition() - blob.getPosition()).getLength() >= blob.getRadius()) {
+        if((getGameTime()-attackTime) >= attackFrequency && (target.getPosition() - blob.getPosition()).getLength() <= blob.getRadius()) {
         
           //Create a vector
           Vec2f attackVector = target.getPosition()-blob.getPosition();
@@ -226,8 +222,12 @@ void onTick(CBrain@ this) {
           //Retrieve the map
           CMap@ map = getMap();
           
+          //Keep in mind if attack was performed
+          bool hasAttacked = false;
+          
           //If hit info references could be obtained for an arc
-          if (map.getHitInfosFromArc( blob.getPosition()-Vec2f(2,0).RotateBy(-attackVector.Angle()),-attackVector.Angle(),90,blob.getRadius()*2, blob, @hitInfos )) {
+          //TODO: This call returns nothing
+          if (map.getHitInfosFromArc( blob.getPosition()-Vec2f(2,0).RotateBy(-attackVector.Angle()),-attackVector.Angle(),90,blob.getRadius() + 6.0f, blob, @hitInfos )) {
           
             //Create a handle for a blob object
             CBlob@ nearbyBlob;
@@ -248,10 +248,10 @@ void onTick(CBrain@ this) {
                 blob.server_Hit(target, target.getPosition(), attackVector, attackDamage, Hitters::bite, false);
             
                 //Update attack time variable
-                blob.set_u16("brain_attack_time", getGameTime());
+                blob.set_u16("lastAttackTime", getGameTime());
                 
-                //Set biting tag
-                blob.Tag("biting");
+                //Remember that target has been hit
+                hasAttacked = true;
                 
                 //Exit loop
                 break;
@@ -260,6 +260,14 @@ void onTick(CBrain@ this) {
               
             }
           
+          }
+          
+          //Check if attack was not performed
+          if(!hasAttacked) {
+          
+            //Pursue target by initiating movement through key press
+            blob.setKeyPressed((target.getPosition().x < blob.getPosition().x) ? key_left : key_right, true);
+            
           }
         
         }
@@ -278,12 +286,17 @@ void onTick(CBrain@ this) {
       else {
       
         //Set mode variable to invading mode
-        blob.set_u8("brain_mode", ZombieBrainMode::MODE_INVADING);
+        blob.set_u8("brainMode", ZombieBrainMode::MODE_INVADING);
         
       }
   
     }
     
+  } else {
+  
+    //Keep any doing any current movement/actions (PressOldKeys.as)
+    PressOldKeys(blob);
+  
   }
     
   //Save delay tracker variable

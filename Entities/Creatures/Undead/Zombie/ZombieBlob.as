@@ -32,6 +32,9 @@ void onInit(CBlob@ this) {
   //Set to not be in a usual player team
 	this.server_setTeamNum(-1);
   
+  //Activate brain
+  this.getBrain().server_SetActive(true);
+  
 }
 
 
@@ -269,6 +272,9 @@ void onDie(CBlob@ this) {
   
   //Set shape elasticity to 0.2
   //this.getShape().setElasticity( 0.2f );
+  
+  //Initiate gibbing
+  this.getSprite().Gib();
 
   //Stop
   return;

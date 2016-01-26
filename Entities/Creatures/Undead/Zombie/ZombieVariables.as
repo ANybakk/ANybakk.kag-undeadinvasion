@@ -22,10 +22,22 @@ namespace ZombieVariables {
   //Define an attack frequency of 2 seconds
   const u8 BRAIN_ATTACK_FREQUENCY = 2;
   
-  //Define a factor for movement in water (horizontal)
-  const f32 MOVEMENT_FACTOR_WATER_X = 0.23f;
+  //Define a factor for movement in water of 0.23 horizontal, 0.23 vertical
+	const Vec2f MOVEMENT_FACTOR_WATER(0.23f, 0.23f);
   
-  //Define a factor for movement in water (vertical)
-  const f32 MOVEMENT_FACTOR_WATER_Y = 0.23f;
+  //Define a factor for slowing down of 2.0 horizontal, 0.0 vertical
+	const Vec2f MOVEMENT_FACTOR_SLOWDOWN(2.0f, 0.0f);
+  
+  //Define a maximum velocity of 0.5
+	const f32 MOVEMENT_MAX_VELOCITY = 0.5f;
+  
+  //Define a walking acceleration of 4.0 horizontal, 0.0 vertical
+  const Vec2f MOVEMENT_WALK_ACCELERATION(4.0f, 0.0f);
+  
+  //Define a running acceleration of 4.0 horizontal, 0.0 vertical
+	const Vec2f MOVEMENT_RUN_ACCELERATION(4.0f, 0.0f);
+  
+  //Define a walking acceleration of 0.0 horizontal, -1.6 vertical
+	const Vec2f MOVEMENT_JUMP_ACCELERATION(0.0f, -1.6f);
   
 }
