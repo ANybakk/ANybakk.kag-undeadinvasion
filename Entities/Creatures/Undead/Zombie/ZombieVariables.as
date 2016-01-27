@@ -13,6 +13,9 @@ namespace ZombieVariables {
   //Define a rotting time of 5 seconds
   const u8 ROTTING_TIME = 5;
   
+  //Define an attack damage of 0.5, which is normally half a heart
+  const f32 ATTACK_DAMAGE = 0.5f;
+  
   //Define a delay of 5 frames
   const u8 BRAIN_DELAY = 5; //TODO: Define in terms of seconds (float)
 

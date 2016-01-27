@@ -223,9 +223,15 @@ void onTick(CBrain@ this) {
           
           //Retrieve attack time variable
           u16 attackTime = blob.get_u16("lastAttackTime");
+            
+          //Calculate attack range using the radius of both blobs
+          f32 attackRange = blob.getRadius() + target.getRadius();
+          
+          //Determine if it's time to attack, by checking lapsed time (minus brain delay) against frequency
+          bool isTimeToAttack = (getGameTime() - attackTime) >= attackFrequency;
           
           //Check if it's time to attack, and if target is within attack range (shape's radius)
-          if((getGameTime()-attackTime) >= attackFrequency && attackVector.getLength() <= blob.getRadius()) {
+          if(isTimeToAttack && attackVector.getLength() <= attackRange) {
             
             //Normalize vector
             attackVector.Normalize();
@@ -239,9 +245,17 @@ void onTick(CBrain@ this) {
             //Keep in mind if attack was performed
             bool hasAttacked = false;
             
+            //Retrieve attack angle (counter-clockwise, right = 0)
+            f32 attackAngle = attackVector.Angle();
+            
+            //Calculate attack position (retracted by 2)
+            Vec2f attackPosition = blob.getPosition() - Vec2f(2,0).RotateBy(-attackAngle);
+            
+            //print("angle:"+attackAngle+" position:("+attackPosition.x + "," + attackPosition.y + ") range:"+attackRange);
+            
             //If hit info references could be obtained for an arc
             //TODO: This call returns nothing
-            if (map.getHitInfosFromArc( blob.getPosition()-Vec2f(2,0).RotateBy(-attackVector.Angle()),-attackVector.Angle(),90,blob.getRadius() + 6.0f, blob, @hitInfos )) {
+            if(map.getHitInfosFromArc(attackPosition, -attackAngle, 90.0f, attackRange, blob, @hitInfos )) {
             
               //Create a handle for a blob object
               CBlob@ nearbyBlob;
@@ -256,7 +270,7 @@ void onTick(CBrain@ this) {
                 if(nearbyBlob is target) {
                 
                   //Retrieve attack damage variable
-                  f32 attackDamage = blob.get_f32("brain_attack_damage");
+                  f32 attackDamage = ZombieVariables::ATTACK_DAMAGE;
                   
                   //Initiate bite attack
                   blob.server_Hit(target, target.getPosition(), attackVector, attackDamage, Hitters::bite, false);
