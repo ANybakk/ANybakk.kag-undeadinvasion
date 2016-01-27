@@ -13,6 +13,9 @@
  * Initialization event function
  */
 void onInit(CBlob@ this) {
+
+  //Set an extended nobuild zone of 16.0, 16.0 to avoid players blocking off (used by DefaultNoBuild.as)
+  this.set_Vec2f("nobuild extend", Vec2f(16.0f, 16.0f));
   
   //Finished
   return;

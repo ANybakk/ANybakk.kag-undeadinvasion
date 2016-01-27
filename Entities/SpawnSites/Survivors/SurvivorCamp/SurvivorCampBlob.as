@@ -60,8 +60,7 @@ void onInit(CBlob@ this) {
   //??
   this.getShape().getConsts().waterPasses = false;
 
-  // defaultnobuild
-  //??
+  //Set an extended nobuild zone of 0.0, 8.0 (used by DefaultNoBuild.as)
   this.set_Vec2f("nobuild extend", Vec2f(0.0f, 8.0f));
 
   // wont work in basichelps in single for some map loading reason

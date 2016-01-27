@@ -16,6 +16,9 @@ namespace ZombieVariables {
   //Define an attack damage of 0.5, which is normally half a heart
   const f32 ATTACK_DAMAGE = 0.5f;
   
+  //Define an amount of coins to drop on death
+  const u8 DROP_COIN_AMOUNT = 1;
+  
   //Define a delay of 5 frames
   const u8 BRAIN_DELAY = 5; //TODO: Define in terms of seconds (float)
 
@@ -28,8 +31,8 @@ namespace ZombieVariables {
   //Define an attack frequency of 2 seconds
   const u8 BRAIN_ATTACK_FREQUENCY = 2;
   
-  //Define a factor for movement in water of 0.23 horizontal, 0.23 vertical
-	const Vec2f MOVEMENT_FACTOR_WATER(0.23f, 0.23f);
+  //Define a factor for movement in water of 0.5 horizontal, 1.0 vertical
+	const Vec2f MOVEMENT_FACTOR_WATER(0.5f, 1.0f);
   
   //Define a factor for slowing down of 2.0 horizontal, 0.0 vertical
 	const Vec2f MOVEMENT_FACTOR_SLOWDOWN(2.0f, 0.0f);
@@ -43,7 +46,7 @@ namespace ZombieVariables {
   //Define a running acceleration of 4.0 horizontal, 0.0 vertical
 	const Vec2f MOVEMENT_RUN_ACCELERATION(6.0f, 0.0f);
   
-  //Define a walking acceleration of 0.0 horizontal, -1.6 vertical
-	const Vec2f MOVEMENT_JUMP_ACCELERATION(0.0f, -1.6f);
+  //Define a walking acceleration of 0.0 horizontal, -1.4 vertical
+	const Vec2f MOVEMENT_JUMP_ACCELERATION(0.0f, -1.4f);
   
 }
