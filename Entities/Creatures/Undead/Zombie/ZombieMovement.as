@@ -4,6 +4,10 @@
  * This script handles anything to do with movement. A zombie will move either 
  * left or right, and if an obstacle is found, a jump is performed.
  * 
+ * TODO: Make zombies able to jump over each other if they aren't making progress
+ * TODO: Make zombies unable to jump if another zombie is standing on top
+ * TODO: Sometimes zombies jump too high
+ * 
  * Author: ANybakk
  * Based on previous work by: Eanmig
  */
@@ -11,6 +15,7 @@
 #define SERVER_ONLY
 
 #include "ZombieVariables.as";
+#include "ZombieBrainMode.as";
 
 
 
@@ -64,6 +69,31 @@ void onTick(CMovement@ this) {
   //Retrieve velocity
   Vec2f vel = blob.getVelocity();
   
+  //Retrieve brain mode variable
+  u8 brainMode = blob.get_u8("brainMode");
+  
+  //Create an acceleration value, default walking
+  Vec2f acceleration = ZombieVariables::MOVEMENT_WALK_ACCELERATION;
+  
+  //Check if brain is in targeting mode
+  if(brainMode == ZombieBrainMode::MODE_TARGETING) {
+  
+    //Set acceleration value to running
+    acceleration = ZombieVariables::MOVEMENT_RUN_ACCELERATION;
+    
+  }
+      
+  //Create a environmental factor
+  Vec2f environmentalFactor(1.0f, 1.0f);
+  
+  //Check if currently in water
+  if(blob.isInWater()) {
+  
+    //Set environmental factor
+    environmentalFactor = ZombieVariables::MOVEMENT_FACTOR_WATER;
+    
+  }
+  
   //Check if left key action
   if(leftAction) {
   
@@ -71,7 +101,7 @@ void onTick(CMovement@ this) {
     blob.SetFacingLeft(true);
     
     //Add a force to the left
-    blob.AddForce(Vec2f( -1.0f * ZombieVariables::MOVEMENT_WALK_ACCELERATION.x, ZombieVariables::MOVEMENT_WALK_ACCELERATION.y));
+    blob.AddForce(Vec2f( -1.0f * acceleration.x * environmentalFactor.x, acceleration.y * environmentalFactor.y));
     
   }
   
@@ -82,14 +112,29 @@ void onTick(CMovement@ this) {
     blob.SetFacingLeft(false);
   
     //Add a force to the right
-    blob.AddForce(Vec2f( 1.0f * ZombieVariables::MOVEMENT_WALK_ACCELERATION.x, ZombieVariables::MOVEMENT_WALK_ACCELERATION.y));
+    blob.AddForce(Vec2f( 1.0f * acceleration.x * environmentalFactor.x, acceleration.y * environmentalFactor.y));
     
   }
+  
+  //Check if up key action
+  if(upAction) {
+    
+    //Calculate horizontal force
+    f32 horizontalForce = blob.getMass() * ZombieVariables::MOVEMENT_JUMP_ACCELERATION.x * environmentalFactor.x;
+    
+    //Calculate vertical force
+    f32 verticalForce = blob.getMass() * ZombieVariables::MOVEMENT_JUMP_ACCELERATION.y * environmentalFactor.y;
+    
+    //Add a jumping force
+    blob.AddForce(Vec2f( horizontalForce, verticalForce));
+    
+    //Stop pressing up key
+    blob.setKeyPressed(key_up, false);
+  
+  }
 
-  // jump if blocked
-
-  //Check if either left, right or up action
-  if (leftAction || rightAction || upAction) {
+  //Check if left or right up key action
+  if (leftAction || rightAction) {
   
     //Retrieve current position
     Vec2f currentPosition = blob.getPosition();
@@ -100,10 +145,8 @@ void onTick(CMovement@ this) {
     //Retrieve radius
     const f32 radius = blob.getRadius();
     
-    //
-    //if (blob.isOnGround()) blob.set_s32("climb",1);
-    
     //Check if currently on ground or in water
+    //TODO: Or standing on top of another creature
     if((blob.isOnGround() || blob.isInWater())) {
     
       //Determine left blocked status
@@ -112,33 +155,15 @@ void onTick(CMovement@ this) {
       //Determine right blocked status
       bool rightBlocked = map.isTileSolid( Vec2f( currentPosition.x + (radius+1.0f), currentPosition.y ));
       
-      //Check if action is up or action is blocked by a solid object
-      if(upAction || (leftAction && leftBlocked) || (rightAction && rightBlocked)) {
+      //Check if action is blocked by a solid object
+      //TODO: And no creature on top
+      if((leftAction && leftBlocked) || (rightAction && rightBlocked)) {
       
-        //Create a environmental factor
-        Vec2f environmentalFactor(1.0f, 1.0f);
+        //Press up key (handled on next tick)
+        blob.setKeyPressed(key_up, true);
         
-        //Check if currently in water
-        if(blob.isInWater()) {
-        
-          //Set environmental factor
-          environmentalFactor.Set(ZombieVariables::MOVEMENT_FACTOR_WATER.x, ZombieVariables::MOVEMENT_FACTOR_WATER.y);
-          
-        }
-        
-        //Calculate horizontal force
-        f32 horizontalForce = blob.getMass() * ZombieVariables::MOVEMENT_JUMP_ACCELERATION.x * environmentalFactor.x;
-        
-        //Calculate vertical force
-        f32 verticalForce = blob.getMass() * ZombieVariables::MOVEMENT_JUMP_ACCELERATION.y * environmentalFactor.y;
-        
-        //Add a jumping force
-        blob.AddForce(Vec2f( horizontalForce, verticalForce));
-        
-        //blob.set_s32("climb",1);
-      
       }
-    
+      
     }
     
   }

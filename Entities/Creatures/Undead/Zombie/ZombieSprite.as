@@ -6,6 +6,8 @@
  * Author: ANybakk
  * Based on previous work by: Eanmig
  */
+ 
+#include "ZombieBrainMode.as";
 
 
 
@@ -34,145 +36,101 @@ void onTick(CSprite@ this) {
   //Obtain a reference to the blob object
   CBlob@ blob = this.getBlob();
   
-  //Check if revival animation is already in progress
-  if(this.isAnimation("revive") && !this.isAnimationEnded()) {
+  //Check if has attacked flag is set and biting animation is not yet active
+  if(blob.get_bool("hasAttacked")) {
   
-    return;
+    //Play biting sound
+    this.PlaySound("/ZombieBite");
+    
+    //Initiate biting animation
+    this.SetAnimation("bite");
+    
+    //Remove flag
+    blob.set_bool("hasAttacked", false);
     
   }
   
-  //Check if biting animation is already in progress
-	if(this.isAnimation("bite") && !this.isAnimationEnded()) {
-  
-    return;
+  //Check if brain is in targeting mode
+  else if(blob.get_u8("brainMode") == ZombieBrainMode::MODE_TARGETING) {
+    
+    //Check if running animation is not active
+    if(!this.isAnimation("run")) {
+    
+      //Play groaning sound
+      this.PlaySound( "/ZombieGroan" );
+      
+      //Initiate running animation
+      this.SetAnimation("run");
+      
+    }
     
   }
   
-  //Check if zombie has any health left
-  if(blob.getHealth() > 0.0) {
-  
-    //Retrieve horizontal velocity
-    f32 x = blob.getVelocity().x;
+  //Check if brain is in invading mode
+  else if(blob.get_u8("brainMode") == ZombieBrainMode::MODE_INVADING) {
     
-    //Check if death animation is already in progress or finished
-    if(this.isAnimation("dead")) {
+    //Check if walking animation is not active
+    if(!this.isAnimation("walk")) {
     
-      //Initiate revival animation
-      //this.SetAnimation("revive");
+      //Initiate walking animation
+      this.SetAnimation("walk");
       
     }
     
-    /*
-    //Check if climb variable is set higher than 1
-    else if(blob.get_s32("climb") > 1 ) {
-    
-      //Check if climbing animation is not active
-      if(!this.isAnimation("climb")) {
-      
-        //Initiate climbing animation
-        this.SetAnimation("climb");
-      }
-      
-    }
-    */
-    
-    //Check if blob object has "biting" tag and biting animation is not active
-    else if(blob.hasTag("biting") && !this.isAnimation("bite")) {
-    
-      //Play biting sound
-      this.PlaySound("/ZombieBite");
-      
-      //Initiate biting animation
-      this.SetAnimation("bite");
-      
-      return;
-      
-    }
-    
-    //Check if horizontal velocity surpasses 0.1
-    else if(Maths::Abs(x) > 0.1f) {
-    
-      //Check if walking animation is not active
-      if(!this.isAnimation("walk")) {
-      
-        //Initiate walking animation
-        this.SetAnimation("walk");
-        
-      }
-      
-    }
-    
-    
-    //Otherwise
-    else {
-    
-      //Once in 200 times
-      if(XORRandom(200)==0) {
-        
-        //Play groaning sound
-        this.PlaySound( "/ZombieGroan" );
-        
-      }
-      
-      //Check if currently on the ground and moving either left or right
-      //COMMENT: Instead of checking for key presses, perhaps it would be possible to interact with the CMovement object, but it's undocumented
-      if(blob.isOnGround() && (blob.isKeyPressed(key_left) || blob.isKeyPressed(key_right)) ) {
-      
-        //Every 9th frame (network id dependant offset)
-        if((blob.getNetworkID() + getGameTime()) % 9 == 0) {
-          
-          //Determine sound volume based on current horizontal velocity (maximum 1.0)
-          f32 soundVolume = Maths::Min( 0.1f + Maths::Abs(blob.getVelocity().x)*0.1f, 1.0f );
-          
-          //Retrieve a tile object for the tile below (vertical distance 4.0)
-          TileType tile = blob.getMap().getTile( blob.getPosition() + Vec2f( 0.0f, blob.getRadius() + 4.0f )).type;
-          
-          //Check if tile is considered the ground
-          if(blob.getMap().isTileGroundStuff(tile)) {
-          
-            //Play earth step sound
-            this.PlaySound("/EarthStep", soundVolume, 0.75f );
-            
-          }
-          
-          //Otherwise, when tile is not the ground
-          else {
-          
-            //Play stone step sound
-            this.PlaySound("/StoneStep", soundVolume, 0.75f );
-            
-          }
-          
-        }
-          
-      }
-
-      //Check if idle animation is not active
-      if(!this.isAnimation("idle")) {
-      
-        //Initiate idle animation
-        this.SetAnimation("idle");
-        
-      }
-      
-    }
-  
   }
   
-  //Otherwise, if zombie has no health left
+  //Otherwise
   else {
   
-    //Check if death animation is not active
-    if(!this.isAnimation("dead")) {
-    
-      //Initiate death animation
-      this.SetAnimation("dead");
+    //Check if has detected flag is set, or once in 200 times
+    if(blob.get_bool("hasDetected") || XORRandom(200)==0) {
       
-      //Play death sound
-      this.PlaySound( "/ZombieDie" );
+      //Play groaning sound
+      this.PlaySound( "/ZombieGroan" );
       
     }
     
+    //Check if currently on the ground and moving either left or right
+    //COMMENT: Instead of checking for key presses, perhaps it would be possible to interact with the CMovement object, but it's undocumented
+    if(blob.isOnGround() && (blob.isKeyPressed(key_left) || blob.isKeyPressed(key_right)) ) {
+    
+      //Every 9th frame (network id dependant offset)
+      if((blob.getNetworkID() + getGameTime()) % 9 == 0) {
+        
+        //Determine sound volume based on current horizontal velocity (maximum 1.0)
+        f32 soundVolume = Maths::Min( 0.1f + Maths::Abs(blob.getVelocity().x)*0.1f, 1.0f );
+        
+        //Retrieve a tile object for the tile below (vertical distance 4.0)
+        TileType tile = blob.getMap().getTile( blob.getPosition() + Vec2f( 0.0f, blob.getRadius() + 4.0f )).type;
+        
+        //Check if tile is considered the ground
+        if(blob.getMap().isTileGroundStuff(tile)) {
+        
+          //Play earth step sound
+          this.PlaySound("/EarthStep", soundVolume, 0.75f );
+          
+        }
+        
+        //Otherwise, when tile is not the ground
+        else {
+        
+          //Play stone step sound
+          this.PlaySound("/StoneStep", soundVolume, 0.75f );
+          
+        }
+        
+      }
+        
+    }
+
+    //Check if idle animation is not active
+    if(!this.isAnimation("idle")) {
+    
+      //Initiate idle animation
+      this.SetAnimation("idle");
+      
+    }
+  
   }
 
   //Finished
@@ -231,13 +189,6 @@ void onGib(CSprite@ this) {
   //Create second arm gib
   CParticle@ Arm2     = makeGibParticle( "ZombieGibs.png", pos, vel + getRandomVelocity( 90, hp - 0.2 , 80 ), 1, 2, Vec2f (8,8), 2.0f, 20, "/BodyGibFall", team );
   
-  //Create shield gib
-  //CParticle@ Shield   = makeGibParticle( "ZombieGibs.png", pos, vel + getRandomVelocity( 90, hp , 80 ),       1, 3, Vec2f (8,8), 2.0f, 0, "/BodyGibFall", team );
-  
-  //Create sword gib
-  //CParticle@ Sword    = makeGibParticle( "ZombieGibs.png", pos, vel + getRandomVelocity( 90, hp + 1 , 80 ),   1, 4, Vec2f (8,8), 2.0f, 0, "/BodyGibFall", team );
-
-
   //Finished
   
 }

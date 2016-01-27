@@ -20,6 +20,10 @@ void onInit(CRules@ this) {
 
   print("[UndeadInvasionRules:onInit]");
   
+  //Register map loading handler script with a custom extension
+  //TODO: This is too late
+  //RegisterFileExtensionScript("Scripts/UndeadInvasionMap.as", "undeadinvasion.png");
+  
   //Initialize the re-spawn system
   UndeadInvasionRespawnSystem respawnSystem();
   
