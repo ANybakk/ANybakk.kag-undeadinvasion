@@ -7,7 +7,7 @@
  * Based on previous work by: Eanmig
  */
  
-#include "ZombieBrainMode.as";
+#include "UndeadBrainMode.as";
 
 
 
@@ -51,7 +51,7 @@ void onTick(CSprite@ this) {
   }
   
   //Check if brain is in targeting mode
-  else if(blob.get_u8("brainMode") == ZombieBrainMode::MODE_TARGETING) {
+  else if(blob.get_u8("brainMode") == UndeadBrainMode::MODE_TARGETING) {
     
     //Check if running animation is not active
     if(!this.isAnimation("run")) {
@@ -67,7 +67,7 @@ void onTick(CSprite@ this) {
   }
   
   //Check if brain is in invading mode
-  else if(blob.get_u8("brainMode") == ZombieBrainMode::MODE_INVADING) {
+  else if(blob.get_u8("brainMode") == UndeadBrainMode::MODE_INVADING) {
     
     //Check if walking animation is not active
     if(!this.isAnimation("walk")) {

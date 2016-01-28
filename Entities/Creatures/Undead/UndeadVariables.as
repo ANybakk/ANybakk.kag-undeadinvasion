@@ -1,12 +1,17 @@
 /*
- * UndeadInvasion Zombie entity variables
+ * UndeadInvasion Undead entity variables
  * 
  * This script contains any variables associated with the entity.
  * 
+ * NOTE: To simply tweak variables on a server, create a new mod containing a 
+ *       copy of this file with the same name.
+ * 
+ * NOTE: Undead entity scripts may rely on these variables. When overriding 
+ *       these values or creating new entities based on this one, bundle this 
+ *       file, or a derived version, together with any scripts used.
+ * 
  * Author: ANybakk
  */
-
-
 
 namespace UndeadVariables {
 
@@ -16,8 +21,8 @@ namespace UndeadVariables {
   //Define an attack damage of 0.5, which is normally half a heart
   const f32 ATTACK_DAMAGE = 0.5f;
   
-  //Define an amount of 2 coins to drop on death
-  const u8 DROP_COIN_AMOUNT = 2;
+  //Define an amount of 1 coin to drop on death
+  const u8 DROP_COIN_AMOUNT = 1;
   
   //Define a delay of 5 frames
   const u8 BRAIN_DELAY = 5; //TODO: Define in terms of seconds (float)
@@ -49,12 +54,4 @@ namespace UndeadVariables {
   //Define a walking acceleration of 0.0 horizontal, -1.4 vertical
 	const Vec2f MOVEMENT_JUMP_ACCELERATION(0.0f, -1.4f);
   
-}
-
-
-
-namespace ZombieVariables {
-
-  //No special variables
-
 }

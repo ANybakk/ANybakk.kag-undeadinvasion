@@ -1,12 +1,12 @@
 /*
- * UndeadInvasion Zombie brain modes
+ * UndeadInvasion Undead brain modes
  * 
  * Defines a brain mode enumeration used by the brain.
  * 
  * Author: ANybakk
  */
 
-namespace ZombieBrainMode {
+namespace UndeadBrainMode {
 
 
   /**
