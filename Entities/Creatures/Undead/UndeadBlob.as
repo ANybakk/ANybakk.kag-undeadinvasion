@@ -21,8 +21,8 @@
  */
 void onInit(CBlob@ this) {
   
-  //Set to not be in a usual player team
-	this.server_setTeamNum(-1);
+  //Set to not be in a usual player team (and not the same team as animals either)
+	this.server_setTeamNum(-2);
   
   //Activate brain
   this.getBrain().server_SetActive(true);
