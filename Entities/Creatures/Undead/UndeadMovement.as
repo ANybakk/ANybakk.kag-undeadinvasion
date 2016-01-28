@@ -135,8 +135,8 @@ void onTick(CMovement@ this) {
   
   }
 
-  //Check if left or right up key action
-  if (leftAction || rightAction) {
+  //Otherwise, check if left or right up key action (ignore if up action)
+  else if (leftAction || rightAction) {
   
     //Retrieve current position
     Vec2f currentPosition = blob.getPosition();
@@ -148,21 +148,31 @@ void onTick(CMovement@ this) {
     const f32 radius = blob.getRadius();
     
     //Check if currently on ground or in water
-    //TODO: Or standing on top of another creature
-    if((blob.isOnGround() || blob.isInWater())) {
+    if(blob.isOnGround() || blob.isInWater()) {
+      
+      //Retrieve left neighbouring tile
+      Tile leftNeighbourTile = map.getTile(Vec2f(currentPosition.x - (radius+1.0f), currentPosition.y));
+    
+      //Retrieve right neighbouring tile
+      Tile rightNeighbourTile = map.getTile(Vec2f(currentPosition.x + (radius+1.0f), currentPosition.y));
     
       //Determine left blocked status
-      bool leftBlocked = map.isTileSolid( Vec2f( currentPosition.x - (radius+1.0f), currentPosition.y ));
+      bool leftBlocked = map.isTileSolid( leftNeighbourTile );
       
       //Determine right blocked status
-      bool rightBlocked = map.isTileSolid( Vec2f( currentPosition.x + (radius+1.0f), currentPosition.y ));
+      bool rightBlocked = map.isTileSolid( rightNeighbourTile );
       
-      //Check if action is blocked by a solid object
-      //TODO: And no creature on top
-      if((leftAction && leftBlocked) || (rightAction && rightBlocked)) {
+      //Determine if blob recently collided with another undead blob
+      bool collidedWithUndeadInFront = blob.hasTag("collidedWithUndeadInFront");
       
+      //Check if action is blocked by a solid object or collided with another undead
+      if((leftAction && (leftBlocked || collidedWithUndeadInFront)) || (rightAction && (rightBlocked || collidedWithUndeadInFront))) {
+        
         //Press up key (handled on next tick)
         blob.setKeyPressed(key_up, true);
+        
+        //Untag collision status
+        blob.Untag("collidedWithUndeadInFront");
         
       }
       

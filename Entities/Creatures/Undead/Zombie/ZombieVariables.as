@@ -46,8 +46,8 @@ namespace UndeadVariables {
   //Define a running acceleration of 5.0 horizontal, 0.0 vertical
 	const Vec2f MOVEMENT_RUN_ACCELERATION(5.0f, 0.0f);
   
-  //Define a walking acceleration of 0.0 horizontal, -1.4 vertical
-	const Vec2f MOVEMENT_JUMP_ACCELERATION(0.0f, -1.4f);
+  //Define a walking acceleration of 0.0 horizontal, -2.4 vertical
+	const Vec2f MOVEMENT_JUMP_ACCELERATION(0.0f, -2.4f);
   
 }
 

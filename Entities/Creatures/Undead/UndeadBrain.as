@@ -255,7 +255,6 @@ void onTick(CBrain@ this) {
             //print("angle:"+attackAngle+" position:("+attackPosition.x + "," + attackPosition.y + ") range:"+attackRange);
             
             //If hit info references could be obtained for an arc
-            //TODO: This call returns nothing
             if(map.getHitInfosFromArc(attackPosition, -attackAngle, 90.0f, attackRange, blob, @hitInfos )) {
             
               //Create a handle for a blob object
