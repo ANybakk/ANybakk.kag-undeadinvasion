@@ -89,22 +89,63 @@ bool doesCollideWithBlob(CBlob@ this, CBlob@ other) {
 /**
  * Collision event function
  * 
+ * COMMENT: Is only called once per collision.
  * TODO: Consider if collision should cause a stumbling effect or something
  */
 void onCollision(CBlob@ this, CBlob@ other, bool solid, Vec2f normal, Vec2f point1) {
 
-  //Check if valid blob reference and that it's tagged as undead
-  if(other !is null && other.hasTag("isUndead")) {
+  //Check if debug mode
+  if(g_debug > 0) {
   
-    //Check if collision was in the facing direction
-    if(this.isFacingLeft() && normal.x > 0.0f || !this.isFacingLeft() && normal.x < 0.0f) {
+    //Store position of collision
+    this.set_Vec2f("collidedWithPosition", point1);
     
-      //Set undead in front collision flag
-      this.Tag("collidedWithUndeadInFront");
+  }
+
+  //Determine if collision has a left component
+  bool collidedLeft = normal.x > 0.0f;
+  
+  //Determine if collision has a right component
+  bool collidedRight = normal.x < 0.0f;
+
+  //Check if valid blob reference
+  if(other !is null) {
+
+    //Check if tagged as undead
+    if(other.hasTag("isUndead")) {
     
+      //Check if collision was in the facing direction
+      if((this.isFacingLeft() && collidedLeft) || (!this.isFacingLeft() && collidedRight)) {
+      
+        //Set undead in front collision flag
+        this.Tag("collidedWithUndeadInFront");
+      
+      }
+      
     }
     
   }
+  
+  /* This does not really work. Collision is quite random, and the function is only called once
+  //Check if solid block
+  if(solid) {
+  
+    //Retrieve a reference to the map object
+    CMap@ map = this.getMap();
+    
+    //Obtain a tile object
+    Tile tile = map.getTile(point1);
+    
+    //Check if tile type is wood
+    if(tile.type == CMap::tile_wood) {
+    
+      //Initiate tile destruction
+      map.server_DestroyTile(point1, 0.1f, this);
+      
+    }
+  
+  }
+  */
 
   //Finished
   return;

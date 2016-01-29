@@ -144,7 +144,26 @@ void onTick(CSprite@ this) {
  */
 void onRender(CSprite@ this) {
 
+  //Check if debug mode
+  if(g_debug > 0) {
+
+    //Obtain a reference to the blob object
+    CBlob@ blob = this.getBlob();
+    
+    //Retrieve screen position for this blob
+    //COMMENT: Alternatively use a saved position at the time of collision
+    Vec2f thisScreenPosition = getDriver().getScreenPosFromWorldPos(blob.getPosition());
+    
+    //Retrieve screen position for collision
+    Vec2f collidedWithScreenPosition = getDriver().getScreenPosFromWorldPos(blob.get_Vec2f("collidedWithPosition"));
+    
+    //Draw an arrow
+    GUI::DrawArrow2D( thisScreenPosition, collidedWithScreenPosition, SColor(0xffdd2212) );
+    
+  }
+  
   //Finished
+  return;
 
 }
 

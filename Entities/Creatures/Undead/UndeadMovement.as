@@ -7,10 +7,6 @@
  * NOTE: This script relies on the variables set in "UndeadVariables.as", and 
  *       must therefore be bundled together with it, or a derived version.
  * 
- * TODO: Make zombies able to jump over each other if they aren't making progress
- * TODO: Make zombies unable to jump if another undead is standing on top
- * TODO: Sometimes zombies jump too high
- * 
  * Author: ANybakk
  * Based on previous work by: Eanmig
  */
@@ -51,7 +47,7 @@ void onTick(CMovement@ this) {
   CBlob@ blob = this.getBlob();
   
   //Check if health is depleted
-  //TODO: Isn't this redundant?
+  //COMMENT: Isn't this redundant?
   if (blob.getHealth() <= 0.0) {
   
     //Stop (dead)
@@ -148,6 +144,7 @@ void onTick(CMovement@ this) {
     const f32 radius = blob.getRadius();
     
     //Check if currently on ground or in water
+    //COMMENT: Standing on top of another undead seems to be considered standing on the ground
     if(blob.isOnGround() || blob.isInWater()) {
       
       //Retrieve left neighbouring tile
@@ -195,6 +192,27 @@ void onTick(CMovement@ this) {
     
   }
   
+  //Create an array of blob references
+  CBlob@[] overlappingBlobs;
+  
+  //Retrieve overlapping blobs
+  blob.getOverlapping(@overlappingBlobs);
+  
+  //Iterate through all overlapping blobs
+  for(int i=0; i<overlappingBlobs.length; i++) {
+  
+    //Otherwise, check if tagged as food
+    if(overlappingBlobs[i].hasTag("food")) {
+
+      //Initiate pick up
+      //TODO: Doesn't seem to work
+      blob.server_Pickup(overlappingBlobs[i]);
+
+    }
+  
+  }
+  
   //Finished
+  return;
   
 }

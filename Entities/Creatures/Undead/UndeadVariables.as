@@ -22,7 +22,7 @@ namespace UndeadVariables {
   const f32 ATTACK_DAMAGE = 0.5f;
   
   //Define an amount of 2 coins to drop on death
-  const u8 DROP_COIN_AMOUNT = 2;
+  const u8 DROP_COIN_AMOUNT = 1;
   
   //Define a delay of 5 frames
   const u8 BRAIN_DELAY = 5; //TODO: Define in terms of seconds (float)
