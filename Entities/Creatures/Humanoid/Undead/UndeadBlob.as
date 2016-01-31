@@ -11,7 +11,10 @@
  * 
  * TODO: Set mode to warm-up when last player leaves (Spawn system's job?)
  * TODO: Idea: Create player-controlled Undead entities
+ * TODO: Consider custom "corpse" block on death by spikes etc., (use server_SetTile(Vec2f, Tile))
  */
+ 
+#include "HumanoidBlob.as";
 
 #include "Hitters.as";
 

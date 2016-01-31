@@ -1,0 +1,78 @@
+/*
+ * UndeadInvasion Humanoid blob
+ * 
+ * This script contains generic functionality for humanoid entities.
+ * 
+ * COMMENT: Custom methods are wrapped in name-spaces to distinguish them from 
+ *          the built-in ones and to avoid naming conflicts
+ * 
+ * Author: ANybakk
+ */
+
+
+
+namespace UndeadInvasion {
+
+  namespace HumanoidBlob {
+  
+  
+  
+    /**
+     * Retrieves the positions for all horizontal neighbouring tiles.
+     * Tiles are indexed in the following order: Left lower ([0][0]), left upper ([0][1]), right lower ([1][0]), right upper ([1][1]).
+     * 
+     * @param   this    a reference to the blob object.
+     * @returns         a 2D array of vectors representing all the possible tile positions.
+     */
+    Vec2f[][] getHorizontalNeighbourTilePositions(CBlob@ this) {
+
+      //Create the array
+      Vec2f[][] result;
+      
+      //Get the blob's position
+      Vec2f currentPosition = this.getPosition();
+      
+      //Get the blob's radius
+      f32 radius = this.getRadius();
+      
+      //Retrieve the map's tile size setting
+      u8 tileSize = this.getMap().tilesize;
+      
+      {
+      
+        Vec2f[] left;
+      
+        //Determine left lower position (horizontal distance is radius plus half tile size, vertical distance is halt tile size)
+        left.push_back(currentPosition + Vec2f(-(radius+tileSize/2), 0.0f + tileSize/2));
+        
+        //Determine left upper position
+        left.push_back(currentPosition + Vec2f(-(radius+tileSize/2), 0.0f - tileSize/2));
+        
+        result.push_back(left);
+        
+      }
+      
+      {
+      
+        Vec2f[] right;
+      
+        //Determine right lower position
+        right.push_back(currentPosition + Vec2f(radius+tileSize/2, 0.0f + tileSize/2));
+        
+        //Determine right upper position
+        right.push_back(currentPosition + Vec2f(radius+tileSize/2, 0.0f - tileSize/2));
+        
+        result.push_back(right);
+        
+      }
+      
+      //Finished, return result
+      return result;
+      
+    }
+    
+    
+    
+  }
+  
+}

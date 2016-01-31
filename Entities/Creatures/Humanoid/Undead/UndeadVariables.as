@@ -20,6 +20,12 @@ namespace UndeadVariables {
   
   //Define an attack damage of 0.5, which is normally half a heart
   const f32 ATTACK_DAMAGE = 0.5f;
+
+  //Define a collateral (tile) attack damage of 0.1 seconds
+  const f32 COLLATERAL_ATTACK_DAMAGE = 0.1f;
+
+  //Define a collateral (tile) attack frequency of 1 second
+  const u8 COLLATERAL_ATTACK_FREQUENCY = 1;
   
   //Define an amount of 2 coins to drop on death
   const u8 DROP_COIN_AMOUNT = 1;

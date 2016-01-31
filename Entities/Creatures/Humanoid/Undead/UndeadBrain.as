@@ -14,6 +14,8 @@
  * 
  * Author: ANybakk
  *
+ * TODO:  Instead of keeping a coutner for when the brain is going to act, how 
+ *        about setting the tick frequency?
  * TODO:  Give undead the ability to change target in BRAINMODE_TARGETING mode, 
  *        if another survivor/animal is closer
  * TODO:  Allow undead to eat meaty food items they may find (steak, burger, 
@@ -228,7 +230,7 @@ void onTick(CBrain@ this) {
           //Calculate attack range using the radius of both blobs
           f32 attackRange = blob.getRadius() + target.getRadius();
           
-          //Determine if it's time to attack, by checking lapsed time (minus brain delay) against frequency
+          //Determine if it's time to attack, by checking lapsed time against frequency
           bool isTimeToAttack = (getGameTime() - attackTime) >= attackFrequency;
           
           //Check if it's time to attack, and if target is within attack range (shape's radius)

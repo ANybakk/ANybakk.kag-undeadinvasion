@@ -36,6 +36,9 @@ void onTick(CSprite@ this) {
   //Obtain a reference to the blob object
   CBlob@ blob = this.getBlob();
   
+  //Obtain a reference to the map object
+  CMap@ map = blob.getMap();
+  
   //Check if has attacked flag is set and biting animation is not yet active
   if(blob.get_bool("hasAttacked")) {
   
@@ -50,7 +53,17 @@ void onTick(CSprite@ this) {
     
   }
   
-  //Check if brain is in targeting mode
+  else if(blob.get_bool("hasJumped")) {
+    
+    //Initiate biting animation
+    //this.SetAnimation("climb");
+    
+    //Remove flag
+    blob.set_bool("hasJumped", false);
+    
+  }
+  
+  //Otherwise, check if brain is in targeting mode
   else if(blob.get_u8("brainMode") == UndeadBrainMode::MODE_TARGETING) {
     
     //Check if running animation is not active
@@ -100,11 +113,11 @@ void onTick(CSprite@ this) {
         //Determine sound volume based on current horizontal velocity (maximum 1.0)
         f32 soundVolume = Maths::Min( 0.1f + Maths::Abs(blob.getVelocity().x)*0.1f, 1.0f );
         
-        //Retrieve a tile object for the tile below (vertical distance 4.0)
-        TileType tile = blob.getMap().getTile( blob.getPosition() + Vec2f( 0.0f, blob.getRadius() + 4.0f )).type;
+        //Retrieve a tile object for the tile below (vertical distance is the blob's radius + half a tile)
+        TileType tile = map.getTile( blob.getPosition() + Vec2f( 0.0f, blob.getRadius() + map.tilesize/2 )).type;
         
         //Check if tile is considered the ground
-        if(blob.getMap().isTileGroundStuff(tile)) {
+        if(map.isTileGroundStuff(tile)) {
         
           //Play earth step sound
           this.PlaySound("/EarthStep", soundVolume, 0.75f );

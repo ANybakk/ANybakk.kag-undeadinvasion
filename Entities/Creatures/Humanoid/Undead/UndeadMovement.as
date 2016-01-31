@@ -6,6 +6,8 @@
  * 
  * NOTE: This script relies on the variables set in "UndeadVariables.as", and 
  *       must therefore be bundled together with it, or a derived version.
+ * TODO: Set a tick frequency?
+ * TODO: Make undead jump if their target in targeting mode is above them.
  * 
  * Author: ANybakk
  * Based on previous work by: Eanmig
@@ -14,6 +16,8 @@
 #define SERVER_ONLY
 
 #include "UndeadBrainMode.as";
+#include "HumanoidBlob.as";
+#include "UndeadInvasionMap.as";
 
 
 
@@ -25,11 +29,8 @@ void onInit(CMovement@ this) {
   //Obtain a reference to the blob object
   CBlob@ blob = this.getBlob();
   
-  //Store climbing counting variable to 0
-	//this.set_s32("movement-climb", 0);
-
-  //Set tick not attached flag
-  //this.getCurrentScript().runFlags |= Script::tick_not_attached;
+  //Set collateral attack time tracking variable to current time
+  blob.set_u16("lastCollateralAttackTime", getGameTime());
   
   //Set remove on "dead" tag
   this.getCurrentScript().removeIfTag	= "dead";
@@ -126,6 +127,9 @@ void onTick(CMovement@ this) {
     //Add a jumping force
     blob.AddForce(Vec2f( horizontalForce, verticalForce));
     
+    //Set jumped flag
+    blob.set_bool("hasJumped", true);
+    
     //Stop pressing up key
     blob.setKeyPressed(key_up, false);
   
@@ -147,29 +151,75 @@ void onTick(CMovement@ this) {
     //COMMENT: Standing on top of another undead seems to be considered standing on the ground
     if(blob.isOnGround() || blob.isInWater()) {
       
-      //Retrieve left neighbouring tile
-      Tile leftNeighbourTile = map.getTile(Vec2f(currentPosition.x - (radius+1.0f), currentPosition.y));
-    
-      //Retrieve right neighbouring tile
-      Tile rightNeighbourTile = map.getTile(Vec2f(currentPosition.x + (radius+1.0f), currentPosition.y));
-    
+      //Get a 2D array of vectors representing all the possible neighbour tile positions
+      Vec2f[][] neighbourTilePositions = UndeadInvasion::HumanoidBlob::getHorizontalNeighbourTilePositions(blob);
+      
+      //Get a 2D array of neighbour tiles (same sequence)
+      Tile[][] neighbourTiles = UndeadInvasion::Map::getTiles(map, neighbourTilePositions);
+      
       //Determine left blocked status
-      bool leftBlocked = map.isTileSolid( leftNeighbourTile );
+      bool leftWalkBlocked = map.isTileSolid(neighbourTiles[0][0]);
       
       //Determine right blocked status
-      bool rightBlocked = map.isTileSolid( rightNeighbourTile );
+      bool rightWalkBlocked = map.isTileSolid(neighbourTiles[1][0]);
       
       //Determine if blob recently collided with another undead blob
       bool collidedWithUndeadInFront = blob.hasTag("collidedWithUndeadInFront");
       
       //Check if action is blocked by a solid object or collided with another undead
-      if((leftAction && (leftBlocked || collidedWithUndeadInFront)) || (rightAction && (rightBlocked || collidedWithUndeadInFront))) {
+      if((leftAction && (leftWalkBlocked || collidedWithUndeadInFront)) || (rightAction && (rightWalkBlocked || collidedWithUndeadInFront))) {
         
         //Press up key (handled on next tick)
         blob.setKeyPressed(key_up, true);
         
-        //Untag collision status
+        //Turn off collision status flag
         blob.Untag("collidedWithUndeadInFront");
+        
+      }
+      
+      //Determine collateral attack frequency
+      u8 collateralAttackFrequency = UndeadVariables::COLLATERAL_ATTACK_FREQUENCY * getTicksASecond();
+      
+      //Retrieve collateral attack time variable
+      u16 collateralAttackTime = blob.get_u16("lastCollateralAttackTime");
+      
+      //Determine if it's time to attack, by checking lapsed time against frequency
+      bool isTimeToAttack = (getGameTime() - collateralAttackTime) >= collateralAttackFrequency;
+      
+      //Check if time to attack
+      if(isTimeToAttack) {
+      
+        //Create a tile object handle
+        Tile tile;
+        
+        //Iterate through directions
+        for(int i=0; i<neighbourTiles.length; i++) {
+        
+          //Check if this direction is blocked
+          if(i == 0 && leftWalkBlocked || i == 1 && rightWalkBlocked) {
+          
+            //Iterate through all tiles
+            for(int j=0; j<neighbourTiles[i].length; j++) {
+            
+              //Store a reference to the tile object
+              tile = neighbourTiles[i][j];
+              
+              //Check if wood tile
+              if(map.isTileWood(tile.type)) {
+            
+                //Initiate tile destruction
+                map.server_DestroyTile(neighbourTilePositions[i][j], UndeadVariables::COLLATERAL_ATTACK_DAMAGE, blob);
+                
+                //Update collateral attack time variable
+                blob.set_u16("lastCollateralAttackTime", getGameTime());
+                
+              }
+              
+            }
+            
+          }
+          
+        }
         
       }
       
