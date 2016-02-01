@@ -6,7 +6,7 @@
  * NOTE: To simply tweak variables on a server, create a new mod containing a 
  *       copy of this file with the same name.
  * 
- * NOTE: Undead entity scripts may rely on these variables. When overriding 
+ * NOTE: Entity scripts may rely on these variables. When overriding 
  *       these values or creating new entities based on this one, bundle this 
  *       file, or a derived version, together with any scripts used.
  * 
@@ -33,10 +33,10 @@ namespace UndeadVariables {
   //Define a delay of 5 frames
   const u8 BRAIN_DELAY = 5; //TODO: Define in terms of seconds (float)
 
-  //Define a detection radius of 32.0
+  //Define a detection radius of 32.0 (approximately 2 tiles in-between)
   const f32 BRAIN_DETECT_RADIUS = 32.0f;
 
-  //Define a chasing radius of 48.0 (Should be farther than detection radius)
+  //Define a chasing radius of 48.0 (approximately 3 tiles in-between). Should be longer than detection radius 
   const f32 BRAIN_CHASE_RADIUS = 48.0f;
 
   //Define an attack frequency of 2 seconds

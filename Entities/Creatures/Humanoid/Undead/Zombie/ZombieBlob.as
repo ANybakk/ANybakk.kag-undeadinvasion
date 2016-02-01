@@ -10,7 +10,6 @@
 #define SERVER_ONLY
 
 #include "UndeadBlob.as";
-
 #include "ZombieVariables.as";
 
 

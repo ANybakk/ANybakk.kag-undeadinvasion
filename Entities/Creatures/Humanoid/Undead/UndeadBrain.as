@@ -13,17 +13,18 @@
  *       must therefore be bundled together with it, or a derived version.
  * 
  * Author: ANybakk
- *
- * TODO:  Instead of keeping a coutner for when the brain is going to act, how 
- *        about setting the tick frequency?
+ * 
  * TODO:  Give undead the ability to change target in BRAINMODE_TARGETING mode, 
  *        if another survivor/animal is closer
  * TODO:  Allow undead to eat meaty food items they may find (steak, burger, 
  *        fish)
+ * TODO: Make undead jump if their target in targeting mode is above them.
  */
 
 #define SERVER_ONLY
 
+#include "CreatureBlob.as";
+#include "UndeadBlob.as";
 #include "UndeadBrainMode.as";
 
 #include "PressOldKeys.as";
@@ -155,7 +156,8 @@ void onTick(CBrain@ this) {
         blob.set_bool("hasDetected", true);
         
         //Move towards target
-        blob.setKeyPressed((target.getPosition().x < blob.getPosition().x) ? key_left : key_right, true);
+        //blob.setKeyPressed((target.getPosition().x < blob.getPosition().x) ? key_left : key_right, true);
+        UndeadInvasion::UndeadBlob::pressMovementKeys(blob, target);
       
       }
       
@@ -198,7 +200,8 @@ void onTick(CBrain@ this) {
         if (target !is null) {
         
           //Keep moving towards nearest player spawn
-          blob.setKeyPressed((target.getPosition().x < blob.getPosition().x) ? key_left : key_right, true);
+          //blob.setKeyPressed((target.getPosition().x < blob.getPosition().x) ? key_left : key_right, true);
+          UndeadInvasion::UndeadBlob::pressMovementKeys(blob, target);
           
         }
         
@@ -226,15 +229,15 @@ void onTick(CBrain@ this) {
           
           //Retrieve attack time variable
           u16 attackTime = blob.get_u16("lastAttackTime");
-            
-          //Calculate attack range using the radius of both blobs
-          f32 attackRange = blob.getRadius() + target.getRadius();
           
           //Determine if it's time to attack, by checking lapsed time against frequency
           bool isTimeToAttack = (getGameTime() - attackTime) >= attackFrequency;
           
+          //Determine if target is within range
+          bool isWithinMeleeRange = UndeadInvasion::CreatureBlob::isWithinMeleeRange(blob, target);
+          
           //Check if it's time to attack, and if target is within attack range (shape's radius)
-          if(isTimeToAttack && attackVector.getLength() <= attackRange) {
+          if(isTimeToAttack && isWithinMeleeRange) {
             
             //Normalize vector
             attackVector.Normalize();
@@ -254,7 +257,8 @@ void onTick(CBrain@ this) {
             //Calculate attack position (retracted by 2)
             Vec2f attackPosition = blob.getPosition() - Vec2f(2,0).RotateBy(-attackAngle);
             
-            //print("angle:"+attackAngle+" position:("+attackPosition.x + "," + attackPosition.y + ") range:"+attackRange);
+            //Calculate attack range using the radius of both blobs
+            f32 attackRange = UndeadInvasion::CreatureBlob::getDistance(blob, target);
             
             //If hit info references could be obtained for an arc
             if(map.getHitInfosFromArc(attackPosition, -attackAngle, 90.0f, attackRange, blob, @hitInfos )) {
@@ -299,7 +303,8 @@ void onTick(CBrain@ this) {
             if(!hasAttacked) {
             
               //Pursue target by initiating movement through key press
-              blob.setKeyPressed((target.getPosition().x < blob.getPosition().x) ? key_left : key_right, true);
+              //blob.setKeyPressed((target.getPosition().x < blob.getPosition().x) ? key_left : key_right, true);
+              UndeadInvasion::UndeadBlob::pressMovementKeys(blob, target);
               
             }
           
@@ -309,7 +314,8 @@ void onTick(CBrain@ this) {
           else {
           
             //Pursue target by initiating movement through key press
-            blob.setKeyPressed((target.getPosition().x < blob.getPosition().x) ? key_left : key_right, true);
+            //blob.setKeyPressed((target.getPosition().x < blob.getPosition().x) ? key_left : key_right, true);
+            UndeadInvasion::UndeadBlob::pressMovementKeys(blob, target);
             
           }
           

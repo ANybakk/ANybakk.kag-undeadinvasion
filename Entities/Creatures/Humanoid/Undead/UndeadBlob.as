@@ -1,10 +1,13 @@
 /*
- * UndeadInvasion Undead blob
+ * UndeadInvasion Undead blob (ABSTRACT)
  * 
- * This script handles anything general.
+ * This script handles anything general related to Undead entity blobs.
  * 
  * NOTE: This script relies on the variables set in "UndeadVariables.as", and 
  *       must therefore be bundled together with it, or a derived version.
+ * 
+ * COMMENT: Custom methods are wrapped in name-spaces to distinguish them from 
+ *          the built-in ones and to avoid naming conflicts
  * 
  * Author: ANybakk
  * Based on previous work by: Eanmig
@@ -12,8 +15,10 @@
  * TODO: Set mode to warm-up when last player leaves (Spawn system's job?)
  * TODO: Idea: Create player-controlled Undead entities
  * TODO: Consider custom "corpse" block on death by spikes etc., (use server_SetTile(Vec2f, Tile))
+ * TODO: Consider letting undead dig through dirt if they smell flesh (lower ranges than above-ground perception)
  */
  
+#include "CreatureBlob.as";
 #include "HumanoidBlob.as";
 
 #include "Hitters.as";
@@ -110,7 +115,8 @@ void onCollision(CBlob@ this, CBlob@ other, bool solid, Vec2f normal, Vec2f poin
   
   //Determine if collision has a right component
   bool collidedRight = normal.x < 0.0f;
-
+  
+  bool collidedFacingDirection = (this.isFacingLeft() && collidedLeft) || (!this.isFacingLeft() && collidedRight);
   //Check if valid blob reference
   if(other !is null) {
 
@@ -118,7 +124,7 @@ void onCollision(CBlob@ this, CBlob@ other, bool solid, Vec2f normal, Vec2f poin
     if(other.hasTag("isUndead")) {
     
       //Check if collision was in the facing direction
-      if((this.isFacingLeft() && collidedLeft) || (!this.isFacingLeft() && collidedRight)) {
+      if(collidedFacingDirection) {
       
         //Set undead in front collision flag
         this.Tag("collidedWithUndeadInFront");
@@ -171,4 +177,103 @@ void onDie(CBlob@ this) {
   //Finished
   return;
 
+}
+
+
+
+namespace UndeadInvasion {
+
+  namespace UndeadBlob {
+    
+    
+    
+    /**
+     * Checks if a target is within chasing range.
+     * 
+     * @param   this            a blob reference.
+     * @param   target          the target blob.
+     */
+    bool isWithinChasingRange(CBlob@ this, CBlob@ target) {
+      
+      //Finished, return true if distance is within the combined radius
+      return UndeadInvasion::CreatureBlob::getDistance(this, target) <= UndeadVariables::BRAIN_CHASE_RADIUS;
+      
+    }
+    
+    
+    
+    /**
+     * Checks if a target is within detection range.
+     * 
+     * @param   this            a blob reference.
+     * @param   target          the target blob.
+     */
+    bool isWithinDetectionRange(CBlob@ this, CBlob@ target) {
+      
+      //Finished, return true if distance is within the combined radius
+      return UndeadInvasion::CreatureBlob::getDistance(this, target) <= UndeadVariables::BRAIN_DETECT_RADIUS;
+      
+    }
+  
+  
+  
+    /**
+     * Presses the correct movement keys to reach a target blob.
+     * 
+     * @param   this            a blob reference.
+     * @param   target          the target blob.
+     */
+    void pressMovementKeys(CBlob@ this, CBlob@ target) {
+    
+      //Obtain this blob's position
+      Vec2f position = this.getPosition();
+      
+      Vec2f targetPosition = target.getPosition();
+      
+      //Check if on ground or in water, and horizontal position is the same or target is within range
+      if((this.isOnGround() || this.isInWater()) && (targetPosition.x == position.x || isWithinChasingRange(this, target))) {
+      
+        //Check if target is above
+        if(targetPosition.y < position.y) {
+        
+          //Press up key
+          this.setKeyPressed(key_up, true);
+          
+        }
+        
+        //Otherwise, check if target is below
+        else if(targetPosition.y > position.y) {
+        
+          //Press down key
+          this.setKeyPressed(key_down, true);
+          
+        }
+        
+      }
+      
+      //Check if target is to the left
+      if(targetPosition.x < position.x) {
+        
+        //Press left key
+        this.setKeyPressed(key_left, true);
+        
+      }
+      
+      //Otherwise, check if target is to the right
+      else if(targetPosition.x > position.x) {
+        
+        //Press right key
+        this.setKeyPressed(key_right, true);
+        
+      }
+      
+      //Finished
+      return;
+      
+    }
+    
+    
+    
+  }
+  
 }

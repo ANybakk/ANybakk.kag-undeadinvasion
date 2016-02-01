@@ -6,8 +6,6 @@
  * 
  * NOTE: This script relies on the variables set in "UndeadVariables.as", and 
  *       must therefore be bundled together with it, or a derived version.
- * TODO: Set a tick frequency?
- * TODO: Make undead jump if their target in targeting mode is above them.
  * 
  * Author: ANybakk
  * Based on previous work by: Eanmig
@@ -64,6 +62,9 @@ void onTick(CMovement@ this) {
   
   //Retrieve up key action
   bool upAction = blob.isKeyPressed(key_up);
+  
+  //Retrieve down key action
+  bool downAction = blob.isKeyPressed(key_down);
 
   //Retrieve velocity
   Vec2f vel = blob.getVelocity();
@@ -134,46 +135,45 @@ void onTick(CMovement@ this) {
     blob.setKeyPressed(key_up, false);
   
   }
-
-  //Otherwise, check if left or right up key action (ignore if up action)
-  else if (leftAction || rightAction) {
   
-    //Retrieve current position
-    Vec2f currentPosition = blob.getPosition();
-    
-    //Retrieve map object reference
-    CMap@ map = blob.getMap();
-    
-    //Retrieve radius
-    const f32 radius = blob.getRadius();
-    
-    //Check if currently on ground or in water
-    //COMMENT: Standing on top of another undead seems to be considered standing on the ground
-    if(blob.isOnGround() || blob.isInWater()) {
+  //Otherwise, if not up key action
+  else {
       
+    //Check if currently on ground
+    //COMMENT: Standing on top of another undead seems to be considered standing on the ground
+    if(blob.isOnGround()) {
+        
+      //Retrieve map object reference
+      CMap@ map = blob.getMap();
+          
       //Get a 2D array of vectors representing all the possible neighbour tile positions
-      Vec2f[][] neighbourTilePositions = UndeadInvasion::HumanoidBlob::getHorizontalNeighbourTilePositions(blob);
+      Vec2f[][] neighbourTilePositions = UndeadInvasion::HumanoidBlob::getNeighbourTilePositions(blob);
       
       //Get a 2D array of neighbour tiles (same sequence)
       Tile[][] neighbourTiles = UndeadInvasion::Map::getTiles(map, neighbourTilePositions);
       
-      //Determine left blocked status
-      bool leftWalkBlocked = map.isTileSolid(neighbourTiles[0][0]);
-      
-      //Determine right blocked status
-      bool rightWalkBlocked = map.isTileSolid(neighbourTiles[1][0]);
-      
-      //Determine if blob recently collided with another undead blob
-      bool collidedWithUndeadInFront = blob.hasTag("collidedWithUndeadInFront");
-      
-      //Check if action is blocked by a solid object or collided with another undead
-      if((leftAction && (leftWalkBlocked || collidedWithUndeadInFront)) || (rightAction && (rightWalkBlocked || collidedWithUndeadInFront))) {
+      //Check if left or right up key action
+      if (leftAction || rightAction) {
         
-        //Press up key (handled on next tick)
-        blob.setKeyPressed(key_up, true);
+        //Determine left blocked status (either tile is solid)
+        bool leftWalkBlocked = map.isTileSolid(neighbourTiles[3][0]) || map.isTileSolid(neighbourTiles[3][0]);
         
-        //Turn off collision status flag
-        blob.Untag("collidedWithUndeadInFront");
+        //Determine right blocked status (either tile is solid)
+        bool rightWalkBlocked = map.isTileSolid(neighbourTiles[1][1]) || map.isTileSolid(neighbourTiles[1][1]);
+        
+        //Determine if blob recently collided with another undead blob
+        bool collidedWithUndeadInFront = blob.hasTag("collidedWithUndeadInFront");
+        
+        //Check if action is blocked by a solid object or collided with another undead
+        if((leftAction && (leftWalkBlocked || collidedWithUndeadInFront)) || (rightAction && (rightWalkBlocked || collidedWithUndeadInFront))) {
+          
+          //Press up key (handled on next tick)
+          blob.setKeyPressed(key_up, true);
+          
+          //Turn off collision status flag
+          blob.Untag("collidedWithUndeadInFront");
+          
+        }
         
       }
       
@@ -189,14 +189,30 @@ void onTick(CMovement@ this) {
       //Check if time to attack
       if(isTimeToAttack) {
       
+        //Create a boolean array for which directions to enable collateral damage for
+        bool[] doCollateralDamage;
+        
+        //Enable collateral damage above if up action
+        //TODO: Doesn't seem to happen anyway?
+        doCollateralDamage.push_back((upAction) ? true : false);
+        
+        //Enable collateral damage to the right if right action
+        doCollateralDamage.push_back((rightAction) ? true : false);
+        
+        //Enable collateral damage below if down action
+        doCollateralDamage.push_back((downAction) ? true : false);
+        
+        //Enable collateral damage to the left if left action
+        doCollateralDamage.push_back((leftAction) ? true : false);
+      
         //Create a tile object handle
         Tile tile;
         
-        //Iterate through directions
+        //Iterate through neighbour tile directions
         for(int i=0; i<neighbourTiles.length; i++) {
         
-          //Check if this direction is blocked
-          if(i == 0 && leftWalkBlocked || i == 1 && rightWalkBlocked) {
+          //Check if this direction is enabled for collateral damage
+          if(doCollateralDamage[i]) {
           
             //Iterate through all tiles
             for(int j=0; j<neighbourTiles[i].length; j++) {
@@ -204,8 +220,8 @@ void onTick(CMovement@ this) {
               //Store a reference to the tile object
               tile = neighbourTiles[i][j];
               
-              //Check if wood tile
-              if(map.isTileWood(tile.type)) {
+              //Check if wood or dirt tile
+              if(map.isTileWood(tile.type) || tile.type == CMap::tile_ground) {
             
                 //Initiate tile destruction
                 map.server_DestroyTile(neighbourTilePositions[i][j], UndeadVariables::COLLATERAL_ATTACK_DAMAGE, blob);
@@ -221,10 +237,12 @@ void onTick(CMovement@ this) {
           
         }
         
+        //TODO: Check if door
+        
       }
       
     }
-    
+  
   }
   
   //Retrieve a reference to the shape object

@@ -171,7 +171,19 @@ void onRender(CSprite@ this) {
     Vec2f collidedWithScreenPosition = getDriver().getScreenPosFromWorldPos(blob.get_Vec2f("collidedWithPosition"));
     
     //Draw an arrow
-    GUI::DrawArrow2D( thisScreenPosition, collidedWithScreenPosition, SColor(0xffdd2212) );
+    GUI::DrawArrow2D( thisScreenPosition, collidedWithScreenPosition, SColor(0xffff8000) );
+    
+    CBlob@ target = getBlobByNetworkID(blob.get_netid("brainTargetID"));
+    
+    if(target !is null && blob.get_u8("brainMode") == UndeadBrainMode::MODE_TARGETING) {
+    
+      //Retrieve screen position for target
+      Vec2f targetScreenPosition = getDriver().getScreenPosFromWorldPos(target.getPosition());
+      
+      //Draw an arrow
+      GUI::DrawArrow2D( thisScreenPosition, targetScreenPosition, SColor(0xffff0000) );
+      
+    }
     
   }
   

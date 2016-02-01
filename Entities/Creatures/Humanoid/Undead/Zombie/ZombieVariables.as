@@ -61,6 +61,7 @@ namespace UndeadVariables {
 
 namespace ZombieVariables {
 
-  //No special variables
+  //Define a placeholder variable
+  const bool IS_TRUE = true;
 
 }

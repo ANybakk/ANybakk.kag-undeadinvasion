@@ -18,13 +18,13 @@ namespace UndeadInvasion {
   
   
     /**
-     * Retrieves the positions for all horizontal neighbouring tiles.
-     * Tiles are indexed in the following order: Left lower ([0][0]), left upper ([0][1]), right lower ([1][0]), right upper ([1][1]).
+     * Retrieves the positions for all neighbouring tiles.
+     * Tiles are indexed clock-wise, starting from the top left.
      * 
      * @param   this    a reference to the blob object.
      * @returns         a 2D array of vectors representing all the possible tile positions.
      */
-    Vec2f[][] getHorizontalNeighbourTilePositions(CBlob@ this) {
+    Vec2f[][] getNeighbourTilePositions(CBlob@ this) {
 
       //Create the array
       Vec2f[][] result;
@@ -40,29 +40,57 @@ namespace UndeadInvasion {
       
       {
       
-        Vec2f[] left;
+        Vec2f[] over;
       
-        //Determine left lower position (horizontal distance is radius plus half tile size, vertical distance is halt tile size)
-        left.push_back(currentPosition + Vec2f(-(radius+tileSize/2), 0.0f + tileSize/2));
+        //Determine over left position (horizontal distance is half tile size, vertical distance is radius plus half tile size)
+        over.push_back(currentPosition + Vec2f(0.0f - tileSize/2, -(radius+tileSize/2)));
         
-        //Determine left upper position
-        left.push_back(currentPosition + Vec2f(-(radius+tileSize/2), 0.0f - tileSize/2));
+        //Determine over right position
+        over.push_back(currentPosition + Vec2f(0.0f + tileSize/2, -(radius+tileSize/2)));
         
-        result.push_back(left);
+        result.push_back(over);
         
       }
       
       {
       
         Vec2f[] right;
+        
+        //Determine right upper position
+        right.push_back(currentPosition + Vec2f(radius+tileSize/2, 0.0f - tileSize/2));
       
         //Determine right lower position
         right.push_back(currentPosition + Vec2f(radius+tileSize/2, 0.0f + tileSize/2));
         
-        //Determine right upper position
-        right.push_back(currentPosition + Vec2f(radius+tileSize/2, 0.0f - tileSize/2));
-        
         result.push_back(right);
+        
+      }
+      
+      {
+      
+        Vec2f[] under;
+        
+        //Determine under right position
+        under.push_back(currentPosition + Vec2f(0.0f + tileSize/2, radius+tileSize/2));
+      
+        //Determine under left position
+        under.push_back(currentPosition + Vec2f(0.0f - tileSize/2, radius+tileSize/2));
+        
+        result.push_back(under);
+        
+      }
+      
+      {
+      
+        Vec2f[] left;
+      
+        //Determine left lower position (horizontal distance is radius plus half tile size, vertical distance is half tile size)
+        left.push_back(currentPosition + Vec2f(-(radius+tileSize/2), 0.0f + tileSize/2));
+        
+        //Determine left upper position
+        left.push_back(currentPosition + Vec2f(-(radius+tileSize/2), 0.0f - tileSize/2));
+        
+        result.push_back(left);
         
       }
       
