@@ -159,6 +159,9 @@ void onRender(CSprite@ this) {
 
   //Check if debug mode
   if(g_debug > 0) {
+  
+    //Set menu font
+    GUI::SetFont("menu");
 
     //Obtain a reference to the blob object
     CBlob@ blob = this.getBlob();
@@ -170,11 +173,13 @@ void onRender(CSprite@ this) {
     //Retrieve screen position for collision
     Vec2f collidedWithScreenPosition = getDriver().getScreenPosFromWorldPos(blob.get_Vec2f("collidedWithPosition"));
     
-    //Draw an arrow
-    GUI::DrawArrow2D( thisScreenPosition, collidedWithScreenPosition, SColor(0xffff8000) );
+    //Draw an asterix
+    GUI::DrawText("*", collidedWithScreenPosition, SColor(0xffff8000));
     
+    //Retrieve a reference to current targeted blob
     CBlob@ target = getBlobByNetworkID(blob.get_netid("brainTargetID"));
     
+    //Check if target is valid and still in targeting mode
     if(target !is null && blob.get_u8("brainMode") == UndeadBrainMode::MODE_TARGETING) {
     
       //Retrieve screen position for target

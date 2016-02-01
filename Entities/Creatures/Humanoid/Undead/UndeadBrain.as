@@ -215,14 +215,22 @@ void onTick(CBrain@ this) {
       //Retrieve a reference to the target blob object
       @target = getBlobByNetworkID(blob.get_netid("brainTargetID"));
       
-      //Check if target is valid
-      if(target !is null) {
+      //Check if target is not valid
+      if(target is null) {
+      
+        //Set mode variable to invading mode
+        blob.set_u8("brainMode", UndeadBrainMode::MODE_INVADING);
+        
+      }
+      
+      //Otherwise, target is valid
+      else {
       
         //Create a vector
-        Vec2f attackVector = target.getPosition()-blob.getPosition();
+        Vec2f attackVector = UndeadInvasion::CreatureBlob::getVector(blob, target);
        
         //Check if still within range, based on the brain's chasing radius
-        if(attackVector.getLength() <= UndeadVariables::BRAIN_CHASE_RADIUS) {
+        if(UndeadInvasion::UndeadBlob::isWithinChasingRange(blob, target)) {
       
           //Determine attack frequency
           u8 attackFrequency = UndeadVariables::BRAIN_ATTACK_FREQUENCY * getTicksASecond();
@@ -242,79 +250,24 @@ void onTick(CBrain@ this) {
             //Normalize vector
             attackVector.Normalize();
             
-            //Create an array of hit info object handles
-            HitInfo@[] hitInfos;
+            //Retrieve attack damage variable
+            f32 attackDamage = UndeadVariables::ATTACK_DAMAGE;
             
-            //Retrieve the map
-            CMap@ map = getMap();
+            //Initiate bite attack
+            blob.server_Hit(target, target.getPosition(), attackVector, attackDamage, Hitters::bite, false);
+        
+            //Update attack time variable
+            blob.set_u16("lastAttackTime", getGameTime());
             
-            //Keep in mind if attack was performed
-            bool hasAttacked = false;
+            //Set has attacked flag (used for animation and sound)
+            blob.set_bool("hasAttacked", true);
             
-            //Retrieve attack angle (counter-clockwise, right = 0)
-            f32 attackAngle = attackVector.Angle();
-            
-            //Calculate attack position (retracted by 2)
-            Vec2f attackPosition = blob.getPosition() - Vec2f(2,0).RotateBy(-attackAngle);
-            
-            //Calculate attack range using the radius of both blobs
-            f32 attackRange = UndeadInvasion::CreatureBlob::getDistance(blob, target);
-            
-            //If hit info references could be obtained for an arc
-            if(map.getHitInfosFromArc(attackPosition, -attackAngle, 90.0f, attackRange, blob, @hitInfos )) {
-            
-              //Create a handle for a blob object
-              CBlob@ nearbyBlob;
-            
-              //Iterate through all hit info objects (closest first)
-              for(uint i = 0; i < hitInfos.length; i++) {
-              
-                //Store blob reference
-                @nearbyBlob = hitInfos[i].blob;
-                
-                //Check if blob is the target
-                if(nearbyBlob is target) {
-                
-                  //Retrieve attack damage variable
-                  f32 attackDamage = UndeadVariables::ATTACK_DAMAGE;
-                  
-                  //Initiate bite attack
-                  blob.server_Hit(target, target.getPosition(), attackVector, attackDamage, Hitters::bite, false);
-              
-                  //Update attack time variable
-                  blob.set_u16("lastAttackTime", getGameTime());
-                  
-                  //Set has attacked flag (used for animation and sound)
-                  blob.set_bool("hasAttacked", true);
-                  
-                  //Remember that target has been hit
-                  hasAttacked = true;
-                  
-                  //Exit loop
-                  break;
-                  
-                }
-                
-              }
-            
-            }
-            
-            //Check if attack was not performed
-            if(!hasAttacked) {
-            
-              //Pursue target by initiating movement through key press
-              //blob.setKeyPressed((target.getPosition().x < blob.getPosition().x) ? key_left : key_right, true);
-              UndeadInvasion::UndeadBlob::pressMovementKeys(blob, target);
-              
-            }
-          
           }
           
           //Otherwise, if not attacking yet or if target is not within attack range
           else {
           
             //Pursue target by initiating movement through key press
-            //blob.setKeyPressed((target.getPosition().x < blob.getPosition().x) ? key_left : key_right, true);
             UndeadInvasion::UndeadBlob::pressMovementKeys(blob, target);
             
           }
@@ -329,14 +282,6 @@ void onTick(CBrain@ this) {
         
         }
       
-      }
-      
-      //Otherwise, target is not valid
-      else {
-      
-        //Set mode variable to invading mode
-        blob.set_u8("brainMode", UndeadBrainMode::MODE_INVADING);
-        
       }
   
     }
