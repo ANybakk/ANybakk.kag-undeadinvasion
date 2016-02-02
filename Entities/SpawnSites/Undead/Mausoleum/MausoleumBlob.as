@@ -13,10 +13,13 @@
  * Initialization event function
  */
 void onInit(CBlob@ this) {
+  
+  //Tag as undead spawn (should normally not be changed)
+  this.Tag("isUndeadSpawn");
 
-  //Set an extended nobuild zone of 16.0, 16.0 to avoid players blocking off (used by DefaultNoBuild.as)
+  //Set an extended nobuild zone of 32.0, 32.0 to avoid players blocking off (used by DefaultNoBuild.as)
   //TODO: Does not seem to be in effect, or area is too small
-  this.set_Vec2f("nobuild extend", Vec2f(16.0f, 16.0f));
+  this.set_Vec2f("nobuild extend", Vec2f(32.0f, 32.0f));
   
   //Finished
   return;

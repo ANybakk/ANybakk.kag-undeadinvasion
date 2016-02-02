@@ -20,6 +20,23 @@ void onInit(CRules@ this) {
 
   print("[UndeadInvasionRules:onInit]");
   
+  //Call restart event function
+  onRestart(this);
+  
+  //Finished
+  return;
+  
+}
+
+
+
+/*
+ * Restart event function
+ */
+void onRestart(CRules@ this) {
+
+  print("[UndeadInvasionRules:onRestart]");
+  
   //Register map loading handler script with a custom extension
   //TODO: This is too late
   //RegisterFileExtensionScript("Scripts/UndeadInvasionMap.as", "undeadinvasion.png");
@@ -72,16 +89,5 @@ void onInit(CRules@ this) {
   
   //Finished
   return;
-  
-}
-
-
-
-/*
- * Restart event function
- */
-void onRestart(CRules@ this) {
-
-  print("[UndeadInvasionRules:onRestart]");
   
 }
