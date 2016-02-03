@@ -18,7 +18,7 @@ namespace UndeadVariables {
   //Define a rotting time of 5 seconds
   const u8 ROTTING_TIME = 5;
   
-  //Define an attack damage of 0.5, which is normally half a heart
+  //Define an attack damage of 0.5, which is normally half a heart (game mode attack modifier of 0.5)
   const f32 ATTACK_DAMAGE = 0.5f;
 
   //Define a collateral (tile) attack damage of 0.1 seconds

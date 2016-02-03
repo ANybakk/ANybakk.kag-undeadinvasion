@@ -2,7 +2,10 @@
  * UndeadInvasion map loader
  * 
  * This script takes care of loading UndeadInvasion maps. What makes the maps 
- * different is that they can contain survivor spawns and undead spawns.
+ * different is that they can contain survivor spawns and undead spawns. In 
+ * addition, it will load an optional sector map. The sector map should have 
+ * the same name with "Sectors" appended to it. The file ending is .png as 
+ * usual.
  * 
  * Author: ANybakk
  */
@@ -14,13 +17,13 @@
 
 
 
-//Additional stuff to keep track of using offset references
-//Kept here because it needs to extend offset enumeration in BasePNGLoader.as
+//Enumeration used when storing special offsets when loading a map (extends enumeration in BasePNGLoader.as)
 enum UndeadInvasionPNGLoaderOffset {
-  zombie_poi = offsets_count, //Point of interest (not used)
-  zombie_offsets_count        //End reference
+  UNDEADINVASION_POI = offsets_count, //Point of interest (not used)
+  UNDEADINVASION_OFFSETS_COUNT        //End reference
 };
 
+//Enumeration used when storing special offsets when loading a sector map
 enum UndeadInvasionPNGLoaderSectorOffset {
   NOBUILD_START = 0,         //No-build sector start point
   NOBUILD_END,               //No-build sector end point
@@ -50,7 +53,7 @@ class UndeadInvasionPNGLoader : PNGLoader {
     super();
     
     //Extend super class' offset reference array with any custom ones
-    int offsetsCountDiff = zombie_offsets_count - offsets_count;
+    int offsetsCountDiff = UNDEADINVASION_OFFSETS_COUNT - offsets_count;
     while (offsetsCountDiff -- > 0) {
       offsets.push_back(array<int>(0));
     }

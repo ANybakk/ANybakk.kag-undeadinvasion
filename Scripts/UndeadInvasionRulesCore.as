@@ -2,6 +2,7 @@
  * UndeadInvasion rules core
  * 
  * TODO: Spawn additional types of undead?
+ * TODO: Detect when the map cycle has reached an end and show a different fail message ("The kingdom has fallen!")
  * 
  * Author: ANybakk
  * Based on previous work by: Eanmig
@@ -67,7 +68,7 @@ shared class UndeadInvasionRulesCore : RulesCore {
   /**
    * Setup method
    */
-  void Setup(CRules@ rules = null, RespawnSystem@ respawnSystem = null) {
+  void Setup(CRules@ rules = null, RespawnSystem@ respawnSystem = null) override {
   
     //Call super class' version of this method
     RulesCore::Setup(rules, respawnSystem);
@@ -100,7 +101,7 @@ shared class UndeadInvasionRulesCore : RulesCore {
   /**
    * Update method
    */
-  void Update() {
+  void Update() override {
     
     //Check if game is over
     if (rules.isGameOver()) {
@@ -115,14 +116,11 @@ shared class UndeadInvasionRulesCore : RulesCore {
     //Retrieve the current game state
     u8 currentGameState = rules.getCurrentState();
     
-    //Calculate lapsed time since game started
-    int lapsedTime = mCurrentTime - mStartTime;
-    
     //Check if warm-up period is active
     if(rules.isWarmup()) {
     
       //Check if teams have enough players
-      if(_allTeamsHaveEnoughPlayers()) {
+      if(allTeamsHaveEnoughPlayers()) {
       
         //Start the game
         rules.SetCurrentState(GAME);
@@ -136,7 +134,7 @@ shared class UndeadInvasionRulesCore : RulesCore {
       else {
       
         //Show a waiting for survivors message
-        rules.SetGlobalMessage("Waiting for enough survivors");
+        rules.SetGlobalMessage("Waiting for enough players");
         
       }
       
@@ -146,41 +144,31 @@ shared class UndeadInvasionRulesCore : RulesCore {
     else if(currentGameState == GAME) {
       
       //Check if no survivors
-      if( !_anyTeamHasSurvivors() ) {
+      //TODO: Or no survivor spawns are left
+      if(!anySurvivorTeamHasPlayersAlive()) {
       
+        //Set game over state
         rules.SetCurrentState(GAME_OVER);
       
         //Show a game over message
-        rules.SetGlobalMessage("You have failed to defend this area. It is only a matter of time before the kingdom is overrun by the undead.");
+        rules.SetGlobalMessage("The survivors have failed to defend this area. The kingdom is in grave danger! Continuing to next area soon.");
       
       }
       
       //Otherwise, there are still survivors
       else {
-      
-        //Calculate how many days have passed
-        int dayNumber = lapsedTime / (rules.daycycle_speed * 60 * getTicksASecond());
-        
-        //Calculate how far into the current day it is
-        f32 timeOfDay = lapsedTime % (rules.daycycle_speed * 60 * getTicksASecond());
-        
-        //Determine if it's night time
-        bool isNightTime = timeOfDay >= 0.66 * rules.daycycle_speed * 60 * getTicksASecond() && timeOfDay <= 0.9 * rules.daycycle_speed * 60 * getTicksASecond();
-        
-        //Determine what factor to use depending on time of day
-        u8 dayOfTimeFactor = (isNightTime) ? UndeadInvasionVariables::UNDEAD_SPAWN_NIGHTTIMEFACTOR : UndeadInvasionVariables::UNDEAD_SPAWN_DAYTIMEFACTOR;
-        
-        //Determine if night has passed
-        bool nightHasPassed = timeOfDay > 0.9 * rules.daycycle_speed * 60 * getTicksASecond();
         
         //Check if night has passed
-        if(nightHasPassed) {
+        if(nightHasPassed()) {
         
           //Show a night time survival message
-          rules.SetGlobalMessage("Day is dawning. You survived the night.");
+          rules.SetGlobalMessage("Day is dawning. The survivors have made it through night.");
         
         //Otherwise, check if not night time
-        } else if(!isNightTime) {
+        } else if(!isNightTime()) {
+      
+          //Determine how many days have passed
+          int dayNumber = getDayNumber();
         
           //Check if not first day
           if(dayNumber > 0) {
@@ -194,100 +182,22 @@ shared class UndeadInvasionRulesCore : RulesCore {
           else {
           
             //Show invasion alert message
-            rules.SetGlobalMessage("The dead are walking! Prepare yourselves! Defend the kingdom!");
+            rules.SetGlobalMessage("The dead are walking! Prepare yourselves, men! Defend the kingdom!");
             
           }
           
         }
         
         //Otherwise, check if night time
-        else if(isNightTime) {
+        else if(isNightTime()) {
           
             //Show blank message
             rules.SetGlobalMessage("");
             
         }
         
-        //Every second
-        if(lapsedTime % (dayOfTimeFactor * UndeadInvasionVariables::UNDEAD_SPAWN_INTERVAL_4 * getTicksASecond()) == 0) {
+        updateUndeadSpawnSites();
         
-          //Create an array of blob references
-          CBlob@[] undeadBlobs;
-          
-          //Retrieve references to any undead blobs
-          getBlobsByTag("isUndead", @undeadBlobs);
-          
-          //Update undead spawn available count
-          mUndeadAvailable = mUndeadCountLimit - undeadBlobs.length;
-          
-          //Create an array of blob references
-          CBlob@[] undeadSpawnSites;
-          
-          //Retrieve references to all undead spawn sites
-          getBlobsByTag("isUndeadSpawn", @undeadSpawnSites);
-          
-          //Create a spawn site blob handle
-          CBlob@ spawnSite;
-          
-          //Iterate over all undead spawn sites
-          //TODO: Randomize sequence?
-          for(int i=0; i<undeadSpawnSites.length; i++) {
-            
-            //Check whether there are any undead available for spawning
-            if(mUndeadAvailable <= 0) {
-            
-              break;
-              
-            } else {
-        
-              //Keep a reference to the spawn site blob object
-              @spawnSite = undeadSpawnSites[i];
-              
-              //Every 4th second, check whether the spawn site's health is 3/4 - 4/4
-              if(
-                  lapsedTime % (dayOfTimeFactor * UndeadInvasionVariables::UNDEAD_SPAWN_INTERVAL_1 * getTicksASecond()) == 0 
-                  && spawnSite.getHealth() >=(spawnSite.getInitialHealth() * 3/4)) {
-                
-                _spawnUndead(spawnSite.getPosition());
-                
-              }
-              
-              //Every 3rd second, check whether the spawn site's health is 2/4 - 3/4
-              else if(
-                  lapsedTime % (dayOfTimeFactor * UndeadInvasionVariables::UNDEAD_SPAWN_INTERVAL_2 * getTicksASecond()) == 0 
-                  && spawnSite.getHealth() >=(spawnSite.getInitialHealth() * 2/4)
-                  && spawnSite.getHealth() < (spawnSite.getInitialHealth() * 3/4)) {
-                
-                _spawnUndead(spawnSite.getPosition());
-                
-              }
-              
-              //Every 2nd second, check whether the spawn site's health is 1/4 - 2/4
-              else if(
-                  lapsedTime % (dayOfTimeFactor * UndeadInvasionVariables::UNDEAD_SPAWN_INTERVAL_3 * getTicksASecond()) == 0 
-                  && spawnSite.getHealth() >=(spawnSite.getInitialHealth() * 1/4)
-                  && spawnSite.getHealth() < (spawnSite.getInitialHealth() * 2/4)) {
-                
-                _spawnUndead(spawnSite.getPosition());
-                
-              }
-              
-              //Every second, check whether the spawn site's health is below 2/4
-              else if(spawnSite.getHealth() < (spawnSite.getInitialHealth() * 1/4)) {
-              
-                _spawnUndead(spawnSite.getPosition());
-                
-              }
-            
-            
-            }
-            
-            //Finished this iteration
-            
-          }
-        
-        }
-      
       }
       
     }
@@ -302,12 +212,123 @@ shared class UndeadInvasionRulesCore : RulesCore {
   
   
   /**
+   * Update handler for undead spawn sites. Spawns undead under the right circumstances.
+   */
+  void updateUndeadSpawnSites() {
+  
+    //Determine lapsed time since game started
+    int lapsedTime = getLapsedTime();
+    
+    //Determine what factor to use depending on time of day
+    u8 dayOfTimeFactor = (isNightTime()) ? UndeadInvasionVariables::UNDEAD_SPAWN_NIGHTTIMEFACTOR : UndeadInvasionVariables::UNDEAD_SPAWN_DAYTIMEFACTOR;
+    
+    //Every second
+    if(lapsedTime % (dayOfTimeFactor * UndeadInvasionVariables::UNDEAD_SPAWN_INTERVAL_4 * getTicksASecond()) == 0) {
+    
+      //Create an array of blob references
+      CBlob@[] undeadBlobs;
+      
+      //Retrieve references to any undead blobs
+      getBlobsByTag("isUndead", @undeadBlobs);
+      
+      //Update undead spawn available count
+      mUndeadAvailable = mUndeadCountLimit - undeadBlobs.length;
+      
+      //Create an array of blob references
+      CBlob@[] undeadSpawnSites;
+      
+      //Retrieve references to all undead spawn sites
+      getBlobsByTag("isUndeadSpawn", @undeadSpawnSites);
+      
+      //Create a spawn site blob handle
+      CBlob@ spawnSite;
+      
+      //Iterate over all undead spawn sites
+      //TODO: Randomize sequence?
+      for(int i=0; i<undeadSpawnSites.length; i++) {
+        
+        //Check whether there are any undead available for spawning
+        if(mUndeadAvailable <= 0) {
+        
+          break;
+          
+        } else {
+    
+          //Keep a reference to the spawn site blob object
+          @spawnSite = undeadSpawnSites[i];
+          
+          //Every 4th second, check whether the spawn site's health is 3/4 - 4/4
+          if(
+              lapsedTime % (dayOfTimeFactor * UndeadInvasionVariables::UNDEAD_SPAWN_INTERVAL_1 * getTicksASecond()) == 0 
+              && spawnSite.getHealth() >=(spawnSite.getInitialHealth() * 3/4)) {
+            
+            spawnUndead(spawnSite.getPosition());
+            
+          }
+          
+          //Every 3rd second, check whether the spawn site's health is 2/4 - 3/4
+          else if(
+              lapsedTime % (dayOfTimeFactor * UndeadInvasionVariables::UNDEAD_SPAWN_INTERVAL_2 * getTicksASecond()) == 0 
+              && spawnSite.getHealth() >=(spawnSite.getInitialHealth() * 2/4)
+              && spawnSite.getHealth() < (spawnSite.getInitialHealth() * 3/4)) {
+            
+            spawnUndead(spawnSite.getPosition());
+            
+          }
+          
+          //Every 2nd second, check whether the spawn site's health is 1/4 - 2/4
+          else if(
+              lapsedTime % (dayOfTimeFactor * UndeadInvasionVariables::UNDEAD_SPAWN_INTERVAL_3 * getTicksASecond()) == 0 
+              && spawnSite.getHealth() >=(spawnSite.getInitialHealth() * 1/4)
+              && spawnSite.getHealth() < (spawnSite.getInitialHealth() * 2/4)) {
+            
+            spawnUndead(spawnSite.getPosition());
+            
+          }
+          
+          //Every second, check whether the spawn site's health is below 2/4
+          else if(spawnSite.getHealth() < (spawnSite.getInitialHealth() * 1/4)) {
+          
+            spawnUndead(spawnSite.getPosition());
+            
+          }
+        
+        
+        }
+        
+        //Finished this iteration
+        
+      }
+    
+    }
+        
+  }
+  
+  
+  
+  /**
    * Checks if all teams have at least one player
    */
-  bool _allTeamsHaveEnoughPlayers()	{
+  bool allTeamsHaveEnoughPlayers()	{
   
-    //Return result from other version of this method
-    return _allTeamsHaveNumberOfPlayers(UndeadInvasionVariables::SURVIVOR_COUNT_START_MINIMUM);
+    //Retrieve minimum player count variable
+    s8 playerCountMinimum = UndeadInvasionVariables::PLAYER_COUNT_START_MINIMUM;
+    
+    //Check if player count minimum is not disabled (negative number)
+    if(playerCountMinimum >= 0) {
+    
+      //Finished, return result from other version of this method
+      return allTeamsHaveNumberOfPlayers(UndeadInvasionVariables::PLAYER_COUNT_START_MINIMUM);
+      
+    }
+    
+    //Otherwise, player count minimum disabled
+    else {
+    
+      //Finished, return result from survivor team check
+      return survivorTeamsHasEnoughPlayers();
+    
+    }
     
 	}
   
@@ -318,7 +339,7 @@ shared class UndeadInvasionRulesCore : RulesCore {
    * 
    * @param   number    minimum number of players.
    */
-  bool _allTeamsHaveNumberOfPlayers(u8 number)	{
+  bool allTeamsHaveNumberOfPlayers(u8 number)	{
   
     //Iterate through all teams
 		for (uint i = 0; i < teams.length; i++) {
@@ -341,15 +362,54 @@ shared class UndeadInvasionRulesCore : RulesCore {
   
   
   /**
-   * Checks if any team has any survivors
+   * Checks if there's a survivor team and that the minimum number of survivors are present.
    */
-  bool _anyTeamHasSurvivors()	{
+  bool survivorTeamsHasEnoughPlayers() {
+    
+    //Finished, return result from other version of this method
+    return survivorTeamsHasEnoughPlayers(UndeadInvasionVariables::SURVIVOR_COUNT_START_MINIMUM);
+  
+  }
+  
+  
+  
+  /**
+   * Checks if there's a survivor team and number of members exceeds the criteria
+   * 
+   * @param   number    number criteria.
+   */
+  bool survivorTeamsHasEnoughPlayers(u8 number) {
   
     //Iterate through all teams
-		for (uint i = 0; i < teams.length; i++) {
+		for(uint i = 0; i < teams.length; i++) {
     
-      //Check if team has any player
-			if (teams[i].players_count > 0) {
+      //Check if not undead team and player count is enough
+      if(teams[i].name != "Undead team" && teams[i].players_count >= number) {
+        
+        //Finished, enough players in survivor team
+        return true;
+        
+      }
+    
+    }
+    
+    //Finished, survivor team not present or empty
+    return false;
+  
+  }
+  
+  
+  
+  /**
+   * Checks if any team has any survivors
+   */
+  bool anyTeamHasPlayers()	{
+  
+    //Iterate through all teams
+		for(uint i=0; i<teams.length; i++) {
+    
+      //Check if team has any players
+			if(teams[i].players_count > 0) {
         
         //Finished, this team has at least one player
 				return true;
@@ -364,11 +424,52 @@ shared class UndeadInvasionRulesCore : RulesCore {
 	}
   
   
+  /**
+   * Checks if any team has any survivors
+   */
+  bool anySurvivorTeamHasPlayersAlive()	{
+  
+    //Iterate through all teams
+		for(uint i=0; i<teams.length; i++) {
+      
+      //Check if not undead team
+      if(teams[i].name != "Undead team") {
+      
+        //Iterate through all players
+        for(uint j=0; j<players.length; j++) {
+        
+          //Check if player is on this team and isn't tagged as dead
+          if(players[j].team == teams[i].index) {
+          
+            //Obtain a reference to this player's blob
+            CBlob@ survivorBlob = getPlayerByUsername(players[j].username).getBlob();
+            
+            //Check if blob is valid and not tagged as dead
+            if(survivorBlob !is null && !survivorBlob.hasTag("dead")) {
+            
+              //Finished, this team has at least one player
+              return true;
+              
+            }
+            
+          }
+          
+        }
+        
+      }
+      
+		}
+    
+    //Finished, no team were found to have any players
+		return false;
+    
+	}
+  
   
   /**
    * Spawns an undead creature in a given place
    */
-  void _spawnUndead(Vec2f position, string typeName = "Zombie" ) {
+  void spawnUndead(Vec2f position, string typeName = "Zombie" ) {
   
     //Check if there are any undead available for spawning
     if(mUndeadAvailable > 0) {
@@ -384,5 +485,62 @@ shared class UndeadInvasionRulesCore : RulesCore {
   }
   
   
-
+  
+  /**
+   * Calculates lapsed time since game started.
+   */
+  int getLapsedTime() {
+  
+    //Finished, return result
+    return mCurrentTime - mStartTime;
+    
+  }
+  
+  /**
+   * Calculates how many days have passed.
+   */
+  int getDayNumber() {
+  
+    //Finished, return result (integer division: lapsed time / day time)
+    return getLapsedTime() / (rules.daycycle_speed * 60 * getTicksASecond());
+    
+  }
+  
+  /**
+   * Calculate how far into the current day it is.
+   */
+  f32 getTimeOfDay() {
+  
+    //Finished, return result (rest division: lapsed time / day time)
+    return getLapsedTime() % (rules.daycycle_speed * 60 * getTicksASecond());
+    
+  }
+  
+  /**
+   * Determine if it's night time.
+   */
+  bool isNightTime() {
+  
+    //Get time of day
+    f32 timeOfDay = getTimeOfDay();
+  
+    //Finished, return result (time of day is within 0.66 - 0.9)
+    return timeOfDay >= 0.66 * rules.daycycle_speed * 60 * getTicksASecond() && timeOfDay <= 0.9 * rules.daycycle_speed * 60 * getTicksASecond();
+    
+  }
+  
+  
+  
+  /**
+   * Determine if night has passed.
+   */
+  bool nightHasPassed() {
+  
+    //Finished, return result (time of day is within 0.9 - 1.0)
+    return getTimeOfDay() > 0.9 * rules.daycycle_speed * 60 * getTicksASecond();
+    
+  }
+  
+  
+  
 }

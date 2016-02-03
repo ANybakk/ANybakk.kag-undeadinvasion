@@ -15,7 +15,10 @@
 
 namespace UndeadInvasionVariables {
   
-  //Define a minimum number of survivors for the game to start
+  //Define a minimum number of -1 (disabled) for players on each team for the game to start
+  const s8 PLAYER_COUNT_START_MINIMUM = -1;
+  
+  //Define a minimum number of 1 for survivors for the game to start
   const u8 SURVIVOR_COUNT_START_MINIMUM = 1;
 
   //Define a maximum number of undead of 125

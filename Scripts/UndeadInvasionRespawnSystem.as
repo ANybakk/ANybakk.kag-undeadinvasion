@@ -32,7 +32,7 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
   /**
    * Links a rules core to this respawn system
    */
-	void SetCore(RulesCore@ rulesCore) {
+	void SetCore(RulesCore@ rulesCore) override {
   
     //Call super class' version of this method
 		RespawnSystem::SetCore(rulesCore);
@@ -46,9 +46,9 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
   /**
    * Performs an update
    */
-  void Update() {
+  void Update() override {
 
-    //print("[UndeadInvasionRespawnSystem:Update]");
+    //if(g_debug > 0) { print("[UndeadInvasionRespawnSystem:Update]"); }
       
     //Create a handle to player info object
     PlayerInfo@ playerInfo;
@@ -65,6 +65,7 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
     }
     
     //Finished
+    return;
     
   }
   
@@ -73,9 +74,9 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
   /**
    * Adds a player to the spawn queue
    */
-  void AddPlayerToSpawn(CPlayer@ player) {
+  void AddPlayerToSpawn(CPlayer@ player) override {
 
-    print("[UndeadInvasionRespawnSystem:AddPlayerToSpawn]");
+    if(g_debug > 0) { print("[UndeadInvasionRespawnSystem:AddPlayerToSpawn]"); }
     
     //Retrieve a reference to the info object for the player
     PlayerInfo@ playerInfo = core.getInfoFromPlayer(player);
@@ -91,6 +92,7 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
     mPlayerInfoSpawnQueue.push_back(playerInfo);
     
     //Finished
+    return;
     
   }
   
@@ -99,9 +101,9 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
   /**
    * Adds a player to the spawn queue
    */
-	void RemovePlayerFromSpawn(CPlayer@ player) {
+	void RemovePlayerFromSpawn(CPlayer@ player) override {
 
-    print("[UndeadInvasionRespawnSystem:RemovePlayerFromSpawn]");
+    if(g_debug > 0) { print("[UndeadInvasionRespawnSystem:RemovePlayerFromSpawn]"); }
     
     //Retrieve a reference to the info object for the player
     PlayerInfo@ playerInfo = core.getInfoFromPlayer(player);
@@ -125,6 +127,7 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
 		}
     
     //Finished
+    return;
   
   }
   
@@ -133,14 +136,15 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
   /**
    * Checks whether a player is in the spawn queue or not
    */
-  bool isSpawning(CPlayer@ player) {
+  bool isSpawning(CPlayer@ player) override {
+
+    //if(g_debug > 0) { print("[UndeadInvasionRespawnSystem:isSpawning]"); }
     
     //Retrieve a reference to the info object for the player
     PlayerInfo@ playerInfo = core.getInfoFromPlayer(player);
-  
-		return mPlayerInfoSpawnQueue.find(playerInfo) != -1;
     
-    //Finished
+    //Finished, return true if in queue
+		return mPlayerInfoSpawnQueue.find(playerInfo) != -1;
     
 	}
   
@@ -149,17 +153,33 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
   /**
    * Spawns a player
    */
-  void DoSpawnPlayer( PlayerInfo@ playerInfo ) {
+  void DoSpawnPlayer(PlayerInfo@ playerInfo) override {
 
-    print("[UndeadInvasionRespawnSystem:DoSpawnPlayer]");
+    //if(g_debug > 0) { print("[UndeadInvasionRespawnSystem:DoSpawnPlayer]"); }
     
-    //Set blob type to be builder
-    playerInfo.blob_name = "builder";
-  
+    BaseTeamInfo teamInfo = core.teams[playerInfo.team];
+    
+    if(teamInfo.name == "Undead team") {
+    
+      //Set blob type to be Zombie
+      //TODO: New player-controlled Zombie type
+      //TODO: Randomize type of undead or stronger type
+      playerInfo.blob_name = "Zombie";
+    
+    }
+    
+    else {
+    
+      //Set blob type to be builder
+      playerInfo.blob_name = "builder";
+      
+    }
+    
     //Call super class' version of this method
     RespawnSystem::DoSpawnPlayer(playerInfo);
     
     //Finished
+    return;
   
   }
   
@@ -168,7 +188,9 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
   /**
    * Checks if a player can be spawned
    */
-  /*bool canSpawnPlayer(PlayerInfo@ playerInfo) {
+  bool canSpawnPlayer(PlayerInfo@ playerInfo) override {
+
+    //if(g_debug > 0) { print("[UndeadInvasionRespawnSystem:canSpawnPlayer]"); }
   
     //Check if player info is not valid
     if(playerInfo is null) {
@@ -177,33 +199,20 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
       
     }
     
-    //Calculate lapsed time since game started
-    int lapsedTime = cast<UndeadInvasionRulesCore@>(core).mCurrentTime - cast<UndeadInvasionRulesCore@>(core).mStartTime;
+    //Finished, return true if not night time
+    return !cast<UndeadInvasionRulesCore@>(core).isNightTime();
     
-    //Determine day cycle time
-    int dayCycleTime = core.rules.daycycle_speed * 60 * getTicksASecond();
-    
-    //Calculate the time of day
-    int timeOfDay = lapsedTime % dayCycleTime;
-    
-    //Check if night time
-    if(timeOfDay >= dayCycleTime/2) {
-    
-      return false;
-      
-    }
-    
-    //Finished
-    return true;
-    
-  }*/
+  }
   
   
   
   /**
    * Provides a spawn location
+   * TODO: Handle different teams
    */
-  Vec2f getSpawnLocation(PlayerInfo@ playerInfo) {
+  Vec2f getSpawnLocation(PlayerInfo@ playerInfo) override {
+
+    //if(g_debug > 0) { print("[UndeadInvasionRespawnSystem:getSpawnLocation]"); }
     
     //Retrieve a reference to the map object
     CMap@ map = getMap();
