@@ -21,6 +21,9 @@ void onInit(CBlob@ this) {
   //Set tick frequency to 30
   this.getCurrentScript().tickFrequency = 30;
   
+  //Tag as survivor spawn (should normally not be changed)
+  this.Tag("isSurvivorSpawn");
+  
   //??
   InitClasses(this);
   
@@ -34,10 +37,10 @@ void onInit(CBlob@ this) {
   this.addCommandID("setShipment");
 
   //Set besieged time variable
-  this.set_f32("besieged_time", 0.0f);
+  this.set_u32("besiegedTime", 0.0f);
   
   //Set the background tiles to be stone back wall
-  this.set_TileType("background tile", CMap::tile_castle_back);
+  this.set_TileType("background tile", CMap::tile_wood_back);
   
   //Tag blob so that inventory is stored on class change (StandardRespawnCommand.as)
   this.Tag("change class store inventory");
@@ -60,8 +63,8 @@ void onInit(CBlob@ this) {
   //??
   this.getShape().getConsts().waterPasses = false;
 
-  //Set an extended nobuild zone of 0.0, 8.0 (used by DefaultNoBuild.as)
-  this.set_Vec2f("nobuild extend", Vec2f(0.0f, 8.0f));
+  //Set an extended no-build zone for floor tiles below
+  this.set_Vec2f("nobuild extend", Vec2f(0.0f, 0.0f + this.getMap().tilesize));
 
   // wont work in basichelps in single for some map loading reason
   //??
@@ -78,26 +81,77 @@ void onInit(CBlob@ this) {
  */
 void onTick(CBlob@ this) {
   
-  //Check if server-side
-  if(getNet().isServer()) {
+  //Check if under siege
+  if(this.hasTag("besieged")) {
   
-    //Check if under siege
-    if(this.hasTag("besieged")) {
-  
-      //Obtain current time
-      f32 currentTime = getGameTime();
+    //Determine for how long besiege alert have been active
+    u32 besiegedBesiegedAlertTime = getGameTime() - this.get_u32("besiegedTime");
     
-      //Get besieged time variable
-      f32 besiegedTime = this.get_f32("besieged_time");
+    //Check if alert period is over
+    if(besiegedBesiegedAlertTime > SurvivorCampVariables::BESIEGED_ALERT_TIMEOUT * getTicksASecond()) {
+    
+      //Remove besieged flag
+      this.Untag("besieged");
+    
+    }
+    
+  }
+  
+  u8 teamNumber = this.getTeamNum();
+  
+  CMap@ map = this.getMap();
+  
+  //Create an array of blob references
+  CBlob@[] nearbyBlobs;
+  
+  //Create a blob handle
+  CBlob@ nearbyBlob;
+  
+  //Check if any blobs within radius
+  if(map.getBlobsInRadius(this.getPosition(), SurvivorCampVariables::BESIEGED_RADIUS, @nearbyBlobs)) {
+  
+    //Create status for undead
+    bool isUndead = false;
+    
+    //Create status for player
+    bool isPlayer = false;
+    
+    //Create status for dead
+    bool isDead;
+    
+    //Iterate through blobs
+    for(uint i=0; i<nearbyBlobs.length; i++) {
+    
+      //Keep a reference to this blob
+      @nearbyBlob = nearbyBlobs[i];
       
-      //Check if alert period is over
-      if(currentTime-besiegedTime > SurvivorCampVariables::BESIEGED_ALERT_TIMEOUT*getTicksASecond()) {
+      //Determine if undead
+      isUndead = nearbyBlob.hasTag("isUndead");
       
-        //Remove besieged flag
-        this.Untag("besieged");
+      //Determine if player
+      isPlayer = nearbyBlob.hasTag("player");
+      
+      //Determine if dead
+      isDead = nearbyBlob.hasTag("dead");
+      
+      //Check if blob is a player, not undead, and not dead
+      if(isPlayer && !isUndead && !isDead) {
+      
+        //Check if spawn site has no owner
+        if(teamNumber > 10) {
         
-        //TODO: Is it necessary to synchronize tag?
-      
+          //Change ownership
+          UndeadInvasion::SurvivorCampBlob::changeOwnership(this, nearbyBlob.getTeamNum());
+          
+        }
+        
+        //Otherwise, besieged
+        else {
+        
+          //TODO: Do defenders v.s. attackers evaluations like in Hall.as
+          
+        }
+        
       }
       
     }
@@ -105,6 +159,7 @@ void onTick(CBlob@ this) {
   }
   
   //Finished
+  return;
 
 }
 
@@ -157,25 +212,31 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params) {
  * Hit event function
  */
 f32 onHit(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitterBlob, u8 customData) {
+
+  if(hitterBlob.hasTag("isUndead")) {
   
-  //Check if server-side
-  //if(getNet().isServer()) {
-    
     //Tag as besieged
     this.Tag("besieged");
     
     //Set besieged time
-    this.set_f32("besieged_time", getGameTime());
-    
-  //}
+    this.set_u32("besiegedTime", getGameTime());
 
-  //Register dealt damage
-  this.Damage(damage, hitterBlob);
+    //Register dealt damage
+    this.Damage(damage, hitterBlob);
+    
+  }
   
-  //Tell that no damage remains
+  //Finished, return no damage remaining
   return 0.0f;
   
-  //Finished
+}
+
+
+
+void onChangeTeam(CBlob@ this, const int oldTeam) {
+
+  //Set changed ownership flag
+  this.Tag("changedOwnership");
   
 }
 
@@ -189,4 +250,65 @@ bool isInventoryAccessible(CBlob@ this, CBlob@ forBlob) {
   //Tell if on same team and overlapping
   return forBlob.getTeamNum() == this.getTeamNum() && forBlob.isOverlapping(this);
 
+}
+
+
+
+namespace UndeadInvasion {
+
+  namespace SurvivorCampBlob {
+  
+  
+  
+    /**
+     * Changes ownership of this spawn site and nearby structures
+     * 
+     * @param   this        blob reference.
+     * @param   teamNumber  the new team owner
+     */
+    void changeOwnership(CBlob@ this, const u8 teamNumber) {
+    
+      //Check if server
+      if (getNet().isServer()) {
+      
+        CMap@ map = this.getMap();
+        
+        //Create an array of blob references
+        CBlob@[] nearbyBlobs;
+        
+        //Obtain blob references within a radius
+        if(map.getBlobsInRadius(this.getPosition(), SurvivorCampVariables::TERRITORY_RADIUS, @nearbyBlobs)) {
+        
+          //Create a blob handle
+          CBlob@ nearbyBlob;
+        
+          //Iterate through nearby blobs
+          for(uint i=0; i<nearbyBlobs.length; i++) {
+          
+            //Keep a reference to blob
+            @nearbyBlob = nearbyBlobs[i];
+            
+            //Check if blob's owner is not same as new owner and is either a door or a building
+            if(nearbyBlob.getTeamNum() != teamNumber && (nearbyBlob.hasTag("door") || nearbyBlob.hasTag("building"))) {
+            
+              //Set ownership on blob
+              nearbyBlob.server_setTeamNum(teamNumber);
+              
+            }
+            
+          }
+          
+        }
+        
+      }
+      
+      //Set ownership of spawn site
+      this.server_setTeamNum(teamNumber);
+      
+    }
+    
+    
+    
+  }
+  
 }

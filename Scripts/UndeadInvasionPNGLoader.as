@@ -70,7 +70,7 @@ class UndeadInvasionPNGLoader : PNGLoader {
   /**
    * Handles loading of a map
    */
-  bool loadMap(CMap@ map, const string& in filename)	{
+  bool loadMap(CMap@ map, const string& in filename) override {
   
     bool result = false;
     
@@ -141,6 +141,7 @@ class UndeadInvasionPNGLoader : PNGLoader {
 
     }
     
+    //Finished, return result
     return result;
     
   }
@@ -150,7 +151,7 @@ class UndeadInvasionPNGLoader : PNGLoader {
 	/**
    * Handles a pixel in the map
    */
-	void handlePixel(SColor color_pixel, int offset) {
+	void handlePixel(SColor color_pixel, int offset) override {
   
     //Call super class' version of this method, to make sure we don't miss out on any default behaviour
 		PNGLoader::handlePixel(color_pixel, offset);
@@ -179,6 +180,7 @@ class UndeadInvasionPNGLoader : PNGLoader {
     }
     
     //Finished
+    return;
     
 	}
   
@@ -202,6 +204,9 @@ class UndeadInvasionPNGLoader : PNGLoader {
       sectorOffsets[NOBUILD_END].push_back(pixelOffset); //Store offset reference, no-build end point
       
     }
+    
+    //Finished
+    return;
   
   }
   
@@ -210,12 +215,13 @@ class UndeadInvasionPNGLoader : PNGLoader {
 	/**
    * Handles addition of any offset references, post-load 
    */
-	void handleOffset(int type, int offset, int position, int count) {
+	void handleOffset(int type, int offset, int position, int count) override {
   
     //Call super class' version of this method, to make sure we don't miss out on any default behaviour
 		PNGLoader::handleOffset(type, offset, position, count);
 		
 		//Finished
+    return;
     
 	}
   

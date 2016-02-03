@@ -42,11 +42,13 @@ void onRender(CSprite@ this) {
   //Check if under attack
   if(blob.hasTag("besieged")) {
   
+    CMap@ map = blob.getMap();
+    
     //Determine the position directly above
     Vec2f positionAbove = getDriver().getScreenPosFromWorldPos(blob.getPosition() + Vec2f(0.0f, -blob.getHeight()));
     
     //Draw alert icon
-    GUI::DrawIconByName("$ALERT$", Vec2f(positionAbove.x - 32.0f, positionAbove.y - 30.0f));
+    GUI::DrawIconByName("$ALERT$", Vec2f(positionAbove.x - 4.0f * map.tilesize, positionAbove.y - 30.0f));
     
     //Set default mini-map icon in second position (alert), size 16x16
     //TODO: Enough to make this call only once?
@@ -57,6 +59,17 @@ void onRender(CSprite@ this) {
     //Unset mini-map icon
     blob.UnsetMinimapVars();
   
+  }
+  
+  //Check if recently changed ownership
+  if(blob.hasTag("changedOwnership")) {
+  
+    //Play a fanfare
+    Sound::Play("/VehicleCapture");
+    
+    //Disable flag
+    blob.Untag("changedOwnership");
+    
   }
   
   //Finished

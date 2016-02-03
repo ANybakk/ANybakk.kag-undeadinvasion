@@ -151,7 +151,7 @@ shared class UndeadInvasionRulesCore : RulesCore {
         rules.SetCurrentState(GAME_OVER);
       
         //Show a game over message
-        rules.SetGlobalMessage("The survivors have failed to defend this area. The kingdom is in grave danger! Continuing to next area soon.");
+        rules.SetGlobalMessage("The survivors have failed to defend this area. The kingdom is in grave danger! Continuing to the next area soon.");
       
       }
       
