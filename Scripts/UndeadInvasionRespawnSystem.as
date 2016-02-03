@@ -159,14 +159,6 @@ shared class UndeadInvasionRespawnSystem : RespawnSystem {
     //Call super class' version of this method
     RespawnSystem::DoSpawnPlayer(playerInfo);
     
-    //Check for warm-up mode
-    if(core.rules.isWarmup()) {
-    
-      //Set flag to start the game
-      core.rules.SetCurrentState(GAME);
-    
-    }
-    
     //Finished
   
   }

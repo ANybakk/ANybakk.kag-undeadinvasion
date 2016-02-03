@@ -15,6 +15,12 @@
 
 namespace UndeadInvasionVariables {
   
+  //Define a minimum number of survivors for the game to start
+  const u8 SURVIVOR_COUNT_START_MINIMUM = 1;
+
+  //Define a maximum number of undead of 125
+  const u8 UNDEAD_SPAWN_MAX_COUNT = 125;
+  
   //Define a spawning interval of 4 seconds for top quarter of spawn site health
   const u8 UNDEAD_SPAWN_INTERVAL_1 = 4;
   

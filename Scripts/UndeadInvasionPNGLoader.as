@@ -21,6 +21,12 @@ enum UndeadInvasionPNGLoaderOffset {
   zombie_offsets_count        //End reference
 };
 
+enum UndeadInvasionPNGLoaderSectorOffset {
+  NOBUILD_START = 0,         //No-build sector start point
+  NOBUILD_END,               //No-build sector end point
+  SECTOR_OFFSETS_COUNT        //End reference
+};
+
 
 
 /**
@@ -28,6 +34,11 @@ enum UndeadInvasionPNGLoaderOffset {
  * Loads maps for Zombie mode
  */
 class UndeadInvasionPNGLoader : PNGLoader {
+
+
+
+  //Keep a store of sector map offsets
+	array<array<int>> sectorOffsets;
 
 
 
@@ -43,10 +54,93 @@ class UndeadInvasionPNGLoader : PNGLoader {
     while (offsetsCountDiff -- > 0) {
       offsets.push_back(array<int>(0));
     }
+    
+    //Initialize sector offset array
+    sectorOffsets = array<array<int>>(SECTOR_OFFSETS_COUNT, array<int>(0));
 
     //Finished
 
 	}
+  
+  
+  
+  /**
+   * Handles loading of a map
+   */
+  bool loadMap(CMap@ map, const string& in filename)	{
+  
+    bool result = false;
+    
+    //Call super class' version of this method
+    result = PNGLoader::loadMap(map, filename);
+    
+    //Derive the map's name from file name
+    string mapName = filename.substr(0, filename.length()-4);
+    
+    //Derive the map's file type from file name
+    string mapType = filename.substr(filename.length()-3, -1);
+    
+    //Attempt to load a secondary sector map with the same name and type
+    CFileImage@ sectorMapImage = CFileImage(mapName + "Sectors." + mapType);
+    
+    //Check if the image was loaded succesfully
+		if(sectorMapImage.isLoaded()) {
+      print("sectormap loaded");
+      //Create a pixel color variable
+      SColor pixelColor;
+      
+      //Create a pixel offset variable
+      int pixelOffset;
+      
+      //Iterate through all pixels
+      while(sectorMapImage.nextPixel()) {
+
+        //Obtain pixel color value
+        pixelColor = sectorMapImage.readPixel();
+
+        //Obtain offset
+        pixelOffset = sectorMapImage.getPixelOffset();
+        
+        //Call helper method (stores needed offsets in sectorOffsets)
+        handleSectorPixel(pixelColor, pixelOffset);
+
+        //Keep connections alive (?)
+        getNet().server_KeepConnectionsAlive();
+
+      }
+      
+      //Iterate through no-build sectors
+      for(uint i = 0; i < sectorOffsets[NOBUILD_START].length; ++i) {
+      
+        //Check if there is at least one matching end offset
+        if(sectorOffsets[NOBUILD_END].length >= i + 1) {
+        
+          //Determine start coordinates
+          Vec2f startCoordinate = map.getTileWorldPosition(sectorOffsets[NOBUILD_START][i]);
+          
+          //Determine end coordinates
+          Vec2f endCoordinate = map.getTileWorldPosition(sectorOffsets[NOBUILD_END][i]);
+          
+          //Check if end coordinate is below and to the right of start coordinate
+          if(endCoordinate.x - startCoordinate.x > 0 && endCoordinate.y - startCoordinate.y > 0) {
+          
+            //Add no-build sector (Correct coordinates to include last row/column)
+            map.server_AddSector(startCoordinate, endCoordinate + Vec2f(0.0f + map.tilesize, 0.0f + map.tilesize), "no build");
+            
+          }
+          
+        }
+
+        //Keep connections alive (?)
+        getNet().server_KeepConnectionsAlive();
+        
+      }
+
+    }
+    
+    return result;
+    
+  }
   
   
   
@@ -64,26 +158,49 @@ class UndeadInvasionPNGLoader : PNGLoader {
     //Check if the color value of the map matches undead spawn
     if(color_pixel == UndeadInvasionPNGLoaderVariables::COLOR_MAUSOLEUM) {
       
-        @spawnedBlob = spawnBlob(map, "Mausoleum", offset, -1); //Spawn blob
-				//@spawnedBlob.AddScript("abc.as");                          //Add behaviour through a script
+        @spawnedBlob = spawnBlob(map, "Mausoleum", offset, -1);   //Spawn blob
+				//@spawnedBlob.AddScript("abc.as");                       //Add behaviour through a script
 				//@spawnedBlob.Tag("script added");
-        offsets[autotile_offset].push_back(offset);               //Store offset reference, generic
+        offsets[autotile_offset].push_back(offset);               //Store offset reference, generic tile
         
     }
     
     //Check if the color value of the map matches survivor spawn
     else if(color_pixel == UndeadInvasionPNGLoaderVariables::COLOR_SURVIVOR_CAMP) {
       
-        @spawnedBlob = spawnBlob(map, "SurvivorCamp", offset, -1);         //Spawn blob
-				//@spawnedBlob.AddScript("abc.as");                          //Add behaviour through a script
+        @spawnedBlob = spawnBlob(map, "SurvivorCamp", offset, -1); //Spawn blob
+				//@spawnedBlob.AddScript("abc.as");                        //Add behaviour through a script
 				//@spawnedBlob.Tag("script added");
-        offsets[autotile_offset].push_back(offset);               //Store offset reference, generic
+        offsets[autotile_offset].push_back(offset);                 //Store offset reference, generic tile
         
     }
     
     //Finished
     
 	}
+  
+  
+  
+  /**
+   * Handles a pixel in the sector map
+   */
+  void handleSectorPixel(SColor pixelColor, int pixelOffset) {
+  
+    //Check if the color value matches no-build sector start
+    if(pixelColor == UndeadInvasionPNGLoaderVariables::COLOR_SECTOR_NOBUILD_START) {
+    
+      sectorOffsets[NOBUILD_START].push_back(pixelOffset); //Store offset reference, no-build start point
+      
+    }
+
+    //Check if the color value matches no-build sector start
+    if(pixelColor == UndeadInvasionPNGLoaderVariables::COLOR_SECTOR_NOBUILD_END) {
+    
+      sectorOffsets[NOBUILD_END].push_back(pixelOffset); //Store offset reference, no-build end point
+      
+    }
+  
+  }
   
   
   
