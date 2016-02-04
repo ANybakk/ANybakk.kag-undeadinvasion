@@ -4,6 +4,8 @@
  * TODO: Spawn additional types of undead?
  * TODO: Detect when the map cycle has reached an end and show a different fail message ("The kingdom has fallen!")
  * 
+ * TODO: Set mode to warm-up when last player leaves (Spawn system's job?)
+ * 
  * Author: ANybakk
  * Based on previous work by: Eanmig
  */
@@ -467,7 +469,7 @@ shared class UndeadInvasionRulesCore : RulesCore {
   
   
   /**
-   * Spawns an undead creature in a given place
+   * Spawns an undead CreatureBlob in a given place
    */
   void spawnUndead(Vec2f position, string typeName = "Zombie" ) {
   

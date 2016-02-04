@@ -1,5 +1,5 @@
 /*
- * UndeadInvasion Humanoid entity variables
+ * UndeadInvasion HumanoidBlob entity variables
  * 
  * This script contains any variables associated with the entity.
  * 
@@ -13,7 +13,7 @@
  * Author: ANybakk
  */
 
-namespace HumanoidVariables {
+namespace HumanoidBlobVariables {
 
   //Define a placeholder variable
   const bool IS_TRUE = true;

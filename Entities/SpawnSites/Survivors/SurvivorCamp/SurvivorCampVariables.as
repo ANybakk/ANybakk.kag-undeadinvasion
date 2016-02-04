@@ -18,4 +18,7 @@ namespace SurvivorCampVariables {
   //Define a besieged alert time-out of 3 seconds
   const u8 BESIEGED_ALERT_TIMEOUT = 3;
   
+  //Define a wooden back wall type
+  const u32 BACKWALL_TYPE = CMap::tile_wood_back;
+  
 }

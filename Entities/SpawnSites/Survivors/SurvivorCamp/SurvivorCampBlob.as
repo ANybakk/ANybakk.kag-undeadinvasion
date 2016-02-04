@@ -8,6 +8,7 @@
 
 #include "SurvivorCampVariables.as";
 
+#include "ClassSelectMenu.as";
 #include "StandardRespawnCommand.as";
 #include "Help.as"
 
@@ -31,16 +32,16 @@ void onInit(CBlob@ this) {
   InitRespawnCommand(this);
   
   //Add state command
-  this.addCommandID("setSpriteFrame");
+  //this.addCommandID("setSpriteFrame");
 
   //Add shipment command
-  this.addCommandID("setShipment");
+  //this.addCommandID("setShipment");
 
   //Set besieged time variable
-  this.set_u32("besiegedTime", 0.0f);
+  this.set_u32("besiegedTime", 0);
   
-  //Set the background tiles to be stone back wall
-  this.set_TileType("background tile", CMap::tile_wood_back);
+  //Set the background tiles to be wood back wall
+  this.set_TileType("background tile", SurvivorCampVariables::BACKWALL_TYPE);
   
   //Tag blob so that inventory is stored on class change (StandardRespawnCommand.as)
   this.Tag("change class store inventory");
@@ -58,9 +59,6 @@ void onInit(CBlob@ this) {
   this.set_Vec2f("travel button pos", Vec2f(-12, 7));
   
   //??
-  this.Tag("storage");	 // gives spawn mats
-  
-  //??
   this.getShape().getConsts().waterPasses = false;
 
   //Set an extended no-build zone for floor tiles below
@@ -71,6 +69,7 @@ void onInit(CBlob@ this) {
   SetHelp(this, "help use", "", "Change class    $KEY_E$", "", 5);
   
   //Finished
+  return;
   
 }
 
@@ -80,6 +79,10 @@ void onInit(CBlob@ this) {
  * Tick event function
  */
 void onTick(CBlob@ this) {
+
+  //Remove window (created by DefaultBuilding.as)
+  Vec2f windowPosition = this.getPosition() - Vec2f(0, 4);
+  getMap().server_SetTile(windowPosition, SurvivorCampVariables::BACKWALL_TYPE);
   
   //Check if under siege
   if(this.hasTag("besieged")) {
@@ -97,7 +100,8 @@ void onTick(CBlob@ this) {
     
   }
   
-  u8 teamNumber = this.getTeamNum();
+  //Obtain this spawn site's team 
+  u8 ownerTeamNumber = this.getTeamNum();
   
   CMap@ map = this.getMap();
   
@@ -138,7 +142,7 @@ void onTick(CBlob@ this) {
       if(isPlayer && !isUndead && !isDead) {
       
         //Check if spawn site has no owner
-        if(teamNumber > 10) {
+        if(ownerTeamNumber > 10) {
         
           //Change ownership
           UndeadInvasion::SurvivorCampBlob::changeOwnership(this, nearbyBlob.getTeamNum());
@@ -171,38 +175,39 @@ void onTick(CBlob@ this) {
 void onCommand(CBlob@ this, u8 cmd, CBitStream @params) {
 
   //Check if setSpriteFrame (is this going to be used?)
-  if (cmd == this.getCommandID("setSpriteFrame")) {
+  //if (cmd == this.getCommandID("setSpriteFrame")) {
     
     //Set sprite animation frame
-    this.getSprite().animation.frame = params.read_u8();
+    //this.getSprite().animation.frame = params.read_u8();
     
-  }
+  //}
 
   //Otherwise, check if shipment
-  else if (cmd == this.getCommandID("setShipment")) {
+  //else if (cmd == this.getCommandID("setShipment")) {
   
     //Obtain a reference to the local player's blob
-    CBlob@ localPlayerBlob = getLocalPlayerBlob();
+    //CBlob@ localPlayerBlob = getLocalPlayerBlob();
     
     //Check if a reference is valid and that the the player is on the same team
-    if (localPlayerBlob !is null && localPlayerBlob.getTeamNum() == this.getTeamNum()) {
+    //if(localPlayerBlob !is null && localPlayerBlob.getTeamNum() == this.getTeamNum()) {
     
       //Add notification about shipment to client chat
-      client_AddToChat("Supplies will drop at your base.");
+      //client_AddToChat("Supplies will drop at your base.");
       
-    }
+    //}
     
-  }
+  //}
 
   //Otherwise
-  else {
+  //else {
 
     //Call function for standard commands (StandardRespawnCommand.as)
     onRespawnCommand(this, cmd, params);
 
-  }
+  //}
   
   //Finished
+  return;
   
 }
 
@@ -213,6 +218,7 @@ void onCommand(CBlob@ this, u8 cmd, CBitStream @params) {
  */
 f32 onHit(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitterBlob, u8 customData) {
 
+  //Check if hitter is undead
   if(hitterBlob.hasTag("isUndead")) {
   
     //Tag as besieged
@@ -223,20 +229,29 @@ f32 onHit(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitt
 
     //Register dealt damage
     this.Damage(damage, hitterBlob);
+  
+    //Finished, return no damage remaining
+    return 0.0f;
     
   }
   
-  //Finished, return no damage remaining
+  //Finished, return no damage remaining (ignore)
   return 0.0f;
   
 }
 
 
 
+/**
+ * Change team event function
+ */
 void onChangeTeam(CBlob@ this, const int oldTeam) {
 
-  //Set changed ownership flag
+  //Set changed ownership flag (used for sprite/sound)
   this.Tag("changedOwnership");
+  
+  //Finished
+  return;
   
 }
 
@@ -271,6 +286,7 @@ namespace UndeadInvasion {
       //Check if server
       if (getNet().isServer()) {
       
+        //Obtain a map reference
         CMap@ map = this.getMap();
         
         //Create an array of blob references
@@ -289,7 +305,7 @@ namespace UndeadInvasion {
             @nearbyBlob = nearbyBlobs[i];
             
             //Check if blob's owner is not same as new owner and is either a door or a building
-            if(nearbyBlob.getTeamNum() != teamNumber && (nearbyBlob.hasTag("door") || nearbyBlob.hasTag("building"))) {
+            if(nearbyBlob.getTeamNum() != teamNumber && (nearbyBlob.hasTag("door") || nearbyBlob.hasTag("building") || nearbyBlob.getName() == "ladder")) {
             
               //Set ownership on blob
               nearbyBlob.server_setTeamNum(teamNumber);
@@ -306,8 +322,6 @@ namespace UndeadInvasion {
       this.server_setTeamNum(teamNumber);
       
     }
-    
-    
     
   }
   

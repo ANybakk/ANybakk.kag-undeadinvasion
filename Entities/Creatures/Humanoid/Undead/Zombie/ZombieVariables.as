@@ -28,10 +28,10 @@ namespace UndeadVariables {
   //Define a delay of 5 frames
   const u8 BRAIN_DELAY = 5; //TODO: Define in terms of seconds (float)
 
-  //Define a detection radius of 32.0
+  //Define a detection radius of 32.0 (approximately 2 tiles in-between)
   const f32 BRAIN_DETECT_RADIUS = 32.0f;
 
-  //Define a chasing radius of 48.0 (Should be farther than detection radius)
+  //Define a chasing radius of 48.0 (approximately 3 tiles in-between). Should be longer than detection radius 
   const f32 BRAIN_CHASE_RADIUS = 48.0f;
 
   //Define an attack frequency of 2 seconds

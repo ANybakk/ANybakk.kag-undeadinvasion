@@ -12,10 +12,10 @@ void onInit(CSprite@ this) {
   int team = this.getBlob().getTeamNum();
   
   //Check if ordinary team
-  if (team >= 0 && team < 8) {
+  if (team >= 0 && team <= 10) {
   
     //Set mode to active
-    this.animation.frame = SurvivorCampSpriteMode::MODE_ACTIVE;
+    this.animation.frame = SurvivorCampSpriteMode::MODE_DEFAULT;
     
   }
   
@@ -66,6 +66,9 @@ void onRender(CSprite@ this) {
   
     //Play a fanfare
     Sound::Play("/VehicleCapture");
+  
+    //Set mode to active
+    this.animation.frame = SurvivorCampSpriteMode::MODE_ACTIVE;
     
     //Disable flag
     blob.Untag("changedOwnership");

@@ -1,8 +1,8 @@
 /* 
- * This script holds everything associated with the blob aspect of the Zombie 
+ * This script holds everything associated with the blob aspect of the Skeleton 
  * entity. That excludes things related to AI brains, AI movement etc.
  * 
- * NOTE:  This script relies on the variables set in "ZombieVariables.as", and 
+ * NOTE:  This script relies on the variables set in "SkeletonVariables.as", and 
  *        must therefore be bundled together with it, or a derived version, 
  *        within the same name-space(s).
  * 
@@ -15,7 +15,7 @@
 
 namespace UndeadInvasion {
 
-  namespace ZombieBlob {
+  namespace Skeleton {
   
   
   
@@ -24,7 +24,7 @@ namespace UndeadInvasion {
      */
     void onInit(CBlob@ this) {
       
-      UndeadInvasion::UndeadBlob::onInit(this);
+      UndeadInvasion::UndeadBlob::doInit(this);
       
       setTags(this);
       
@@ -38,8 +38,10 @@ namespace UndeadInvasion {
      * @param   this            a blob reference.
      */
     void setTags(CBlob@ this) {
-    
-      this.Tag("isZombie");
+      
+      this.Untag("isMadeOfFlesh");
+      this.Untag("hasEyes");
+      this.Tag("isSkeleton");
       
     }
     

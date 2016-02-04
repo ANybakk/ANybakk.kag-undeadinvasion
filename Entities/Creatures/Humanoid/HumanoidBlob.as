@@ -1,13 +1,11 @@
-/*
- * UndeadInvasion Humanoid blob
- * 
- * This script contains generic functionality for humanoid entities.
- * 
- * COMMENT: Custom methods are wrapped in name-spaces to distinguish them from 
- *          the built-in ones and to avoid naming conflicts
+/* 
+ * This script holds everything associated with the blob aspect of the Humanoid 
+ * entity. That excludes things related to AI brains, AI movement etc.
  * 
  * Author: ANybakk
  */
+
+#include "CreatureBlob.as";
 
 
 
@@ -17,6 +15,37 @@ namespace UndeadInvasion {
   
   
   
+    /**
+     * Initializes this entity
+     */
+    void doInit(CBlob@ this) {
+      
+      UndeadInvasion::CreatureBlob::doInit(this);
+      
+      setTags(this);
+      
+    }
+  
+    
+    
+    /**
+     * Sets various tags for this entity type. Inheriting types should call this.
+     * 
+     * @param   this            a blob reference.
+     */
+    void setTags(CBlob@ this) {
+      
+      this.Tag("isMadeOfBones");
+      this.Tag("hasLimbs");
+      this.Tag("hasArms");
+      this.Tag("hasLegs");
+      this.Tag("hasEyes");
+      
+    }
+  
+  
+  
+      
     /**
      * Retrieves the positions for all neighbouring tiles.
      * Tiles are indexed clock-wise, starting from the top left.

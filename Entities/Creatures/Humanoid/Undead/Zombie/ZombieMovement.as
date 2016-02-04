@@ -1,17 +1,46 @@
-/*
- * UndeadInvasion Zombie movement
+/* 
+ * This script holds everything associated with the movement aspect of the 
+ * Zombie entity.
  * 
- * This script handles anything to do with movement. It's based on the Undead 
- * movement.
+ * NOTE:  This script relies on the variables set in "ZombieVariables.as", and 
+ *        must therefore be bundled together with it, or a derived version, 
+ *        within the same name-space.
  * 
  * Author: ANybakk
  */
 
-#define SERVER_ONLY
-
 #include "UndeadMovement.as";
 
-#include "ZombieVariables.as";
 
 
+namespace UndeadInvasion {
 
+  namespace ZombieMovement {
+  
+  
+  
+    /**
+     * Initialization event funcion
+     */
+    void onInit(CMovement@ this) {
+    
+      UndeadInvasion::UndeadMovement::onInit(this);
+      
+    }
+    
+    
+    
+    /**
+     * Tick event function
+     */
+    void onTick(CMovement@ this) {
+    
+      UndeadInvasion::UndeadMovement::onTick(this);
+      
+    }
+    
+    
+    
+  }
+  
+}

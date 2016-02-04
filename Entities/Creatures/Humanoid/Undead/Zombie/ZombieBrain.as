@@ -1,8 +1,10 @@
-/*
- * UndeadInvasion Zombie brain
+/* 
+ * This script holds everything associated with the brain aspect of the Zombie 
+ * entity.
  * 
- * This script handles anything to do with the brain. It's based on the Undead 
- * brain.
+ * NOTE:  This script relies on the variables set in "ZombieVariables.as", and 
+ *        must therefore be bundled together with it, or a derived version, 
+ *        within the same name-space.
  * 
  * Author: ANybakk
  */
@@ -11,7 +13,36 @@
 
 #include "UndeadBrain.as";
 
-#include "ZombieVariables.as";
 
 
+namespace UndeadInvasion {
 
+  namespace ZombieBrain {
+  
+  
+  
+    /**
+     * Initialization event function
+     */
+    void onInit(CBrain@ this) {
+    
+      UndeadInvasion::UndeadBrain::onInit(this);
+      
+    }
+    
+    
+    
+    /**
+     * Tick event function
+     */
+    void onTick(CBrain@ this) {
+    
+      UndeadInvasion::UndeadBrain::onTick(this);
+      
+    }
+    
+    
+    
+  }
+  
+}

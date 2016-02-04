@@ -175,7 +175,9 @@ class UndeadInvasionPNGLoader : PNGLoader {
         @spawnedBlob = spawnBlob(map, "SurvivorCamp", offset, -1); //Spawn blob
 				//@spawnedBlob.AddScript("abc.as");                        //Add behaviour through a script
 				//@spawnedBlob.Tag("script added");
-        offsets[autotile_offset].push_back(offset);                 //Store offset reference, generic tile
+        offsets[autotile_offset].push_back(offset);                //Store offset reference, generic tile
+        
+        //TODO: For some reason, the default offset handler doesn't repair the correct tile
         
     }
     

@@ -1,5 +1,5 @@
 /*
- * UndeadInvasion Creature entity variables
+ * UndeadInvasion CreatureBlob entity variables
  * 
  * This script contains any variables associated with the entity.
  * 
@@ -13,7 +13,7 @@
  * Author: ANybakk
  */
 
-namespace CreatureVariables {
+namespace CreatureBlobVariables {
 
   //Define a placeholder variable
   const bool IS_TRUE = true;
