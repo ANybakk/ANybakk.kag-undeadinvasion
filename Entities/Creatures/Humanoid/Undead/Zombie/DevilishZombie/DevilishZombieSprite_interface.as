@@ -1,11 +1,11 @@
 /*
- * Zombie sprite interface.
+ * Devilish Zombie sprite interface.
  * 
  * Author: ANybakk
  */
 
 #include "ZombieSprite.as";
-#include "ZombieVariables.as";
+#include "DevilishZombieVariables.as";
 
 
 

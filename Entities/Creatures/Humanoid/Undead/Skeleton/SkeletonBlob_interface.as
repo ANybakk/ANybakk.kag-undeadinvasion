@@ -1,18 +1,18 @@
 /*
- * Zombie blob interface.
+ * Skeleton blob interface.
  * 
  * Author: ANybakk
  */
 
 #include "UndeadBlob.as";
-#include "ZombieBlob.as";
-#include "ZombieVariables.as";
+#include "SkeletonBlob.as";
+#include "SkeletonVariables.as";
 
 
 
 void onInit(CBlob@ this) {
   
-  UndeadInvasion::ZombieBlob::onInit(this);
+  UndeadInvasion::SkeletonBlob::onInit(this);
   
 }
 

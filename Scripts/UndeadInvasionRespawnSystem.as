@@ -20,7 +20,7 @@
  * UndeadInvasionRespawnSystem
  * Represents the re-spawn functionality
  */
-shared class UndeadInvasionRespawnSystem : RespawnSystem {
+class UndeadInvasionRespawnSystem : RespawnSystem {
 
 
   

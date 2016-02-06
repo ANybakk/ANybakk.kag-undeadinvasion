@@ -1,12 +1,12 @@
 /*
- * Zombie blob interface.
+ * Devilish Zombie blob interface.
  * 
  * Author: ANybakk
  */
 
 #include "UndeadBlob.as";
 #include "ZombieBlob.as";
-#include "ZombieVariables.as";
+#include "DevilishZombieVariables.as";
 
 
 

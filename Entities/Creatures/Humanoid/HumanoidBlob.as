@@ -1,6 +1,5 @@
 /* 
- * This script holds everything associated with the blob aspect of the Humanoid 
- * entity. That excludes things related to AI brains, AI movement etc.
+ * Humanoid blob.
  * 
  * Author: ANybakk
  */
@@ -18,9 +17,9 @@ namespace UndeadInvasion {
     /**
      * Initializes this entity
      */
-    void doInit(CBlob@ this) {
+    void onInit(CBlob@ this) {
       
-      UndeadInvasion::CreatureBlob::doInit(this);
+      UndeadInvasion::CreatureBlob::onInit(this);
       
       setTags(this);
       

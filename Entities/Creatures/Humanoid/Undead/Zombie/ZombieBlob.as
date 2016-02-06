@@ -1,10 +1,5 @@
 /* 
- * This script holds everything associated with the blob aspect of the Zombie 
- * entity. That excludes things related to AI brains, AI movement etc.
- * 
- * NOTE:  This script relies on the variables set in "ZombieVariables.as", and 
- *        must therefore be bundled together with it, or a derived version, 
- *        within the same name-space(s).
+ * Zombie blob.
  * 
  * Author: ANybakk
  */
@@ -19,25 +14,17 @@ namespace UndeadInvasion {
   
   
   
-    /**
-     * Initializes this entity
-     */
-    void onInit(CBlob@ this) {
+    void onInit(CBlob@ this) { //Override
       
       UndeadInvasion::UndeadBlob::onInit(this);
       
       setTags(this);
       
     }
-  
     
     
-    /**
-     * Sets various tags for this entity type. Inheriting types should call this.
-     * 
-     * @param   this            a blob reference.
-     */
-    void setTags(CBlob@ this) {
+    
+    void setTags(CBlob@ this) { //Override
     
       this.Tag("isZombie");
       

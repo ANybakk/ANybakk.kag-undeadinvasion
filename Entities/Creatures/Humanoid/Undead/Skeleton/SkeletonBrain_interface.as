@@ -1,5 +1,5 @@
 /*
- * Zombie brain interface.
+ * Skeleton brain interface.
  
  * Author: ANybakk
  */
@@ -7,7 +7,7 @@
 #define SERVER_ONLY
 
 #include "UndeadBrain.as";
-#include "ZombieVariables.as";
+#include "SkeletonVariables.as";
 
 
 

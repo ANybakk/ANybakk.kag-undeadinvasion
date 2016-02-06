@@ -1,10 +1,5 @@
 /* 
- * This script holds everything associated with the blob aspect of the Undead 
- * entity. That excludes things related to AI brains, AI movement etc.
- * 
- * NOTE:  This script relies on the variables set in "UndeadVariables.as", and 
- *        must therefore be bundled together with it, or a derived version, 
- *        within the same name-space.
+ * Undead blob.
  * 
  * Author: ANybakk
  */
@@ -20,12 +15,9 @@ namespace UndeadInvasion {
   
   
   
-    /**
-     * Initializes this entity
-     */
-    void onInit(CBlob@ this) {
+    void onInit(CBlob@ this) { //Override
       
-      UndeadInvasion::HumanoidBlob::doInit(this);
+      UndeadInvasion::HumanoidBlob::onInit(this);
       
       setTags(this);
       
@@ -39,33 +31,16 @@ namespace UndeadInvasion {
     
     
     
-    /**
-     * Sets various tags for this entity type.
-     * 
-     * @param   this            a blob reference.
-     */
-    void setTags(CBlob@ this) {
+    void setTags(CBlob@ this) { //Override
       
       this.Tag("isUndead");
       
     }
-  
-  
-  
-    /**
-     * Tick handler
-     */
-    void onTick(CBlob@ this) {
-    
-      //Finished
-      return;
-      
-    }
     
     
     
     /**
-     * pickup check function
+     * Pickup check function
      */
     bool canBePickedUp(CBlob@ this, CBlob@ other) {
       
@@ -77,7 +52,7 @@ namespace UndeadInvasion {
     
     
     /**
-     * pickup check function
+     * Collision check function
      */
     bool doesCollideWithBlob(CBlob@ this, CBlob@ other) {
       
@@ -95,7 +70,7 @@ namespace UndeadInvasion {
      * TODO: Consider if collision should cause a stumbling effect or something
      */
     void onCollision(CBlob@ this, CBlob@ other, bool solid, Vec2f normal, Vec2f point1) {
-
+    
       //Check if debug mode
       if(g_debug > 0) {
       
@@ -159,17 +134,16 @@ namespace UndeadInvasion {
     
     /**
      * Hit event function
+     * 
+     * COMMENT: Damage received is normally 0.5 from builder, 1.0 from knight stab, 2.0 from knight slash
      */
     f32 onHit(CBlob@ this, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitterBlob, u8 customData) {
-
-      /*
-      //Take damage
-      this.Damage(damage, hitterBlob);
-      print("DMG recieved:"+damage+" Health:"+this.getHealth());
-      //Finished, tell that no damage remains
-      */
       
-      return 0.0f;
+      if(g_debug > 0) { print("[UndeadBlob:onHit]: name=" + this.getName() + ", damage=" + damage + ", from=" + hitterBlob.getName()); }
+      
+      //Finished, return all damage (no damage reduction)
+      //COMMENT: The actual damage going to be dealt is affected by the game mode's "attackdamage_modifier" value
+      return damage;
       
     }
     

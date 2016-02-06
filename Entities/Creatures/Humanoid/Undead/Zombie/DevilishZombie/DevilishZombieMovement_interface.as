@@ -1,5 +1,5 @@
 /*
- * Undead movement interface.
+ * Devilish Zombie movement interface.
  * 
  * Author: ANybakk
  */
@@ -7,7 +7,7 @@
 #define SERVER_ONLY
 
 #include "UndeadMovement.as";
-#include "UndeadVariables.as";
+#include "DevilishZombieVariables.as";
 
 
 

@@ -1,13 +1,8 @@
 /* 
- * This script holds everything associated with the movement aspect of the 
- * Undead entity.
+ * Undead movement
  * 
- * This script handles anything to do with movement. An undead will move either 
- * left or right, and if an obstacle is found, a jump is performed.
- * 
- * NOTE:  This script relies on the variables set in "UndeadVariables.as", and 
- *        must therefore be bundled together with it, or a derived version, 
- *        within the same name-space.
+ * Undead will move either left or right, and if an obstacle is found, a jump 
+ * is performed.
  * 
  * Author: ANybakk
  */
@@ -21,9 +16,9 @@
 namespace UndeadInvasion {
 
   namespace UndeadMovement {
-
-
-
+  
+  
+  
     /**
      * Initialization event funcion
      */
@@ -39,9 +34,9 @@ namespace UndeadInvasion {
       this.getCurrentScript().removeIfTag	= "dead";
       
     }
-
-
-
+    
+    
+    
     /**
      * Tick event function
      */
@@ -183,7 +178,7 @@ namespace UndeadInvasion {
           }
           
           //Determine collateral attack frequency
-          u8 collateralAttackFrequency = UndeadVariables::COLLATERAL_ATTACK_FREQUENCY * getTicksASecond();
+          f32 collateralAttackFrequency = UndeadVariables::COLLATERAL_ATTACK_FREQUENCY * getTicksASecond();
           
           //Retrieve collateral attack time variable
           u16 collateralAttackTime = blob.get_u16("lastCollateralAttackTime");

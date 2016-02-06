@@ -1,6 +1,5 @@
 /* 
- * This script holds everything associated with the brain aspect of the Undead 
- * entity.
+ * Undead brain.
  *
  * The AI is fairly simple. Undead brains are either in invading mode, or 
  * targeting mode. In the first case, the undead will target the nearest 
@@ -9,11 +8,11 @@
  * survivor or animal while in invading mode, it will switch to targeting mode. 
  * It will switch back to invading mode if the target is too far away.
  * 
- * NOTE:  This script relies on the variables set in "UndeadVariables.as", and 
- *        must therefore be bundled together with it, or a derived version, 
- *        within the same name-space.
- * 
  * Author: ANybakk
+ * 
+ * TODO:  Give undead the ability to change target in BRAINMODE_TARGETING mode, 
+ *        if another survivor/animal is closer
+ * TODO:  Allow undead to eat meaty food items they may find (steak, burger)
  */
 
 #include "Blob.as";
@@ -74,7 +73,7 @@ namespace UndeadInvasion {
      * Tick event function
      */
     void onTick(CBrain@ this) {
-
+    
       //Obtain a reference to the blob object
       CBlob@ blob = this.getBlob();
       
@@ -130,8 +129,8 @@ namespace UndeadInvasion {
               
             }
             
-            //Check if target is not on the same team and is tagged with flesh
-            if(potentialTarget.getTeamNum() != blob.getTeamNum() && potentialTarget.hasTag("flesh")) {
+            //Check if target is not on the same team and is tagged as flesh
+            if(potentialTarget.getTeamNum() != blob.getTeamNum() && (potentialTarget.hasTag("isMadeOfFlesh") || potentialTarget.hasTag("flesh"))) {
                 
               //Store a reference to this target object
               @target = potentialTarget;
@@ -233,7 +232,7 @@ namespace UndeadInvasion {
             if(UndeadInvasion::UndeadBlob::isWithinChasingRange(blob, target)) {
           
               //Determine attack frequency
-              u8 attackFrequency = UndeadVariables::BRAIN_ATTACK_FREQUENCY * getTicksASecond();
+              f32 attackFrequency = UndeadVariables::BRAIN_ATTACK_FREQUENCY * getTicksASecond();
               
               //Retrieve attack time variable
               u16 attackTime = blob.get_u16("lastAttackTime");
@@ -297,7 +296,7 @@ namespace UndeadInvasion {
       blob.set_u8("brain_delay", brainDelay);
       
       //Finished
-
+      
     }
     
     

@@ -1,4 +1,0 @@
-There are some things to keep in mind when making maps for UndeadInvasion.
-
-- The undead will jump over a maximum of two tiles if their path is blocked.
-- The undead will, by default, occasionally cause collateral damage on wood or dirt tiles if their path is blocked. When the CreatureBlob starts to dig through these tiles and create a tunnel, others will follow it. Therefore it is wise to not add pits with wood or dirt sides near the undead spawn sites. Otherwise, a lot of zombies will be busy in the tunnel while the survivors has a completely safe passage above. Other tile types will not cause this problem. The collateral damage behaviour can also be disabled to avoid it.

@@ -1,10 +1,5 @@
 /* 
- * This script holds everything associated with the blob aspect of the Skeleton 
- * entity. That excludes things related to AI brains, AI movement etc.
- * 
- * NOTE:  This script relies on the variables set in "SkeletonVariables.as", and 
- *        must therefore be bundled together with it, or a derived version, 
- *        within the same name-space(s).
+ * Skeleton blob.
  * 
  * Author: ANybakk
  */
@@ -15,16 +10,13 @@
 
 namespace UndeadInvasion {
 
-  namespace Skeleton {
+  namespace SkeletonBlob {
   
   
   
-    /**
-     * Initializes this entity
-     */
-    void onInit(CBlob@ this) {
+    void onInit(CBlob@ this) { //Override
       
-      UndeadInvasion::UndeadBlob::doInit(this);
+      UndeadInvasion::UndeadBlob::onInit(this);
       
       setTags(this);
       
@@ -32,14 +24,10 @@ namespace UndeadInvasion {
   
     
     
-    /**
-     * Sets various tags for this entity type. Inheriting types should call this.
-     * 
-     * @param   this            a blob reference.
-     */
-    void setTags(CBlob@ this) {
+    void setTags(CBlob@ this) { //Override
       
       this.Untag("isMadeOfFlesh");
+      this.Untag("flesh"); //Vanilla tag that allows being targeted by a bison for instance
       this.Untag("hasEyes");
       this.Tag("isSkeleton");
       

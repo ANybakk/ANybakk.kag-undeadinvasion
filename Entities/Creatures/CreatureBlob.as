@@ -1,6 +1,5 @@
 /* 
- * This script holds everything associated with the blob aspect of the Creature 
- * entity. That excludes things related to AI brains, AI movement etc.
+ * Creature blob.
  * 
  * Author: ANybakk
  */
@@ -18,9 +17,9 @@ namespace UndeadInvasion {
     /**
      * Initializes this entity
      */
-    void doInit(CBlob@ this) {
+    void onInit(CBlob@ this) {
       
-      UndeadInvasion::Blob::doInit(this);
+      UndeadInvasion::Blob::onInit(this);
       
       setTags(this);
       
@@ -37,6 +36,7 @@ namespace UndeadInvasion {
     
       this.Tag("isCreatureBlob");
       this.Tag("isMadeOfFlesh");
+      this.Tag("flesh"); //Vanilla tag that allows being targeted by a bison for instance
       
     }
     

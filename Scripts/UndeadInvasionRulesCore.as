@@ -11,6 +11,7 @@
  */
 
 #include "UndeadInvasionVariables.as";
+#include "EntitySpawn.as";
 
 #include "RulesCore.as";
 
@@ -20,7 +21,7 @@
  * UndeadInvasionRulesCore
  * Represents the game rules
  */
-shared class UndeadInvasionRulesCore : RulesCore {
+class UndeadInvasionRulesCore : RulesCore {
 
 
   
@@ -164,7 +165,7 @@ shared class UndeadInvasionRulesCore : RulesCore {
         if(nightHasPassed()) {
         
           //Show a night time survival message
-          rules.SetGlobalMessage("Day is dawning. The survivors have made it through night.");
+          rules.SetGlobalMessage("Day is dawning. The survivors have made it through the night.");
         
         //Otherwise, check if not night time
         } else if(!isNightTime()) {
@@ -471,16 +472,47 @@ shared class UndeadInvasionRulesCore : RulesCore {
   /**
    * Spawns an undead CreatureBlob in a given place
    */
-  void spawnUndead(Vec2f position, string typeName = "Zombie" ) {
+  void spawnUndead(Vec2f position) {
   
     //Check if there are any undead available for spawning
     if(mUndeadAvailable > 0) {
     
-      //Spawn undead
-      server_CreateBlob( typeName, -1, position);
+      //Get a random value between 0 and 100
+      u8 randomChance = XORRandom(100);
       
-      //Reduce available undead for spawning
-      mUndeadAvailable--;
+      //Get a reference to the spawn mix array
+      UndeadInvasion::EntitySpawn[] spawnMix = UndeadInvasionVariables::UNDEAD_ENTITY_SPAWN_MIX;
+      
+      //Create an entity spawn object handle
+      UndeadInvasion::EntitySpawn spawn;
+      
+      //Keep track of accumulated spawn chance
+      u8 accumulatedChance = 0;
+      
+      //Iterate through all entity spawn objects (think: percentage pie chart)
+      for(u8 i=0; i<spawnMix.length; i++) {
+      
+        //Keep a reference to this entity spawn object
+        spawn = UndeadInvasionVariables::UNDEAD_ENTITY_SPAWN_MIX[i];
+        
+        //Check if random chance value is within this window
+        if(randomChance > accumulatedChance && randomChance < accumulatedChance + spawn.mSpawnChance) {
+        
+          //Spawn this entity
+          server_CreateBlob( spawn.mEntityName, -1, position);
+          
+          //Reduce available undead for spawning
+          mUndeadAvailable--;
+          
+          //Exit loop
+          break;
+        
+        }
+        
+        //Accumulate chance value
+        accumulatedChance += spawn.mSpawnChance;
+        
+      }
       
     }
     

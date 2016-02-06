@@ -1,18 +1,5 @@
 /*
- * UndeadInvasion Undead entity blob interface script
- * 
- * This script offers default blob behaviour for Undead entities. It is merely 
- * an interface between functions in the UndeadBlob name-space and the game 
- * engine.
- * 
- * NOTE:  This script can be included in the configuration file of a derived 
- *        entity type directly, or included in another script. If some 
- *        functionality needs to be overridden, however, it is better to write 
- *        a new script where you pick what existing functionality you want, or 
- *        provide something else.
- * 
- * NOTE:  If you, as a server administrator, wish to override variables, create 
- *        a new mod where you supply your own version.
+ * Undead blob interface.
  * 
  * Author: ANybakk
  
@@ -29,12 +16,6 @@
 void onInit(CBlob@ this) {
   
   UndeadInvasion::UndeadBlob::onInit(this);
-  
-}
-
-void onTick(CBlob@ this) {
-  
-  UndeadInvasion::UndeadBlob::onTick(this);
   
 }
 

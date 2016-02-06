@@ -1,6 +1,5 @@
 /* 
- * This script holds everything associated with the blob aspect of an entity. 
- * That excludes things related to AI brains, AI movement etc.
+ * Generic blob
  * 
  * Author: ANybakk
  */
@@ -16,7 +15,7 @@ namespace UndeadInvasion {
     /**
      * Initializes this entity
      */
-    void doInit(CBlob@ this) {
+    void onInit(CBlob@ this) {
       
       setTags(this);
       

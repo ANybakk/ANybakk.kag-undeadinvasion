@@ -13,6 +13,10 @@
  * Author: ANybakk
  */
 
+#include "EntitySpawn.as";
+
+
+ 
 namespace UndeadInvasionVariables {
   
   //Define a minimum number of -1 (disabled) for players on each team for the game to start
@@ -41,5 +45,12 @@ namespace UndeadInvasionVariables {
   
   //Define an undead spawning factor during daytime of 2 (base interval)
   const u8 UNDEAD_SPAWN_NIGHTTIMEFACTOR = 1;
+  
+  //Define an array of Undead entities to spawn
+  const UndeadInvasion::EntitySpawn[] UNDEAD_ENTITY_SPAWN_MIX = {
+    UndeadInvasion::EntitySpawn("Zombie", 60),          //Zombie 60% chance
+    UndeadInvasion::EntitySpawn("Skeleton", 35),        //Skeleton 35% chance
+    UndeadInvasion::EntitySpawn("Devilish Zombie", 5)   //Devilish Zombie 5% chance
+  };
   
 }
