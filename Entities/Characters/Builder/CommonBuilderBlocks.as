@@ -75,11 +75,11 @@ void addCommonBuilderBlocks(BuildBlock[][]@ blocks) {
     blocks[0].push_back(b);
   }
   
-  /*{
+  {
     BuildBlock b(0, "Belt Conveyor", "$Belt Conveyor$", "Conveyor\nTransports stuff");
     AddRequirement(b.reqs, "blob", "mat_wood", "Wood", 15);
     blocks[0].push_back(b);
-  }*/
+  }
   
   //{
   //  BuildBlock b(0, "spikes", "$spikes$", "Spikes\nPlace on Stone Block\nfor Retracting Trap");

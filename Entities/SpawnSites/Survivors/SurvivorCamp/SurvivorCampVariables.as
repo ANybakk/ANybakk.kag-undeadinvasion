@@ -13,9 +13,6 @@ namespace SurvivorCampVariables {
   const f32 TERRITORY_RADIUS = 150.0f;
 
   //Define a besieged alert time-out of 3 seconds
-  const f32 BESIEGED_RADIUS = 100.0f;
-
-  //Define a besieged alert time-out of 3 seconds
   const u8 BESIEGED_ALERT_TIMEOUT = 3;
   
   //Define a wooden back wall type

@@ -11,6 +11,7 @@
  * Based on previous work by: Eanmig
  */
 
+#include "Rules.as";
 #include "RulesCore.as";
 #include "RespawnSystem.as";
 
@@ -203,7 +204,7 @@ class UndeadInvasionRespawnSystem : RespawnSystem {
     }
     
     //Finished, return true if not night time
-    return !cast<UndeadInvasionRulesCore@>(core).isNightTime();
+    return ANybakk::Rules::isDayTime(core.rules);
     
   }
   

@@ -9,8 +9,9 @@
  
 #define SERVER_ONLY
 
-#include "UndeadInvasionRulesCore.as";
-#include "UndeadInvasionRespawnSystem.as";
+#include "Rules.as"
+#include "UndeadInvasionRulesCore.as"
+#include "UndeadInvasionRespawnSystem.as"
 
 
 
@@ -20,6 +21,8 @@
 void onInit(CRules@ this) {
 
   print("[UndeadInvasionRules:onInit]");
+  
+  ANybakk::Rules::onInit(this);
   
   //Call restart event function
   onRestart(this);
@@ -37,6 +40,8 @@ void onInit(CRules@ this) {
 void onRestart(CRules@ this) {
 
   print("[UndeadInvasionRules:onRestart]");
+  
+  ANybakk::Rules::onRestart(this);
   
   //Set no timer flag (used by TimeToEnd.as)
   this.set_bool("no timer", true);

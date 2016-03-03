@@ -103,16 +103,14 @@ void onTick(CBlob@ this) {
   //Obtain this spawn site's team 
   u8 ownerTeamNumber = this.getTeamNum();
   
-  CMap@ map = this.getMap();
-  
   //Create an array of blob references
-  CBlob@[] nearbyBlobs;
+  CBlob@[] overlappingBlobs;
   
   //Create a blob handle
-  CBlob@ nearbyBlob;
+  CBlob@ overlappingBlob;
   
-  //Check if any blobs within radius
-  if(map.getBlobsInRadius(this.getPosition(), SurvivorCampVariables::BESIEGED_RADIUS, @nearbyBlobs)) {
+  //Check if any overlapping blobs
+  if(this.getOverlapping(@overlappingBlobs)) {
   
     //Create status for undead
     bool isUndead = false;
@@ -124,37 +122,43 @@ void onTick(CBlob@ this) {
     bool isDead;
     
     //Iterate through blobs
-    for(uint i=0; i<nearbyBlobs.length; i++) {
+    for(uint i=0; i<overlappingBlobs.length; i++) {
     
       //Keep a reference to this blob
-      @nearbyBlob = nearbyBlobs[i];
+      @overlappingBlob = overlappingBlobs[i];
       
       //Determine if undead
-      isUndead = nearbyBlob.hasTag("isUndead");
+      isUndead = overlappingBlob.hasTag("isUndead");
       
       //Determine if player
-      isPlayer = nearbyBlob.hasTag("player");
+      isPlayer = overlappingBlob.hasTag("player");
       
       //Determine if dead
-      isDead = nearbyBlob.hasTag("dead");
+      isDead = overlappingBlob.hasTag("dead");
       
-      //Check if blob is a player, not undead, and not dead
-      if(isPlayer && !isUndead && !isDead) {
+      //TODO: Do defenders v.s. attackers evaluations like in Hall.as
       
-        //Check if spawn site has no owner
-        if(ownerTeamNumber > 10) {
+      //Check if spawn site has no owner, overlapping is player and not dead
+      if(ownerTeamNumber > 10 && isPlayer && !isDead) {
+      
+        //Change ownership
+        UndeadInvasion::SurvivorCampBlob::changeOwnership(this, overlappingBlob.getTeamNum());
         
-          //Change ownership
-          UndeadInvasion::SurvivorCampBlob::changeOwnership(this, nearbyBlob.getTeamNum());
-          
-        }
+        this.Untag("besieged");
         
-        //Otherwise, besieged
-        else {
+      }
+      
+      //Otherwise, check if different team
+      else if(overlappingBlob.getTeamNum() != ownerTeamNumber) {
         
-          //TODO: Do defenders v.s. attackers evaluations like in Hall.as
-          
-        }
+        this.Tag("besieged");
+        
+      }
+      
+      //Otherwise
+      else {
+        
+        this.Untag("besieged");
         
       }
       

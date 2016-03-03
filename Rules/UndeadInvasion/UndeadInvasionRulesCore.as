@@ -10,10 +10,11 @@
  * Based on previous work by: Eanmig
  */
 
-#include "UndeadInvasionVariables.as";
-#include "EntitySpawn.as";
-
-#include "RulesCore.as";
+#include "UndeadInvasionVariables.as"
+#include "EntitySpawn.as"
+#include "Rules.as"
+#include "RulesCore.as"
+#include "UndeadInvasionRespawnSystem.as"
 
 
 
@@ -24,7 +25,7 @@
 class UndeadInvasionRulesCore : RulesCore {
 
 
-  
+
   //Keep track of when the game started
   int mStartTime;
   
@@ -79,10 +80,6 @@ class UndeadInvasionRulesCore : RulesCore {
     //Store a reference to the respawn system
     @mRespawnSystem = cast<UndeadInvasionRespawnSystem@>(respawnSystem);
     
-    //Create background music
-    //TODO: Consider adding background music
-    //server_CreateBlob( "Entities/Meta/WARMusic.cfg" );
-    
     //Register game start time
     mStartTime = getGameTime();
     
@@ -94,6 +91,9 @@ class UndeadInvasionRulesCore : RulesCore {
     
     //Initialize the amount of undead available for spawning
     mUndeadAvailable = mUndeadCountLimit;
+    
+    //Create audio meta entity
+    server_CreateBlob("Undead Invasion Audio");
     
     //Finished
     
@@ -162,16 +162,16 @@ class UndeadInvasionRulesCore : RulesCore {
       else {
         
         //Check if night has passed
-        if(nightHasPassed()) {
+        if(ANybakk::Rules::nightHasPassed(rules)) {
         
           //Show a night time survival message
           rules.SetGlobalMessage("Day is dawning. The survivors have made it through the night.");
         
         //Otherwise, check if not night time
-        } else if(!isNightTime()) {
+        } else if(!ANybakk::Rules::isNightTime(rules)) {
       
           //Determine how many days have passed
-          int dayNumber = getDayNumber();
+          int dayNumber = ANybakk::Rules::getDayNumber(rules);
         
           //Check if not first day
           if(dayNumber > 0) {
@@ -192,7 +192,7 @@ class UndeadInvasionRulesCore : RulesCore {
         }
         
         //Otherwise, check if night time
-        else if(isNightTime()) {
+        else if(ANybakk::Rules::isNightTime(rules)) {
           
             //Show blank message
             rules.SetGlobalMessage("");
@@ -220,10 +220,10 @@ class UndeadInvasionRulesCore : RulesCore {
   void updateUndeadSpawnSites() {
   
     //Determine lapsed time since game started
-    int lapsedTime = getLapsedTime();
+    int lapsedTime = ANybakk::Rules::getLapsedTime(rules);
     
     //Determine what factor to use depending on time of day
-    u8 dayOfTimeFactor = (isNightTime()) ? UndeadInvasionVariables::UNDEAD_SPAWN_NIGHTTIMEFACTOR : UndeadInvasionVariables::UNDEAD_SPAWN_DAYTIMEFACTOR;
+    u8 dayOfTimeFactor = (ANybakk::Rules::isNightTime(rules)) ? UndeadInvasionVariables::UNDEAD_SPAWN_NIGHTTIMEFACTOR : UndeadInvasionVariables::UNDEAD_SPAWN_DAYTIMEFACTOR;
     
     //Every second
     if(lapsedTime % (dayOfTimeFactor * UndeadInvasionVariables::UNDEAD_SPAWN_INTERVAL_4 * getTicksASecond()) == 0) {
@@ -427,6 +427,7 @@ class UndeadInvasionRulesCore : RulesCore {
 	}
   
   
+  
   /**
    * Checks if any team has any survivors
    */
@@ -467,6 +468,7 @@ class UndeadInvasionRulesCore : RulesCore {
 		return false;
     
 	}
+  
   
   
   /**
@@ -515,63 +517,6 @@ class UndeadInvasionRulesCore : RulesCore {
       }
       
     }
-    
-  }
-  
-  
-  
-  /**
-   * Calculates lapsed time since game started.
-   */
-  int getLapsedTime() {
-  
-    //Finished, return result
-    return mCurrentTime - mStartTime;
-    
-  }
-  
-  /**
-   * Calculates how many days have passed.
-   */
-  int getDayNumber() {
-  
-    //Finished, return result (integer division: lapsed time / day time)
-    return getLapsedTime() / (rules.daycycle_speed * 60 * getTicksASecond());
-    
-  }
-  
-  /**
-   * Calculate how far into the current day it is.
-   */
-  f32 getTimeOfDay() {
-  
-    //Finished, return result (rest division: lapsed time / day time)
-    return getLapsedTime() % (rules.daycycle_speed * 60 * getTicksASecond());
-    
-  }
-  
-  /**
-   * Determine if it's night time.
-   */
-  bool isNightTime() {
-  
-    //Get time of day
-    f32 timeOfDay = getTimeOfDay();
-  
-    //Finished, return result (time of day is within 0.66 - 0.9)
-    return timeOfDay >= 0.66 * rules.daycycle_speed * 60 * getTicksASecond() && timeOfDay <= 0.9 * rules.daycycle_speed * 60 * getTicksASecond();
-    
-  }
-  
-  
-  
-  /**
-   * Determine if night has passed.
-   */
-  bool nightHasPassed() {
-  
-    //Finished, return result (time of day is within 0.9 - 1.0)
-    return getTimeOfDay() > 0.9 * rules.daycycle_speed * 60 * getTicksASecond();
     
   }
   
