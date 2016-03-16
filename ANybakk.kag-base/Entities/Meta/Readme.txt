@@ -1,0 +1,1 @@
+Meta entities typically don't inherit behavior because of their special nature.

@@ -17,7 +17,7 @@ void LoadDefaultMapLoaders()
 	}
 	else if (sv_gamemode == "UndeadInvasion" || sv_gamemode == "undeadinvasion")
 	{
-		RegisterFileExtensionScript("Scripts/UndeadInvasionMap.as", "png");
+		RegisterFileExtensionScript("UndeadInvasionMap_interface.as", "png");
 	}
 	else
 	{
@@ -25,5 +25,5 @@ void LoadDefaultMapLoaders()
 	}
 
 
-	RegisterFileExtensionScript("Scripts/MapLoaders/GenerateFromKAGGen.as", "kaggen.cfg");
+	RegisterFileExtensionScript("Scripts/MapLoaders/GenerateFromKAGGen.as", "kaggen.data");
 }

@@ -1,5 +1,5 @@
 /*
- * UndeadInvasion builder block configuration
+ * UndeadInvasion builder block data
  * 
  * This script handles anything related to a builders building options
  * 

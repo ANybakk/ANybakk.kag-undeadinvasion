@@ -1,66 +1,70 @@
+/* 
+ * Ambience Soundtrack
+ * 
+ * Author: ANybakk
+ */
 
 #include "AudioSoundtrack.as"
 #include "UndergroundSoundtrack.as"
 #include "HighSoundtrack.as"
 
 
-namespace ANybakk {
 
-  namespace AmbienceSoundtrack {
+namespace AmbienceSoundtrack {
+
+  //Function handle used for delegate calls
+  funcdef bool criteria(CBlob@);
+
+}
+
+
+
+/**
+ * An underground soundtrack data structure.
+ */
+class AmbienceSoundtrack : AudioSoundtrack {
+
+
+
+  UndergroundSoundtrack mUnderground;
+  HighSoundtrack mHigh;
   
-    //Function handle used for delegate calls
-    funcdef bool criteria(CBlob@);
   
+  
+  AmbienceSoundtrack() {
+  
+    super();
+    
   }
+  
+  
+  
+  AmbienceSoundtrack(string name, string groupName, string[] filePaths, bool stopOnCriteriaNotMet, f32 fadeoutTime, f32 fadeinTime) {
+  
+    super(name, groupName, filePaths, stopOnCriteriaNotMet, fadeoutTime, fadeinTime);
+    
+  }
+  
+  
   
   /**
-   * An underground soundtrack data structure.
+   * Checks if the criteria for playing this soundtrack is met.
+   * 
+   * @param   audioBlob   a reference to the audio blob object.
    */
-  class AmbienceSoundtrack : ANybakk::AudioSoundtrack {
+  bool meetsCriteria(CBlob@ audioBlob) override {
   
-  
-  
-    ANybakk::UndergroundSoundtrack mUnderground;
-    ANybakk::HighSoundtrack mHigh;
+    //Create an underground soundtrack delegate
+    AmbienceSoundtrack::criteria@ undergroundMeetsCriteria = AmbienceSoundtrack::criteria(mUnderground.meetsCriteria);
     
+    //Create a high soundtrack delegate
+    AmbienceSoundtrack::criteria@ highMeetsCriteria = AmbienceSoundtrack::criteria(mHigh.meetsCriteria);
     
-    
-    AmbienceSoundtrack() {
-    
-      super();
-      
-    }
-    
-    
-    
-    AmbienceSoundtrack(string name, string groupName, string[] filePaths, bool stopOnCriteriaNotMet, f32 fadeoutTime, f32 fadeinTime) {
-    
-      super(name, groupName, filePaths, stopOnCriteriaNotMet, fadeoutTime, fadeinTime);
-      
-    }
-    
-    
-    
-    /**
-     * Checks if the criteria for playing this soundtrack is met.
-     * 
-     * @param   audioBlob   a reference to the audio blob object.
-     */
-    bool meetsCriteria(CBlob@ audioBlob) override {
-    
-      //Create an underground soundtrack delegate
-      criteria@ undergroundMeetsCriteria = criteria(mUnderground.meetsCriteria);
-      
-      //Create a high soundtrack delegate
-      criteria@ highMeetsCriteria = criteria(mHigh.meetsCriteria);
-    
-      //Return true if underground and high tracks criteria isn't met.
-      return !undergroundMeetsCriteria(audioBlob) && !highMeetsCriteria(audioBlob);
-      
-    }
-    
-    
+    //Return true if underground and high tracks criteria isn't met.
+    return !undergroundMeetsCriteria(audioBlob) && !highMeetsCriteria(audioBlob);
     
   }
+  
+  
   
 }

@@ -1,110 +1,162 @@
+/* 
+ * Audio blob script
+ * 
+ * Author: ANybakk
+ */
 
+#define CLIENT_ONLY
+
+#include "Audio.as"
 #include "AudioManager.as"
 
 
 
-namespace ANybakk {
+//Called on initialization.
+void onInit(CBlob@ this) {
 
-  namespace AudioBlob {
+  //Create soundtrack lists
   
+  string[] defaultSoundtrackList = {
+    "Sounds/Music/KAGWorld1-1a.ogg",
+    "Sounds/Music/KAGWorld1-2a.ogg",
+    "Sounds/Music/KAGWorld1-3a.ogg",
+    "Sounds/Music/KAGWorld1-4a.ogg",
+    "Sounds/Music/KAGWorld1-9a.ogg"
+  };
   
+  string[] defaultAmbienceSoundtrackList = {
+    "Sounds/Music/ambient_forrest.ogg"
+  };
   
-    void onInit(CBlob@ this) {
+  string[] undergroundAmbienceSountrackList = {
+    "Sounds/Music/ambient_cavern.ogg"
+  };
+  
+  string[] highAmbienceSoundtrackList  = {
+    "Sounds/Music/ambient_mountain.ogg"
+  };
+  
+  //Default data
+  
+  Audio::Data data();
+  
+  //Configure and add default music
+  data.sDefaultMusicSoundtrack.mFilePaths = defaultSoundtrackList;
+  data.oSoundtracks.push_back(data.sDefaultMusicSoundtrack);
+  
+  //Configure and add default ambience
+  data.sDefaultAmbienceSoundtrack.mName = "Default Ambience";
+  data.sDefaultAmbienceSoundtrack.mGroupName = "Ambience";
+  data.sDefaultAmbienceSoundtrack.mFilePaths = defaultAmbienceSoundtrackList;
+  data.oSoundtracks.push_back(data.sDefaultAmbienceSoundtrack);
+  
+  //Configure and add underground ambience
+  data.sUndergroundAmbienceSoundtrack.mName = "Underground Ambience";
+  data.sUndergroundAmbienceSoundtrack.mGroupName = "Ambience";
+  data.sUndergroundAmbienceSoundtrack.mFilePaths = undergroundAmbienceSountrackList;
+  data.oSoundtracks.push_back(data.sUndergroundAmbienceSoundtrack);
+  
+  //Configure and add high ambience
+  data.sHighAmbienceSoundtrack.mName = "High Ambience";
+  data.sHighAmbienceSoundtrack.mGroupName = "Ambience";
+  data.sHighAmbienceSoundtrack.mFilePaths = highAmbienceSoundtrackList;
+  data.oSoundtracks.push_back(data.sHighAmbienceSoundtrack);
+  
+  //Store data object
+  Audio::Blob::storeData(this, @data);
+  
+  //Audio Manager
+  
+  AudioManager@ audioManager = AudioManager(data.SOUND_TRACKS);
+  this.set("AudioManager", @audioManager);
+  
+  //Initialization
+  
+  this.Tag("isAudio");
+  
+}
+
+
+
+//Called on every tick.
+void onTick(CBlob@ this) {
+
+  //Create audio manager handle
+  AudioManager@ audioManager;
+  
+  //Check if audio manager could be retrieved
+  if(this.get("AudioManager", @audioManager)) {
+  
+    //Retrieve data
+    Audio::Data@ data = Audio::Blob::retrieveData(this);
+  
+    //Check if sound is enabled and not muted
+    if(s_soundon != 0 && s_musicvolume > 0.0f) {
     
-      //Create audio manager
-      ANybakk::AudioManager audioManager(ANybakk::AudioVariables::SOUND_TRACKS);
+      //Retreive a reference to the player blob object
+      CBlob @playerBlob = getLocalPlayerBlob();
       
-      //Save audio manager
-      this.set("AudioManager", @audioManager);
+      //Check if invalid player blob object
+      if(playerBlob is null) {
       
-      //Disable match was started flag
-      this.Untag("matchWasStarted");
-      
-    }
-    
-    
-    
-    void onTick(CBlob@ this) {
-    
-      //Create audio manager handle
-      ANybakk::AudioManager@ audioManager;
-      
-      //Check if audio manager could be retrieved
-      if(this.get("AudioManager", @audioManager)) {
-      
-        //Check if sound is enabled and not muted
-        if(s_soundon != 0 && s_musicvolume > 0.0f) {
+        //Fade out all
+        audioManager.fadeOutAll(0.0f, 6.0f);
         
-          //Retreive a reference to the player blob object
-          CBlob @playerBlob = getLocalPlayerBlob();
+        //Finished
+        return;
+        
+      }
+      
+      //Update 
+      audioManager.update(this);
+      
+      //Obtain a reference to the rules object
+      CRules@ rules = getRules();
+      
+      //Check if match is active
+      if(rules.isMatchRunning()) {
+      
+        //Check if match was started flag is disabled
+        if(!data.iMatchWasStarted) {
+        
+          //Check if match start sound is set
+          if(data.oMatchStartSound != "") {
           
-          //Check if invalid player blob object
-          if(playerBlob is null) {
-          
-            //Fade out all
-            audioManager.fadeOutAll(0.0f, 6.0f);
-            
-            //Finished
-            return;
-            
-          }
-          
-          //Update 
-          audioManager.update(this);
-          
-          //Obtain a reference to the rules object
-          CRules@ rules = getRules();
-          
-          //Check if match is active
-          if(rules.isMatchRunning()) {
-          
-            //Check if match was started flag is disabled
-            if(!this.hasTag("matchWasStarted")) {
-            
-              //Check if match start sound is set
-              if(ANybakk::AudioVariables::MATCH_START_SOUND != "") {
-              
-                //Play game start sound
-                //TODO: Move to a sprite script?
-                Sound::Play(ANybakk::AudioVariables::MATCH_START_SOUND);
-                
-              }
-              
-              //Set flag
-              this.Tag("matchWasStarted");
-              
-            }
+            //Play game start sound
+            //TODO: Move to a sprite script?
+            Sound::Play(data.oMatchStartSound);
             
           }
           
-          //Otherwise, check if not warm-up (game ended)
-          else if(!rules.isWarmup()){
-            
-            //Check if playing anything
-            if(audioManager.getPlayingCount() >= 0) {
-
-              //Fade out all
-              audioManager.fadeOutAll(0.0f, 0.5f);
-
-            }
-            
-          }
+          //Set flag
+          data.iMatchWasStarted = true;
           
         }
         
-        //Otherwise (sound off or muted)
-        else {
+      }
+      
+      //Otherwise, check if not warm-up (game ended)
+      else if(!rules.isWarmup()){
         
+        //Check if playing anything
+        if(audioManager.getPlayingCount() >= 0) {
+
           //Fade out all
-          audioManager.fadeOutAll(0.0f, 2.0f);
-          
+          audioManager.fadeOutAll(0.0f, 0.5f);
+
         }
         
       }
       
     }
     
+    //Otherwise (sound off or muted)
+    else {
     
+      //Fade out all
+      audioManager.fadeOutAll(0.0f, 2.0f);
+      
+    }
     
   }
   
