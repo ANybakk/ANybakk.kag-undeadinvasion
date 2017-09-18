@@ -41,7 +41,7 @@ class UndeadInvasionPNGLoader : PNGLoader {
 
 
   //Keep a store of sector map offsets
-	array<array<int>> sectorOffsets;
+  array<array<int>> sectorOffsets;
 
 
 
@@ -87,7 +87,7 @@ class UndeadInvasionPNGLoader : PNGLoader {
     CFileImage@ sectorMapImage = CFileImage(mapName + "Sectors." + mapType);
     
     //Check if the image was loaded succesfully
-		if(sectorMapImage.isLoaded()) {
+    if(sectorMapImage.isLoaded()) {
       print("sectormap loaded");
       //Create a pixel color variable
       SColor pixelColor;
@@ -148,13 +148,13 @@ class UndeadInvasionPNGLoader : PNGLoader {
   
   
   
-	/**
+  /**
    * Handles a pixel in the map
    */
-	void handlePixel(SColor color_pixel, int offset) override {
+  void handlePixel(SColor color_pixel, int offset) override {
   
     //Call super class' version of this method, to make sure we don't miss out on any default behaviour
-		PNGLoader::handlePixel(color_pixel, offset);
+    PNGLoader::handlePixel(color_pixel, offset);
     
     //Keep a handle for any blob that might be spawned
     CBlob@ spawnedBlob;
@@ -163,8 +163,8 @@ class UndeadInvasionPNGLoader : PNGLoader {
     if(color_pixel == UndeadInvasionPNGLoaderVariables::COLOR_MAUSOLEUM) {
       
         @spawnedBlob = spawnBlob(map, "Mausoleum", offset, -1);   //Spawn blob
-				//@spawnedBlob.AddScript("abc.as");                       //Add behaviour through a script
-				//@spawnedBlob.Tag("script added");
+        //@spawnedBlob.AddScript("abc.as");                       //Add behaviour through a script
+        //@spawnedBlob.Tag("script added");
         offsets[autotile_offset].push_back(offset);               //Store offset reference, generic tile
         
     }
@@ -173,18 +173,24 @@ class UndeadInvasionPNGLoader : PNGLoader {
     else if(color_pixel == UndeadInvasionPNGLoaderVariables::COLOR_SURVIVOR_CAMP) {
       
         @spawnedBlob = spawnBlob(map, "SurvivorCamp", offset, -1); //Spawn blob
-				//@spawnedBlob.AddScript("abc.as");                        //Add behaviour through a script
-				//@spawnedBlob.Tag("script added");
+        //@spawnedBlob.AddScript("abc.as");                        //Add behaviour through a script
+        //@spawnedBlob.Tag("script added");
         offsets[autotile_offset].push_back(offset);                //Store offset reference, generic tile
         
         //TODO: For some reason, the default offset handler doesn't repair the correct tile
         
     }
     
+    else if(color_pixel == UndeadInvasionPNGLoaderVariables::COLOR_BED) {
+    
+       @spawnedBlob = spawnBlob(map, "Bed", offset, -1); //Spawn blob
+       
+    }
+    
     //Finished
     return;
     
-	}
+  }
   
   
   

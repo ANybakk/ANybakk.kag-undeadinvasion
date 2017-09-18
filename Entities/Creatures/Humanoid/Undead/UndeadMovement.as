@@ -156,10 +156,10 @@ namespace UndeadInvasion {
           if (leftAction || rightAction) {
             
             //Determine left blocked status (either tile is solid)
-            bool leftWalkBlocked = map.isTileSolid(neighbourTiles[3][0]) || map.isTileSolid(neighbourTiles[3][0]);
+            bool leftWalkBlocked = map.isTileSolid(neighbourTiles[3][0]) || map.isTileSolid(neighbourTiles[3][1]);
             
             //Determine right blocked status (either tile is solid)
-            bool rightWalkBlocked = map.isTileSolid(neighbourTiles[1][1]) || map.isTileSolid(neighbourTiles[1][1]);
+            bool rightWalkBlocked = map.isTileSolid(neighbourTiles[1][0]) || map.isTileSolid(neighbourTiles[1][1]);
             
             //Determine if blob recently collided with another undead blob
             bool collidedWithUndeadInFront = blob.hasTag("collidedWithUndeadInFront");

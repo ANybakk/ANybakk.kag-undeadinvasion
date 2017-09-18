@@ -75,11 +75,11 @@ void addCommonBuilderBlocks(BuildBlock[][]@ blocks) {
     blocks[0].push_back(b);
   }
   
-  {
-    BuildBlock b(0, "Belt Conveyor", "$Belt Conveyor$", "Conveyor\nTransports stuff");
-    AddRequirement(b.reqs, "blob", "mat_wood", "Wood", 15);
-    blocks[0].push_back(b);
-  }
+  //{
+  //  BuildBlock b(0, "Belt Conveyor", "$Belt Conveyor$", "Conveyor\nTransports stuff");
+  //  AddRequirement(b.reqs, "blob", "mat_wood", "Wood", 15);
+  //  blocks[0].push_back(b);
+  //}
   
   //{
   //  BuildBlock b(0, "spikes", "$spikes$", "Spikes\nPlace on Stone Block\nfor Retracting Trap");
@@ -92,6 +92,14 @@ void addCommonBuilderBlocks(BuildBlock[][]@ blocks) {
     AddRequirement(b.reqs, "blob", "mat_wood", "Wood", 150);
     b.buildOnGround = true;
     b.size.Set(40, 24);
+    blocks[0].push_back(b);
+  }
+  
+  {
+    BuildBlock b(0, "Bed", "$Bed$", "Bed\nSleep tight");
+    AddRequirement(b.reqs, "blob", "mat_wood", "Wood", 30);
+    b.buildOnGround = true;
+    b.size.Set(24, 16);
     blocks[0].push_back(b);
   }
   
