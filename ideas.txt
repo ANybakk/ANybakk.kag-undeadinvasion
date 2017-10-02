@@ -1,0 +1,5 @@
+- Different game mode varieties: Arcade (coins and CTF shops), War (migrants and TTH automation), Survival (material crafting)
+
+- Producer utilities that has a storage for materials, and a "shop" for chosing what to create. Any creation might take any amount of time to finish. Only one thing can be made at a time. A progress bar would be good.
+
+- Clock entity that shows the time

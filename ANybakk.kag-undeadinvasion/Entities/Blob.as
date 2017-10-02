@@ -96,6 +96,18 @@ namespace UndeadInvasion {
     
     
     
+    /**
+     * Returns true if a blob has lost any amount of health
+     */
+    bool isDamaged(CBlob@ this) {
+    
+      return this.getHealth() < this.getInitialHealth();
+    
+    }
+
+    
+    
+    
   }
   
 }

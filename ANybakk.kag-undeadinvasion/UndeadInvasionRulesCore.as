@@ -16,6 +16,8 @@
 #include "RulesCore.as"
 #include "UndeadInvasionRespawnSystem.as"
 
+#include "MakeCrate.as" //For shipments
+
 
 
 /**
@@ -37,6 +39,9 @@ class UndeadInvasionRulesCore : RulesCore {
   
   //Keep track of the number of undead available for spawning
   int mUndeadAvailable;
+  
+  //Keep track of whether shipments were sent
+  bool mShipmentsSent;
   
   //Keep a handle for the respawn system
   UndeadInvasionRespawnSystem@ mRespawnSystem;
@@ -154,7 +159,7 @@ class UndeadInvasionRulesCore : RulesCore {
         rules.SetCurrentState(GAME_OVER);
       
         //Show a game over message
-        rules.SetGlobalMessage("The survivors have failed to defend this area. The kingdom is in grave danger! Continuing to the next area soon.");
+        rules.SetGlobalMessage("The survivors have failed to defend this area. Other areas await!");
       
       }
       
@@ -166,6 +171,17 @@ class UndeadInvasionRulesCore : RulesCore {
         
           //Show a night time survival message
           rules.SetGlobalMessage("Day is dawning. The survivors have made it through the night.");
+          
+          //If shipments haven't been sent already
+          if(!mShipmentsSent) {
+          
+            //Time to spawn shipments
+            spawnShipments();
+            
+            //Remember
+            mShipmentsSent = true;
+            
+          }
         
         //Otherwise, check if not night time
         } else if(!ANybakk::Rules::isNightTime(rules)) {
@@ -185,7 +201,7 @@ class UndeadInvasionRulesCore : RulesCore {
           else {
           
             //Show invasion alert message
-            rules.SetGlobalMessage("The dead are walking! Prepare yourselves, men! Defend the kingdom!");
+            rules.SetGlobalMessage("The dead are walking! Prepare yourselves! Defend the kingdom!");
             
           }
           
@@ -196,6 +212,9 @@ class UndeadInvasionRulesCore : RulesCore {
           
             //Show blank message
             rules.SetGlobalMessage("");
+            
+            //Reset shipment flag
+            mShipmentsSent = false;
             
         }
         
@@ -513,6 +532,58 @@ class UndeadInvasionRulesCore : RulesCore {
         
         //Accumulate chance value
         accumulatedChance += spawn.mSpawnChance;
+        
+      }
+      
+    }
+    
+  }
+  
+  
+  
+  /**
+   * Spawns shipments at any survivor spawn sites
+   */
+  void spawnShipments() {
+
+    //Create an array of blob references
+    CBlob@[] survivorSpawnSites;
+
+    //Retrieve references to all survivor spawn sites
+    getBlobsByTag("isSurvivorSpawn", @survivorSpawnSites);
+
+    //Create a spawn site blob handle
+    CBlob@ spawnSite;
+
+    //Iterate over all survivor spawn sites
+    for(int i=0; i<survivorSpawnSites.length; i++) {
+
+      //Keep a reference to the spawn site blob object
+      @spawnSite = survivorSpawnSites[i];
+      
+      //Create crate (MakeCrate.as)
+      CBlob@ crate = server_MakeCrateOnParachute("", "", 5, spawnSite.getTeamNum(), getDropPosition(spawnSite.getPosition()));
+      
+      //Continue, if valid reference
+      if (crate !is null) {
+      
+        //Enable unpack button
+        crate.Tag("unpackall");
+        
+        //Create a material blob handle
+        CBlob@ material;
+        
+        {
+        
+          //Create wood material
+          @material = server_CreateBlob("mat_wood");
+          
+          //Put into crate inventory, if reference is valid
+          if(material !is null) {
+              crate.server_PutInInventory(material);
+          }
+          
+        }
         
       }
       

@@ -1,9 +1,9 @@
 /*
- * UndeadInvasion builder block configuration
+ * Builder block configuration for UndeadInvasion
  * 
  * This script handles anything related to a builders building options
  * 
- * Author: ANybakk
+ * Modifications by: ANybakk
  */
 
 #include "BuildBlock.as";
@@ -95,9 +95,34 @@ void addCommonBuilderBlocks(BuildBlock[][]@ blocks) {
     blocks[0].push_back(b);
   }
   
+  { //Vanilla fireplace
+    BuildBlock b(0, "fireplace", "$fireplace$", "Fireplace\nKeeps ghosts away");
+    AddRequirement(b.reqs, "blob", "mat_wood", "Wood", 30);
+    AddRequirement(b.reqs, "blob", "mat_stone", "Stone", 30);
+    b.buildOnGround = true;
+    b.size.Set(16, 16);
+    blocks[0].push_back(b);
+  }
+  /*
+  { //Vanilla workbench
+    BuildBlock b(0, "workbench", "$workbench$", "Workbench\nBasic build options");
+    AddRequirement(b.reqs, "blob", "mat_wood", "Wood", 40);
+    b.buildOnGround = true;
+    b.size.Set(32, 16);
+    blocks[0].push_back(b);
+  }*/
+  
+  { //Workbench
+    BuildBlock b(0, "Workbench", "$Workbench$", "Workbench\nBasic build options");
+    AddRequirement(b.reqs, "blob", "mat_wood", "Wood", 60);
+    b.buildOnGround = true;
+    b.size.Set(32, 16);
+    blocks[0].push_back(b);
+  }
+  
   {
     BuildBlock b(0, "Bed", "$Bed$", "Bed\nSleep tight");
-    AddRequirement(b.reqs, "blob", "mat_wood", "Wood", 30);
+    AddRequirement(b.reqs, "blob", "mat_wood", "Wood", 60);
     b.buildOnGround = true;
     b.size.Set(24, 16);
     blocks[0].push_back(b);
