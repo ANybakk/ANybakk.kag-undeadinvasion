@@ -6,7 +6,7 @@
  * Author: ANybakk
  */
 
-#include "Blob.as";
+#include "UtilityBlob.as";
 #include "ProductionOptionCost.as";
 #include "ProductionOption.as";
 
@@ -23,10 +23,11 @@ namespace UndeadInvasion {
      */
     void onInit(CBlob@ this) {
       
-      UndeadInvasion::Blob::onInit(this);
+      UndeadInvasion::UtilityBlob::onInit(this);
       
       setTags(this);
       setCommands(this);
+      setHarvestMaterials(this);
       
       //Check if storage should be enabled
       if(ProducerVariables::hasMaterialStorage) {
@@ -37,6 +38,7 @@ namespace UndeadInvasion {
       }
       
       this.set_string("currentProductName", "");
+      this.set_bool("producingRepeat", false);
       
     }
   
@@ -67,6 +69,24 @@ namespace UndeadInvasion {
       
       this.addCommandID("userProduce");
       
+      this.addCommandID("userStopProduce");
+      AddIconToken("$userStopProduce$", "BuilderIcons.png", Vec2f(32, 32), 2); //Icon number 3 (Hammer stop sign)
+      
+      this.addCommandID("userRepeatProduce");
+      AddIconToken("$userRepeatProduce$", "MenuItems.png", Vec2f(32, 32), 21); //Icon number 22 (Circular arrow)
+      
+    }
+    
+    
+    
+    /**
+     * Sets what materials are returned when harvesting
+     */
+    void setHarvestMaterials(CBlob@ this) {
+    
+      //Replace with derivative of BlobBuildBlock
+      //this.set("harvest", BlobBuildBlock().mHarvestMaterials);
+      
     }
     
     
@@ -87,9 +107,37 @@ namespace UndeadInvasion {
         
           //Create blob
           CBlob@ producedBlob = server_CreateBlob(this.get_string("currentProductName"), this.getTeamNum(), this.getPosition());
-        
-          //Reset product name
-          this.set_string("currentProductName", "");
+          
+          //Check if repeat is active
+          if(this.get_bool("producingRepeat")) {
+          
+            //Determine production time
+            u16 produceTime = this.get_u16("producingFinishTime") - this.get_u16("producingStartTime");
+            
+            //Store new start time, including correction
+            this.set_u16("producingStartTime", getGameTime() + timeRemaining);
+            
+            //Store new finish time
+            this.set_u16("producingFinishTime", getGameTime() + produceTime);
+            
+            //Create argument bit stream
+            CBitStream repeatArgumentStream;
+            
+            //Write blob name to stream
+            repeatArgumentStream.write_string(this.get_string("currentProductName"));
+            
+            //Send produce command
+            this.SendCommandOnlyServer(this.getCommandID("userProduce"), repeatArgumentStream);
+            
+          }
+          
+          //Otherwise, if repeat is inactive
+          else {
+          
+            //Reset product name
+            this.set_string("currentProductName", "");
+            
+          }
           
         }
         
@@ -126,8 +174,8 @@ namespace UndeadInvasion {
         //Continue, if valid reference and is player
         if(userBlob !is null && userBlob.isMyPlayer()) {
         
-          //Create a grid menu
-          CGridMenu@ menu = CreateGridMenu(
+          //Create a product grid menu
+          CGridMenu@ productMenu = CreateGridMenu(
               userBlob.getScreenPos(),                  //pos2d
               this,                                     //blob
               ProducerVariables::PRODUCTION_MENU_SIZE, //slots
@@ -135,7 +183,7 @@ namespace UndeadInvasion {
             );
           
           //Check if valid reference and there are productions options
-          if(menu !is null && ProducerVariables::PRODUCTION_OPTIONS.length > 0) {
+          if(productMenu !is null && ProducerVariables::PRODUCTION_OPTIONS.length > 0) {
           
             //Create button reference handle
             CGridButton@ button;
@@ -201,7 +249,7 @@ namespace UndeadInvasion {
               }
               
               //Add button
-              @button = menu.AddButton(
+              @button = productMenu.AddButton(
                   "$" + productionOption.mName + "$",             //iconName
                   productionOption.mCaption,                      //caption
                   this.getCommandID("userProduce"),               //cmdID
@@ -230,6 +278,104 @@ namespace UndeadInvasion {
                 
               }
             
+            }
+            
+            //Continue if tool menu is supposed to be enabled
+            if(ProducerVariables::TOOL_MENU_ENABLED) {
+            
+              f32 toolMenuSize = 0.0f;
+              
+              if(ProducerVariables::TOOL_MENU_STOP_ENABLED) {
+                toolMenuSize += 1.0f;
+              }
+              
+              if(ProducerVariables::TOOL_MENU_REPEAT_ENABLED) {
+                toolMenuSize += 1.0f;
+              }
+              
+              //Determine where to position the tool menu
+              Vec2f toolMenuPosition = productMenu.getUpperLeftPosition() + Vec2f(-32.0f, (toolMenuSize +1.0f) * 32 / 2);
+              
+              //Create menu
+              CGridMenu@ toolMenu = CreateGridMenu(
+                  toolMenuPosition,           //pos2d
+                  this,                       //blob
+                  Vec2f(1.0f, toolMenuSize),  //slots
+                  ""                          //
+                );
+                
+              //Continue if valid
+              if(toolMenu !is null) {
+              
+                //Disable caption
+                toolMenu.SetCaptionEnabled(false);
+                
+                //If stop tool should be enabled
+                if(ProducerVariables::TOOL_MENU_STOP_ENABLED) {
+                
+                  //Create argument stream
+                  CBitStream stopToolButtonArgumentStream;
+                  
+                  //Write name of current product
+                  stopToolButtonArgumentStream.write_string(this.get_string("currentProductName"));
+                  
+                  //Add button
+                  CGridButton@ stopToolButton = toolMenu.AddButton(
+                      "$userStopProduce$",                            //iconName
+                      "",                                             //caption
+                      this.getCommandID("userStopProduce"),           //cmdID
+                      //Vec2f(1.0f, 1.0f),                              //slotsDim (button size, overrides inventory size, but only if larger)
+                      stopToolButtonArgumentStream                    //parameters
+                    );
+                  
+                  //Continue if button added
+                  if(stopToolButton !is null) {
+                  
+                    //Set hover text
+                    stopToolButton.SetHoverText("Stop producing\n");
+                    
+                  }
+                  
+                }
+                
+                //If repeat tool should be enabled
+                if(ProducerVariables::TOOL_MENU_REPEAT_ENABLED) {
+                
+                  //Create argument stream
+                  CBitStream repeatToolButtonArgumentStream;
+                  
+                  //Write name of current product
+                  repeatToolButtonArgumentStream.write_string(this.get_string("currentProductName"));
+                  
+                  //Add button
+                  CGridButton@ repeatToolButton = toolMenu.AddButton(
+                      "$userRepeatProduce$",                            //iconName
+                      "",                                             //caption
+                      this.getCommandID("userRepeatProduce"),           //cmdID
+                      //Vec2f(1.0f, 1.0f),                              //slotsDim (button size, overrides inventory size, but only if larger)
+                      repeatToolButtonArgumentStream                    //parameters
+                    );
+                  
+                  //Continue if button added
+                  if(repeatToolButton !is null) {
+                  
+                    //Set hover text
+                    repeatToolButton.SetHoverText("Repeat\n");
+                    
+                    //Check if already repeat active
+                    if(this.get_bool("producingRepeat")) {
+                    
+                      //Set button selected
+                      repeatToolButton.SetSelected(1);
+                      
+                    }
+                    
+                  }
+                  
+                }
+                
+              }
+              
             }
             
           }
@@ -283,6 +429,60 @@ namespace UndeadInvasion {
           
         }
         
+        
+      }
+      
+      //If stop produce
+      else if(commandID == this.getCommandID("userStopProduce")) {
+      
+        //Attempt to read blob name
+        string productName;
+        if(!argumentStream.saferead_string(productName)) {
+          productName = "";
+        }
+        
+        //Check if still producing same product
+        if(this.get_string("currentProductName") == productName) {
+        
+          //Reset product name
+          this.set_string("currentProductName", "");
+          
+          //Unset repeat flag
+          this.set_bool("producingRepeat", false);
+          
+        }
+        
+      }
+      
+      //If repeat produce
+      else if(commandID == this.getCommandID("userRepeatProduce")) {
+        
+        //Attempt to read blob name
+        string productName;
+        if(!argumentStream.saferead_string(productName)) {
+          productName = "";
+        }
+        
+        //Stop, if product mismatch (something happened meanwhile)
+        if(this.get_string("currentProductName") != productName) {
+          return;
+        }
+        
+        //Check if repeat is already active
+        if(this.get_bool("producingRepeat")) {
+        
+          //Deactivate/toggle
+          this.set_bool("producingRepeat", false);
+          
+        }
+        
+        //Otherwise
+        else {
+          
+          //Set repeat flag
+          this.set_bool("producingRepeat", true);
+          
+        }
         
       }
       

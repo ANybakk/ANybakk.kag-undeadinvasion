@@ -18,6 +18,8 @@ namespace UndeadInvasion {
     void onInit(CBlob@ this) {
       
       setTags(this);
+      setCommands(this);
+      setHarvestMaterials(this);
       
     }
   
@@ -31,6 +33,32 @@ namespace UndeadInvasion {
     void setTags(CBlob@ this) {
     
       this.Tag("isBlob");
+      
+    }
+    
+    
+    
+    /**
+     * Sets various commands for this entity type.
+     * 
+     * @param   this            a blob reference.
+     */
+    void setCommands(CBlob@ this) {
+    
+      //this.addCommandID("commandName");
+      //AddIconToken("$commandName$", "InteractionIcons.png", Vec2f(32, 32), 0); //Icon number 1
+      
+    }
+    
+    
+    
+    /**
+     * Sets what materials are returned when harvesting
+     */
+    void setHarvestMaterials(CBlob@ this) {
+    
+      //Replace with derivative of BlobBuildBlock
+      //this.set("harvest", BlobBuildBlock().mHarvestMaterials);
       
     }
     

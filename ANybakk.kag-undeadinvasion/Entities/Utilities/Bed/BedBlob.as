@@ -5,6 +5,9 @@
  */
 
 #include "Blob.as";
+#include "UtilityBlob.as";
+
+#include "BedBuildBlock.as";
 
 #include "Help.as" //?
 
@@ -21,10 +24,11 @@ namespace UndeadInvasion {
      */
     void onInit(CBlob@ this) {
       
-      UndeadInvasion::Blob::onInit(this);
+      UndeadInvasion::UtilityBlob::onInit(this);
       
       setTags(this);
       setCommands(this);
+      setHarvestMaterials(this);
 	  
       //Redundant?
       //this.getShape().getConsts().mapCollisions = false;
@@ -74,6 +78,17 @@ namespace UndeadInvasion {
     
       this.addCommandID("rest");
       AddIconToken("$rest$", "InteractionIcons.png", Vec2f(32, 32), 29); //Icon number 30
+      
+    }
+    
+    
+    
+    /**
+     * Sets what materials are returned when harvesting
+     */
+    void setHarvestMaterials(CBlob@ this) {
+    
+      this.set("harvest", BedBuildBlock().mHarvestMaterials);
       
     }
     

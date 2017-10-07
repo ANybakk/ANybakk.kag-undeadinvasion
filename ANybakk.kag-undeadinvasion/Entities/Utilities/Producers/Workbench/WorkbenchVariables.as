@@ -9,6 +9,17 @@
 
 
 
+namespace BlobVariables {
+  
+}
+
+namespace UtilityVariables {
+
+  //Define a flag for removing grass
+  const bool REMOVE_GRASS = true;
+  
+}
+
 namespace ProducerVariables {
 
   const UndeadInvasion::ProductionOptionCost@[] PRODUCTION_OPTION_COST_LANTERN = {
@@ -74,6 +85,18 @@ namespace ProducerVariables {
   
   //Define a menu size vector
   const Vec2f PRODUCTION_MENU_SIZE(4.0f, 5.0f);
+  
+  //Define a flag for enabling the tool menu
+  const bool TOOL_MENU_ENABLED = true;
+  
+  //Define a flag for enabling the stop tool
+  const bool TOOL_MENU_STOP_ENABLED = true;
+  
+  //Define a flag for enabling the repeat tool
+  const bool TOOL_MENU_REPEAT_ENABLED = true;
+  
+  //Define a progress bar width
+  const Vec2f PROGRESS_BAR_SIZE(16, 3);
   
 }
 

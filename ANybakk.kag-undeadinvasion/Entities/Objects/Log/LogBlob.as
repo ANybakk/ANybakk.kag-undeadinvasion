@@ -1,17 +1,18 @@
 /* 
- * Workbench blob.
+ * Log blob
  * 
  * Author: ANybakk
  */
 
-#include "ProducerBlob.as";
-#include "WorkbenchBuildBlock.as";
+#include "ObjectBlob.as";
+
+#include "LogBuildBlock.as";
 
 
 
 namespace UndeadInvasion {
 
-  namespace WorkbenchBlob {
+  namespace LogBlob {
   
   
   
@@ -20,27 +21,30 @@ namespace UndeadInvasion {
      */
     void onInit(CBlob@ this) {
       
-      UndeadInvasion::ProducerBlob::onInit(this);
+      UndeadInvasion::ObjectBlob::onInit(this);
       
       setTags(this);
       setCommands(this);
       setHarvestMaterials(this);
+      
+      //Set decay
+      this.server_SetTimeToDie(240 + XORRandom(60));
       
     }
   
     
     
     /**
-     * Sets various tags for this entity type.
+     * Sets various tags for this entity type. Inheriting types should call this.
      * 
      * @param   this            a blob reference.
      */
     void setTags(CBlob@ this) {
     
-      this.Tag("isWorkbenchBlob");
+      this.Tag("isLogBlob");
       
     }
-  
+    
     
     
     /**
@@ -62,18 +66,7 @@ namespace UndeadInvasion {
      */
     void setHarvestMaterials(CBlob@ this) {
     
-      this.set("harvest", WorkbenchBuildBlock().mHarvestMaterials);
-      
-    }
-    
-    
-    
-    /**
-     * Tick event function
-     */
-    void onTick(CBlob@ this) {
-    
-      UndeadInvasion::ProducerBlob::onTick(this);
+      this.set("harvest", LogBuildBlock().mHarvestMaterials);
       
     }
     

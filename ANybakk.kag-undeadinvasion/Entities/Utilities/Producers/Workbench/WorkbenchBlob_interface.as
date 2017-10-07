@@ -4,6 +4,7 @@
  * Author: ANybakk
  */
 
+#include "UtilityBlob.as";
 #include "ProducerBlob.as";
 #include "WorkbenchBlob.as";
 #include "WorkbenchVariables.as";
@@ -43,5 +44,13 @@ void GetButtonsFor(CBlob@ this, CBlob@ caller) {
 bool isInventoryAccessible(CBlob@ this, CBlob@ forBlob) {
 
   return UndeadInvasion::ProducerBlob::isInventoryAccessible(this, forBlob);
+  
+}
+
+
+
+void onSetStatic(CBlob@ this, const bool isStatic) {
+  
+  UndeadInvasion::UtilityBlob::onSetStatic(this, isStatic);
   
 }

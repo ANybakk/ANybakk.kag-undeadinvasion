@@ -9,6 +9,10 @@
 #include "BuildBlock.as";
 #include "Requirements.as";
 
+//UndeadInvasion
+#include "WorkbenchBuildBlock.as";
+#include "BedBuildBlock.as";
+
 
 
 const string blocks_property = "blocks";
@@ -112,20 +116,10 @@ void addCommonBuilderBlocks(BuildBlock[][]@ blocks) {
     blocks[0].push_back(b);
   }*/
   
-  { //Workbench
-    BuildBlock b(0, "Workbench", "$Workbench$", "Workbench\nBasic build options");
-    AddRequirement(b.reqs, "blob", "mat_wood", "Wood", 60);
-    b.buildOnGround = true;
-    b.size.Set(32, 16);
-    blocks[0].push_back(b);
-  }
+  //Workbench
+  blocks[0].push_back(WorkbenchBuildBlock());
   
-  {
-    BuildBlock b(0, "Bed", "$Bed$", "Bed\nSleep tight");
-    AddRequirement(b.reqs, "blob", "mat_wood", "Wood", 60);
-    b.buildOnGround = true;
-    b.size.Set(24, 16);
-    blocks[0].push_back(b);
-  }
+  //Bed
+  blocks[0].push_back(BedBuildBlock());
   
 }

@@ -1,5 +1,5 @@
 /*
- * Bed variables.
+ * Utility variables.
  * 
  * Author: ANybakk
  */
@@ -14,9 +14,5 @@ namespace UtilityVariables {
 
   //Define a flag for removing grass
   const bool REMOVE_GRASS = true;
-  
-}
-
-namespace BedVariables {
   
 }
