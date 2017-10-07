@@ -17,7 +17,7 @@ void LoadDefaultMapLoaders()
 	}
 	else if (sv_gamemode == "UndeadInvasion" || sv_gamemode == "undeadinvasion")
 	{
-		RegisterFileExtensionScript("Scripts/UndeadInvasionMap.as", "png");
+		RegisterFileExtensionScript("Scripts/[UndeadInvasion]Map_interface.as", "png");
 	}
 	else
 	{

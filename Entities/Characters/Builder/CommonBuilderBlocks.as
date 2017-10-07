@@ -9,9 +9,8 @@
 #include "BuildBlock.as";
 #include "Requirements.as";
 
-//UndeadInvasion
-#include "WorkbenchBuildBlock.as";
-#include "BedBuildBlock.as";
+#include "[UndeadInvasion]WorkbenchBuildBlock.as";
+#include "[UndeadInvasion]BedBuildBlock.as";
 
 
 
