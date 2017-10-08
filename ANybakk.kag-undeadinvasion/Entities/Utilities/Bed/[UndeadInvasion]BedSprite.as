@@ -21,16 +21,19 @@ namespace UndeadInvasion {
       this.SetFrame(0);
       
       //Add snore bubble layer
-      CSpriteLayer@ snoreBubbleLayer = this.addSpriteLayer( "zzz", 8,8 );
+      //CSpriteLayer@ snoreBubbleLayer = this.addSpriteLayer("zzz", 8, 8);
+      CSpriteLayer@ snoreBubbleLayer = this.addSpriteLayer("zzz", "[UndeadInvasion]BedSnoreBubble.png", 8, 8);
       
       //If valid reference
       if(snoreBubbleLayer !is null) {
       
         //Add default animation
-        snoreBubbleLayer.addAnimation("default", 3, true);
+        //snoreBubbleLayer.addAnimation("default", 15, true); //(name, time, loop)
+        snoreBubbleLayer.addAnimation("default", 13, true); //(name, time, loop)
         
         //Create frame array
-        int[] frames = {7,14,15};
+        //int[] frames = {6, 7, 14, 15};
+        int[] frames = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
         
         //Add frames
         snoreBubbleLayer.animation.AddFrames(frames);
