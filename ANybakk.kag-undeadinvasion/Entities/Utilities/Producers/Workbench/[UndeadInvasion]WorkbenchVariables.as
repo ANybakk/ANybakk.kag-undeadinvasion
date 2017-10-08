@@ -95,8 +95,8 @@ namespace ProducerVariables {
   //Define a flag for enabling the repeat tool
   const bool TOOL_MENU_REPEAT_ENABLED = true;
   
-  //Define a progress bar width
-  const Vec2f PROGRESS_BAR_SIZE(16, 3);
+  //Define a progress bar width (x: number of world pixels, y: number of screen pixels)
+  const Vec2f PROGRESS_BAR_SIZE(16.0f, 6.0f);
   
 }
 

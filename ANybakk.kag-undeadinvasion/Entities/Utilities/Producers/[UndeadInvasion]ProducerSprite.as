@@ -43,17 +43,16 @@ namespace UndeadInvasion {
         
         //Continue only if not yet finished
         if(currentProductionTime <= fullProductionTime) {
-          
-          //Calculate positions
-          Vec2f barTopLeftPosition = blob.getPosition() + Vec2f(-ProducerVariables::PROGRESS_BAR_SIZE.x/2, blob.getHeight() / 2 - 1.0f - ProducerVariables::PROGRESS_BAR_SIZE.y);
-          Vec2f barBottomRightPosition = blob.getPosition() + Vec2f(ProducerVariables::PROGRESS_BAR_SIZE.x/2, blob.getHeight() / 2 - 1.0f);
+        
+          //Calculate left and right positions
+          Vec2f barLeftPosition = getDriver().getScreenPosFromWorldPos(blob.getPosition() + Vec2f(-ProducerVariables::PROGRESS_BAR_SIZE.x/2, blob.getHeight()/2 - 1.0f));
+          Vec2f barRightPosition = getDriver().getScreenPosFromWorldPos(blob.getPosition() + Vec2f(ProducerVariables::PROGRESS_BAR_SIZE.x/2, blob.getHeight()/2 - 1.0f));
           
           //Draw progress bar
           GUI::DrawProgressBar(
-              getDriver().getScreenPosFromWorldPos(barTopLeftPosition)
-              , getDriver().getScreenPosFromWorldPos(barBottomRightPosition)
-              , (0.0f + currentProductionTime) / (0.0f + fullProductionTime)
-            );
+              barLeftPosition + Vec2f(0.0f, -ProducerVariables::PROGRESS_BAR_SIZE.y)
+              , barRightPosition
+              , (0.0f + currentProductionTime) / (0.0f + fullProductionTime));
           
         }
         
