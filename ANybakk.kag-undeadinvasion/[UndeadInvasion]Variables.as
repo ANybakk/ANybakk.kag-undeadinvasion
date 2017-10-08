@@ -43,7 +43,7 @@ namespace UndeadInvasionVariables {
   //Define an undead spawning factor during daytime of 2 (double interval)
   const u8 UNDEAD_SPAWN_DAYTIMEFACTOR = 2;
   
-  //Define an undead spawning factor during daytime of 2 (base interval)
+  //Define an undead spawning factor during nighttime of 1 (base interval)
   const u8 UNDEAD_SPAWN_NIGHTTIMEFACTOR = 1;
   
   //Define an array of Undead entities to spawn
@@ -52,5 +52,11 @@ namespace UndeadInvasionVariables {
     UndeadInvasion::EntitySpawn("Skeleton", 35),        //Skeleton 35% chance
     UndeadInvasion::EntitySpawn("Devilish Zombie", 5)   //Devilish Zombie 5% chance
   };
+  
+  //Define a step time for grass growth (in seconds, zero for every tick, negative to disable)
+  const f32 GRASS_GROWTH_STEP_TIME = 0.25f;
+  
+  //Define an amount of grass to (potentially) grow per step
+  const u8 GRASS_GROWTH_STEP_AMOUNT = 1;
   
 }

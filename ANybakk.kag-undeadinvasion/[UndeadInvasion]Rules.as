@@ -11,8 +11,8 @@
 
 #include "[Base]Rules.as";
 
-#include "[UndeadInvasion]RulesCore.as";
-#include "[UndeadInvasion]RespawnSystem.as";
+#include "[UndeadInvasion]DefaultRulesCore.as";
+#include "[UndeadInvasion]DefaultRespawnSystem.as";
 
 
 
@@ -27,7 +27,7 @@ namespace UndeadInvasion {
      */
     void onInit(CRules@ this) {
     
-      print("[UndeadInvasion::Rules:onInit]");
+      print("[UndeadInvasion::Rules::onInit]");
       
       Base::Rules::onInit(this);
       
@@ -46,16 +46,16 @@ namespace UndeadInvasion {
      */
     void onRestart(CRules@ this) {
     
-      print("[UndeadInvasion::Rules:onRestart]");
+      print("[UndeadInvasion::Rules::onRestart]");
       
       //Set no timer flag (used by TimeToEnd.as)
       this.set_bool("no timer", true);
       
       //Initialize the re-spawn system
-      UndeadInvasionRespawnSystem respawnSystem();
+      UndeadInvasion::DefaultRespawnSystem respawnSystem();
       
       //Initialize the rules core
-      UndeadInvasionRulesCore rulesCore(this, respawnSystem);
+      UndeadInvasion::DefaultRulesCore rulesCore(this, respawnSystem);
       
       //Connect rules core
       this.set("core", @rulesCore);
