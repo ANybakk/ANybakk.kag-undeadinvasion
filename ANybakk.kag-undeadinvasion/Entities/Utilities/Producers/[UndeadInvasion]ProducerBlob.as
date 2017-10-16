@@ -64,16 +64,16 @@ namespace UndeadInvasion {
      */
     void setCommands(CBlob@ this) {
     
-      this.addCommandID("userShowProduction");
-      AddIconToken("$userShowProduction$", "InteractionIcons.png", Vec2f(32, 32), 15); //Icon number 16 (Hammer)
+      this.addCommandID("ProducerBlob::showMenu");
+      AddIconToken("$ProducerBlob::showMenu$", "InteractionIcons.png", Vec2f(32, 32), 15); //Icon number 16 (Hammer)
       
-      this.addCommandID("userProduce");
+      this.addCommandID("ProducerBlob::make");
       
-      this.addCommandID("userStopProduce");
-      AddIconToken("$userStopProduce$", "BuilderIcons.png", Vec2f(32, 32), 2); //Icon number 3 (Hammer stop sign)
+      this.addCommandID("ProducerBlob::stop");
+      AddIconToken("$ProducerBlob::stop$", "BuilderIcons.png", Vec2f(32, 32), 2); //Icon number 3 (Hammer stop sign)
       
-      this.addCommandID("userRepeatProduce");
-      AddIconToken("$userRepeatProduce$", "MenuItems.png", Vec2f(32, 32), 21); //Icon number 22 (Circular arrow)
+      this.addCommandID("ProducerBlob::repeat");
+      AddIconToken("$ProducerBlob::repeat$", "MenuItems.png", Vec2f(32, 32), 21); //Icon number 22 (Circular arrow)
       
     }
     
@@ -108,6 +108,34 @@ namespace UndeadInvasion {
           //Create blob
           CBlob@ producedBlob = server_CreateBlob(this.get_string("currentProductName"), this.getTeamNum(), this.getPosition());
           
+          AttachmentPoint@ attachmentPoint;
+          CBlob@ wasAttachedBlob;
+          
+          //Iterate
+          for(int i=0; i<ProducerVariables::PRODUCTION_MENU_SIZE.x; i++) {
+          
+            //Obtain attachment point reference
+            @attachmentPoint = this.getAttachments().getAttachmentPointByName("MATLOCK" + i);
+            
+            if(attachmentPoint !is null) {
+            
+              //Obtain reference to attached blob
+              @wasAttachedBlob = attachmentPoint.getOccupied();
+              
+              if(wasAttachedBlob !is null) {
+              
+                //Detach
+                wasAttachedBlob.server_DetachFrom(this);
+                
+                //Remove
+                wasAttachedBlob.server_Die();
+                
+              }
+              
+            }
+            
+          }
+          
           //Check if repeat is active
           if(this.get_bool("producingRepeat")) {
           
@@ -123,11 +151,27 @@ namespace UndeadInvasion {
             //Create argument bit stream
             CBitStream repeatArgumentStream;
             
-            //Write blob name to stream
-            repeatArgumentStream.write_string(this.get_string("currentProductName"));
+            UndeadInvasion::ProductionOption@ productionOption;
             
-            //Send produce command
-            this.SendCommandOnlyServer(this.getCommandID("userProduce"), repeatArgumentStream);
+            //Iterate through production options
+            for(int i=0; i<ProducerVariables::PRODUCTION_OPTIONS.length; i++) {
+              
+              @productionOption = ProducerVariables::PRODUCTION_OPTIONS[i];
+              
+              //Check if current product
+              if(productionOption.mName == this.get_string("currentProductName")) {
+              
+                //Serialize production option
+                productionOption.toStream(repeatArgumentStream, ProducerVariables::hasMaterialStorage);
+                
+                break;
+                
+              }
+              
+            }
+            
+            //Send make command
+            this.SendCommandOnlyServer(this.getCommandID("ProducerBlob::make"), repeatArgumentStream);
             
           }
           
@@ -144,7 +188,7 @@ namespace UndeadInvasion {
         //Otherwise (not finished)
         else {
         
-          //TODO: Modify "locked" material quantity
+          //TODO: Modify "locked" material quantity?
           
         }
         
@@ -159,8 +203,8 @@ namespace UndeadInvasion {
      */
     void onCommand(CBlob@ this, u8 commandID, CBitStream @argumentStream) {
     
-      //If show production
-      if(commandID == this.getCommandID("userShowProduction")) {
+      //showMenu
+      if(commandID == this.getCommandID("ProducerBlob::showMenu")) {
       
         //Attempt to read user ID
         u16 userID;
@@ -168,321 +212,40 @@ namespace UndeadInvasion {
           return;
         }
         
-        //Obtain reference to user blob
-        CBlob@ userBlob = getBlobByNetworkID(userID);
-        
-        //Continue, if valid reference and is player
-        if(userBlob !is null && userBlob.isMyPlayer()) {
-        
-          //Create a product grid menu
-          CGridMenu@ productMenu = CreateGridMenu(
-              userBlob.getScreenPos(),                  //pos2d
-              this,                                     //blob
-              ProducerVariables::PRODUCTION_MENU_SIZE, //slots
-              "Materials"                               //
-            );
-          
-          //Check if valid reference and there are productions options
-          if(productMenu !is null && ProducerVariables::PRODUCTION_OPTIONS.length > 0) {
-          
-            //Create button reference handle
-            CGridButton@ button;
-            
-            //Create a production option reference handle
-            UndeadInvasion::ProductionOption@ productionOption;
-            
-            //Create hover text string
-            string hoverText;
-            
-            //Iterate through production options
-            for(int i=0; i<ProducerVariables::PRODUCTION_OPTIONS.length; i++) {
-            
-              //Keep reference
-              @productionOption = ProducerVariables::PRODUCTION_OPTIONS[i];
-              
-              //Create argument bit stream
-              CBitStream buttonArgumentStream;
-              
-              //Write blob name to stream
-              buttonArgumentStream.write_string(productionOption.mName);
-              
-              //Write time to stream
-              buttonArgumentStream.write_u16(productionOption.mTime * getTicksASecond());
-              
-              //Begin to build up hover text string
-              hoverText = productionOption.mDecription + "\n\n";
-            
-              //Create a production option cost reference handle
-              UndeadInvasion::ProductionOptionCost@ productionOptionCost;
-              
-              //Iterate through costs
-              for(int j=0; j<productionOption.mCosts.length; j++) {
-              
-                //Keep reference
-                @productionOptionCost = productionOption.mCosts[j];
-                
-                //Create a string token for cost text color depending on material requirements
-                string costColor = "$RED$";
-                
-                //Check if storage should be enabled
-                if(ProducerVariables::hasMaterialStorage) {
-                
-                  //Check if enough in material storage
-                  if(this.getBlobCount(productionOptionCost.mName) >= productionOptionCost.mAmount) {
-                  
-                    //Change color string token
-                    costColor = "$GREEN$";
-                    
-                  }
-                  
-                  //Write material blob name to stream
-                  buttonArgumentStream.write_string(productionOptionCost.mName);
-                  
-                  //Write material blob amount to stream
-                  buttonArgumentStream.write_u8(productionOptionCost.mAmount);
-                  
-                }
-                
-                //Append cost to hover text
-                hoverText += " " + costColor + productionOptionCost.mAmount + costColor + " $" + productionOptionCost.mName + "$ " + costColor + productionOptionCost.mCaption + costColor;
-                
-              }
-              
-              //Add button
-              @button = productMenu.AddButton(
-                  "$" + productionOption.mName + "$",             //iconName
-                  productionOption.mCaption,                      //caption
-                  this.getCommandID("userProduce"),               //cmdID
-                  //Vec2f(1.0f, 1.0f),                              //slotsDim (button size, overrides inventory size, but only if larger)
-                  buttonArgumentStream                            //parameters
-                );
-              
-              //Continue only if valid reference (to ensure there was enough space)
-              if(button !is null) {
-                
-                //Set hover text
-                button.hoverText = hoverText + " (" + productionOption.mTime + "s)\n";
-                
-                //Check if producing same product
-                if(this.get_string("currentProductName") == productionOption.mName) {
-                
-                  //Set not clickable
-                  //button.clickable = false;
-                  
-                  //Disable button (greyed out)
-                  button.SetEnabled(false);
-                  
-                }
-                
-                button.selectOnClick = true;
-                
-              }
-            
-            }
-            
-            //Continue if tool menu is supposed to be enabled
-            if(ProducerVariables::TOOL_MENU_ENABLED) {
-            
-              f32 toolMenuSize = 0.0f;
-              
-              if(ProducerVariables::TOOL_MENU_STOP_ENABLED) {
-                toolMenuSize += 1.0f;
-              }
-              
-              if(ProducerVariables::TOOL_MENU_REPEAT_ENABLED) {
-                toolMenuSize += 1.0f;
-              }
-              
-              //Determine where to position the tool menu
-              Vec2f toolMenuPosition = productMenu.getUpperLeftPosition() + Vec2f(-32.0f, (toolMenuSize +1.0f) * 32 / 2);
-              
-              //Create menu
-              CGridMenu@ toolMenu = CreateGridMenu(
-                  toolMenuPosition,           //pos2d
-                  this,                       //blob
-                  Vec2f(1.0f, toolMenuSize),  //slots
-                  ""                          //
-                );
-                
-              //Continue if valid
-              if(toolMenu !is null) {
-              
-                //Disable caption
-                toolMenu.SetCaptionEnabled(false);
-                
-                //If stop tool should be enabled
-                if(ProducerVariables::TOOL_MENU_STOP_ENABLED) {
-                
-                  //Create argument stream
-                  CBitStream stopToolButtonArgumentStream;
-                  
-                  //Write name of current product
-                  stopToolButtonArgumentStream.write_string(this.get_string("currentProductName"));
-                  
-                  //Add button
-                  CGridButton@ stopToolButton = toolMenu.AddButton(
-                      "$userStopProduce$",                            //iconName
-                      "",                                             //caption
-                      this.getCommandID("userStopProduce"),           //cmdID
-                      //Vec2f(1.0f, 1.0f),                              //slotsDim (button size, overrides inventory size, but only if larger)
-                      stopToolButtonArgumentStream                    //parameters
-                    );
-                  
-                  //Continue if button added
-                  if(stopToolButton !is null) {
-                  
-                    //Set hover text
-                    stopToolButton.SetHoverText("Stop producing\n");
-                    
-                  }
-                  
-                }
-                
-                //If repeat tool should be enabled
-                if(ProducerVariables::TOOL_MENU_REPEAT_ENABLED) {
-                
-                  //Create argument stream
-                  CBitStream repeatToolButtonArgumentStream;
-                  
-                  //Write name of current product
-                  repeatToolButtonArgumentStream.write_string(this.get_string("currentProductName"));
-                  
-                  //Add button
-                  CGridButton@ repeatToolButton = toolMenu.AddButton(
-                      "$userRepeatProduce$",                            //iconName
-                      "",                                             //caption
-                      this.getCommandID("userRepeatProduce"),           //cmdID
-                      //Vec2f(1.0f, 1.0f),                              //slotsDim (button size, overrides inventory size, but only if larger)
-                      repeatToolButtonArgumentStream                    //parameters
-                    );
-                  
-                  //Continue if button added
-                  if(repeatToolButton !is null) {
-                  
-                    //Set hover text
-                    repeatToolButton.SetHoverText("Repeat\n");
-                    
-                    //Check if already repeat active
-                    if(this.get_bool("producingRepeat")) {
-                    
-                      //Set button selected
-                      repeatToolButton.SetSelected(1);
-                      
-                    }
-                    
-                  }
-                  
-                }
-                
-              }
-              
-            }
-            
-          }
-          
-        }
+        showMenu(this, userID);
         
       }
       
-      //If produce
-      else if(commandID == this.getCommandID("userProduce")) {
-      
-        //Attempt to read blob name
-        string productName;
-        if(!argumentStream.saferead_string(productName)) {
-          return;
-        }
-      
-        //Attempt to read production time (default to next tick if missing)
-        u16 produceTime;
-        if(!argumentStream.saferead_u16(produceTime)) {
-          produceTime = 1;
-        }
+      //make
+      else if(commandID == this.getCommandID("ProducerBlob::make")) {
         
-        //Continue if not already producing same product
-        if(productName != this.get_string("currentProductName")) {
-        
-          //Store new product name
-          this.set_string("currentProductName", productName);
-          
-          //Store new start time
-          this.set_u16("producingStartTime", getGameTime());
-          
-          //Store new finish time
-          this.set_u16("producingFinishTime", getGameTime() + produceTime);
-          
-          //Create material name string
-          string materialName;
-          
-          //Create material amount varialble
-          u8 materialAmount;
-          
-          //Repeat while there are more
-          while(argumentStream.saferead_string(productName)) {
-          
-            argumentStream.saferead_u8(materialAmount);
-          
-            //TODO: Lock materials
-            //Move from this.inventory to MATLOCK1 and MATLOCK2 attachmentpoints
-          
-          }
-          
-        }
-        
+        make(this, UndeadInvasion::ProductionOption(argumentStream));
         
       }
       
-      //If stop produce
-      else if(commandID == this.getCommandID("userStopProduce")) {
+      //stop
+      else if(commandID == this.getCommandID("ProducerBlob::stop")) {
       
-        //Attempt to read blob name
+        //Attempt to read blob name (default to nothing)
         string productName;
         if(!argumentStream.saferead_string(productName)) {
           productName = "";
         }
         
-        //Check if still producing same product
-        if(this.get_string("currentProductName") == productName) {
-        
-          //Reset product name
-          this.set_string("currentProductName", "");
-          
-          //Unset repeat flag
-          this.set_bool("producingRepeat", false);
-          
-        }
+        stop(this, productName);
         
       }
       
-      //If repeat produce
-      else if(commandID == this.getCommandID("userRepeatProduce")) {
+      //repeat
+      else if(commandID == this.getCommandID("ProducerBlob::repeat")) {
         
-        //Attempt to read blob name
+        //Attempt to read blob name (default to nothing)
         string productName;
         if(!argumentStream.saferead_string(productName)) {
           productName = "";
         }
         
-        //Stop, if product mismatch (something happened meanwhile)
-        if(this.get_string("currentProductName") != productName) {
-          return;
-        }
-        
-        //Check if repeat is already active
-        if(this.get_bool("producingRepeat")) {
-        
-          //Deactivate/toggle
-          this.set_bool("producingRepeat", false);
-          
-        }
-        
-        //Otherwise
-        else {
-          
-          //Set repeat flag
-          this.set_bool("producingRepeat", true);
-          
-        }
+        repeat(this, productName);
         
       }
       
@@ -525,16 +288,444 @@ namespace UndeadInvasion {
       
       //Create a button to the left that sends the show production command
       userBlob.CreateGenericButton(
-          "$userShowProduction$",                   //iconName
-          buttonPositionOffset,                     //_offset
-          this,                                     //attached
-          this.getCommandID("userShowProduction"),  //cmdID
-          "Production",                             //caption
-          argumentStream                            //parameters
+          "$ProducerBlob::showMenu$",                   //iconName
+          buttonPositionOffset,                         //_offset
+          this,                                         //attached
+          this.getCommandID("ProducerBlob::showMenu"),  //cmdID
+          "Production",                                 //caption
+          argumentStream                                //parameters
         );
       
     }
-
+    
+    
+    
+    /**
+     * Shows a production menu for a specific user
+     * TODO: Does not currently check player's inventory if storage isn't enabled
+     * TODO: Does not color costs correctly after producing something
+     */
+    void showMenu(CBlob@ this, u16 userID) {
+        
+        //Obtain reference to user blob
+        CBlob@ userBlob = getBlobByNetworkID(userID);
+        
+        //Continue, if valid reference and is player
+        if(userBlob !is null && userBlob.isMyPlayer()) {
+        
+          //Create a product grid menu
+          CGridMenu@ productMenu = CreateGridMenu(
+              userBlob.getScreenPos(),                  //pos2d
+              this,                                     //blob
+              ProducerVariables::PRODUCTION_MENU_SIZE,  //slots
+              "Product"                               //
+            );
+          
+          //Check if valid reference and there are productions options
+          if(productMenu !is null && ProducerVariables::PRODUCTION_OPTIONS.length > 0) {
+          
+            //Create button reference handle
+            CGridButton@ button;
+            
+            //Create a production option reference handle
+            UndeadInvasion::ProductionOption@ productionOption;
+            
+            //Create hover text string
+            string hoverText;
+            
+            //Iterate through production options
+            for(int i=0; i<ProducerVariables::PRODUCTION_OPTIONS.length; i++) {
+            
+              //Keep reference
+              @productionOption = ProducerVariables::PRODUCTION_OPTIONS[i];
+              
+              //Create argument bit stream
+              CBitStream buttonArgumentStream;
+              
+              //Serialize to stream, including costs if storage should be enabled
+              productionOption.toStream(buttonArgumentStream, ProducerVariables::hasMaterialStorage);
+              
+              //Begin to build up hover text string
+              hoverText = productionOption.mDescription + "\n\n";
+            
+              //Create a production option cost reference handle
+              UndeadInvasion::ProductionOptionCost@ productionOptionCost;
+              
+              //Iterate through costs
+              for(int j=0; j<productionOption.mCosts.length; j++) {
+              
+                //Keep reference
+                @productionOptionCost = productionOption.mCosts[j];
+                
+                //Create a string token for cost text color depending on material requirements
+                string costColor = "$RED$";
+                
+                //Check if storage should be enabled
+                if(ProducerVariables::hasMaterialStorage) {
+                
+                  //Check if enough in material storage
+                  if(this.getBlobCount(productionOptionCost.mName) >= productionOptionCost.mAmount) {
+                  
+                    //Change color string token
+                    costColor = "$GREEN$";
+                    
+                  }
+                  
+                }
+                
+                //Append cost to hover text
+                hoverText += " " + costColor + productionOptionCost.mAmount + costColor + " $" + productionOptionCost.mName + "$ " + costColor + productionOptionCost.mCaption + costColor;
+                
+              }
+              
+              //Add button
+              @button = productMenu.AddButton(
+                  "$" + productionOption.mName + "$",             //iconName
+                  productionOption.mCaption,                      //caption
+                  this.getCommandID("ProducerBlob::make"),               //cmdID
+                  //Vec2f(1.0f, 1.0f),                              //slotsDim (button size, overrides inventory size, but only if larger)
+                  buttonArgumentStream                            //parameters
+                );
+              
+              //Continue only if valid reference (to ensure there was enough space)
+              if(button !is null) {
+                
+                //Set hover text
+                button.hoverText = hoverText + " (" + productionOption.mTime + "s)\n";
+                
+                //Check if producing same product
+                if(this.get_string("currentProductName") == productionOption.mName) {
+                
+                  //Set not clickable
+                  //button.clickable = false;
+                  
+                  //Disable button (greyed out)
+                  button.SetEnabled(false);
+                  
+                }
+                
+                button.selectOnClick = true;
+                
+              }
+            
+            }
+            
+            //If tool menu is supposed to be enabled
+            if(ProducerVariables::TOOL_MENU_ENABLED) {
+            
+              f32 toolMenuSize = 0.0f;
+              
+              if(ProducerVariables::TOOL_MENU_STOP_ENABLED) {
+                toolMenuSize += 1.0f;
+              }
+              
+              if(ProducerVariables::TOOL_MENU_REPEAT_ENABLED) {
+                toolMenuSize += 1.0f;
+              }
+              
+              //Determine where to position the tool menu
+              Vec2f toolMenuPosition = productMenu.getUpperLeftPosition() + Vec2f(-32.0f, (toolMenuSize +1.0f) * 32 / 2);
+              
+              //Create menu
+              CGridMenu@ toolMenu = CreateGridMenu(
+                  toolMenuPosition,           //pos2d
+                  this,                       //blob
+                  Vec2f(1.0f, toolMenuSize),  //slots
+                  ""                          //
+                );
+                
+              //Continue if valid
+              if(toolMenu !is null) {
+              
+                //Disable caption
+                toolMenu.SetCaptionEnabled(false);
+                
+                //If stop tool should be enabled
+                if(ProducerVariables::TOOL_MENU_STOP_ENABLED) {
+                
+                  //Create argument stream
+                  CBitStream stopToolButtonArgumentStream;
+                  
+                  //Write name of current product
+                  stopToolButtonArgumentStream.write_string(this.get_string("currentProductName"));
+                  
+                  //Add button
+                  CGridButton@ stopToolButton = toolMenu.AddButton(
+                      "$ProducerBlob::stop$",                            //iconName
+                      "",                                             //caption
+                      this.getCommandID("ProducerBlob::stop"),           //cmdID
+                      //Vec2f(1.0f, 1.0f),                              //slotsDim (button size, overrides inventory size, but only if larger)
+                      stopToolButtonArgumentStream                    //parameters
+                    );
+                  
+                  //Continue if button added
+                  if(stopToolButton !is null) {
+                  
+                    //Set hover text
+                    stopToolButton.SetHoverText("Stop producing\n");
+                    
+                  }
+                  
+                }
+                
+                //If repeat tool should be enabled
+                if(ProducerVariables::TOOL_MENU_REPEAT_ENABLED) {
+                
+                  //Create argument stream
+                  CBitStream repeatToolButtonArgumentStream;
+                  
+                  //Write name of current product
+                  repeatToolButtonArgumentStream.write_string(this.get_string("currentProductName"));
+                  
+                  //Add button
+                  CGridButton@ repeatToolButton = toolMenu.AddButton(
+                      "$ProducerBlob::repeat$",                            //iconName
+                      "",                                             //caption
+                      this.getCommandID("ProducerBlob::repeat"),           //cmdID
+                      //Vec2f(1.0f, 1.0f),                              //slotsDim (button size, overrides inventory size, but only if larger)
+                      repeatToolButtonArgumentStream                    //parameters
+                    );
+                  
+                  //Continue if button added
+                  if(repeatToolButton !is null) {
+                  
+                    //Set hover text
+                    repeatToolButton.SetHoverText("Repeat\n");
+                    
+                    //Check if already repeat active
+                    if(this.get_bool("producingRepeat")) {
+                    
+                      //Set button selected
+                      repeatToolButton.SetSelected(1);
+                      
+                    }
+                    
+                  }
+                  
+                }
+                
+              }
+              
+            }
+            
+            //If storage enabled
+            if(ProducerVariables::hasMaterialStorage) {
+            
+              f32 matlockMenuSize = 1.0f;
+              
+              //Determine where to position the matlock menu
+              Vec2f matlockMenuPosition(
+                  userBlob.getScreenPos().x
+                  , productMenu.getLowerRightPosition().y 
+                      + 32.0f + (matlockMenuSize + 1.0f) * 32 / 2
+                );
+              
+              //Create menu
+              CGridMenu@ matlockMenu = CreateGridMenu(
+                  matlockMenuPosition         //pos2d
+                  , this                      //blob
+                  , Vec2f(ProducerVariables::PRODUCTION_MENU_SIZE.x, 1.0f)  //slots
+                  , "Ingredients"             //
+                );
+                
+              AttachmentPoint@ attachmentPoint;
+              CBlob@ attachedBlob;
+              CGridButton@ matlockButton;
+              
+              //Iterate
+              for(int i=0; i<ProducerVariables::PRODUCTION_MENU_SIZE.x; i++) {
+              
+                //Obtain attachment point reference
+                @attachmentPoint = this.getAttachments().getAttachmentPointByName("MATLOCK" + i);
+                
+                if(attachmentPoint !is null) {
+                
+                  @attachedBlob = attachmentPoint.getOccupied();
+                  
+                  if(attachedBlob !is null) {
+                  
+                    //Add button
+                    @matlockButton = matlockMenu.AddButton(
+                        "$" + attachedBlob.getName() + "$"                  //iconName
+                        , "Ingredients"                                     //caption
+                        , Vec2f(1.0f, 1.0f)                                 //slotsDim (button size, overrides inventory size, but only if larger)
+                      );
+                      
+                    if(matlockButton !is null) {
+                    
+                      matlockButton.SetHoverText(attachedBlob.getInventoryName() + ": " + attachedBlob.getQuantity());
+                      matlockButton.clickable = false;
+                      
+                    }
+                    
+                  }
+                  
+                }
+                
+              }
+                
+            }
+            
+          }
+          
+        }
+        
+    } //End function
+    
+    
+    
+    /**
+     * Makes a certain product type
+     * TODO: Currently does not handle the case where storage is disabled
+     */
+    void make(CBlob@ this, UndeadInvasion::ProductionOption@ productionOption) {
+      
+      CInventory@ inventory = this.getInventory();
+      
+      AttachmentPoint@[] attachmentPoints;
+      
+      bool undoAndAbort = false;
+      
+      //Continue if not already producing same product
+      if(productionOption.mName != this.get_string("currentProductName")) {
+      
+        UndeadInvasion::ProductionOptionCost@ optionCost;
+        
+        //Repeat for each cost
+        for(int i=0; i<productionOption.mCosts.length; i++) {
+        
+          @optionCost = productionOption.mCosts[i];
+          
+          //Check if not present
+          if(!inventory.isInInventory(optionCost.mName, optionCost.mAmount)) {
+          
+            //Abort
+            undoAndAbort = true;
+            break;
+            
+          }
+          
+          //Obtain reference to material lock attachment point
+          attachmentPoints.push_back(
+              this.getAttachments().getAttachmentPointByName("MATLOCK" + i)
+            );
+          
+          if(attachmentPoints[i] !is null) {
+          
+            //Create new blob
+            //CBlob@ lockedBlob = server_CreateBlobNoInit(optionCost.mName);
+            CBlob@ lockedBlob = server_CreateBlob(optionCost.mName);
+            
+            //Set quantity
+            lockedBlob.server_SetQuantity(optionCost.mAmount);
+            
+            //If able to attach
+            if(this.server_AttachTo(lockedBlob, attachmentPoints[i])) {
+            
+              //Remove from inventory
+              int amountRemoved = inventory.server_RemoveItems(optionCost.mName, optionCost.mAmount);
+              
+            }
+            
+            //Otherwise, if not able to attach
+            else {
+              
+              //Abort
+              undoAndAbort = true;
+              break;
+              
+            }
+            
+          }
+          
+        }
+        
+        //If something happened and stuff has to be undone
+        if(undoAndAbort) {
+        
+          //Iterate through all the attachment points again
+          for(int i=0; i<attachmentPoints.length; i++) {
+          
+            if(attachmentPoints[i] !is null) {
+            
+              CBlob@ wasAttachedBlob = attachmentPoints[i].getOccupied();
+              
+              //Detach
+              wasAttachedBlob.server_DetachFrom(this);
+              
+              //Check if room
+              if(inventory.canPutItem(wasAttachedBlob)) {
+              
+                //Put back in inventory
+                this.server_PutInInventory(wasAttachedBlob);
+                
+              }
+              
+              //Otherwise, no room
+              else {
+              
+                //Place in world
+                wasAttachedBlob.setPosition(this.getPosition());
+                
+              }
+              
+            }
+            
+          }
+          
+          //Abort
+          return;
+          
+        }
+        
+        //Store new product name
+        this.set_string("currentProductName", productionOption.mName);
+        
+        //Store new start time
+        this.set_u16("producingStartTime", getGameTime());
+        
+        //Store new finish time
+        this.set_u16("producingFinishTime", getGameTime() + productionOption.mTime * getTicksASecond());
+        
+      }
+      
+    }
+    
+    
+    
+    /**
+     * Stops producing a certain product type
+     */
+    void stop(CBlob@ this, string productName) {
+    
+      //Check if still producing same product
+      if(this.get_string("currentProductName") == productName) {
+      
+        //Reset product name
+        this.set_string("currentProductName", "");
+        
+        //Unset repeat flag
+        this.set_bool("producingRepeat", false);
+        
+      }
+      
+    }
+    
+    
+    
+    /**
+     * Toggles repeat for a certain product
+     */
+    void repeat(CBlob@ this, string productName) {
+    
+      //Stop, if product mismatch (something happened meanwhile)
+      if(this.get_string("currentProductName") != productName) {
+        return;
+      }
+      
+      this.set_bool("producingRepeat", !this.get_bool("producingRepeat"));
+      
+    }
     
     
     

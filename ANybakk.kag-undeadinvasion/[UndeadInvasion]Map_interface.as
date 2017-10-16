@@ -25,3 +25,9 @@ void onTick(CMap@ this) {
   UndeadInvasion::Map::onTick(this);
   
 }
+
+TileType server_onTileHit(CMap@ this, f32 damage, u32 index, TileType oldTileType) {
+
+  return UndeadInvasion::Map::server_onTileHit(this, damage, index, oldTileType);
+  
+}

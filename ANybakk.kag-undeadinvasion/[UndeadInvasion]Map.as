@@ -8,15 +8,16 @@
 
 #include "[UndeadInvasion]Variables.as";
 #include "[UndeadInvasion]DefaultPNGLoader.as";
+#include "[UndeadInvasion]MapVariables.as";
 
 
 
 namespace UndeadInvasion {
 
   namespace Map {
-  
-  
-  
+    
+    
+    
     void onInit(CMap@ this) {
     
       print("[UndeadInvasion::Map::onInit]");
@@ -61,6 +62,53 @@ namespace UndeadInvasion {
         }
         
       }
+      
+    }
+    
+    
+    
+    /**
+     * Hit function
+     */
+    TileType server_onTileHit(CMap@ this, f32 damage, u32 index, TileType oldTileType) {
+      
+      TileType newType = oldTileType;
+      
+      //Check if custom tile (don't mess with vanilla stuff)
+      if(oldTileType >= UndeadInvasion::MapVariables::TILE_OFFSET_START) {
+      
+        TileType[][] offsets = UndeadInvasion::MapVariables::TILE_OFFSETS;
+      
+        //Iterate over all custom types
+        for(int i=0; i<offsets.length; i++) {
+          
+          //Iterate over all tiles of this type
+          for(int j=0; j<offsets[i].length; j++) {
+          
+            //Check if match
+            if(offsets[i][j] == oldTileType) {
+            
+              //If not last, increment (decrease "health")
+              if(j < offsets[i].length - 1) {
+                newType++;
+              }
+              
+              //Otherwise, empty ("depleted")
+              else {
+                newType = CMap::tile_empty;
+              }
+              
+              break;
+              
+            }
+            
+          }
+          
+        }
+        
+      }
+      
+      return newType;
       
     }
     

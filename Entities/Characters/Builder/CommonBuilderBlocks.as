@@ -10,6 +10,7 @@
 #include "Requirements.as";
 
 #include "[UndeadInvasion]WorkbenchBuildBlock.as";
+#include "[UndeadInvasion]ForgeBuildBlock.as";
 #include "[UndeadInvasion]BedBuildBlock.as";
 
 
@@ -90,13 +91,16 @@ void addCommonBuilderBlocks(BuildBlock[][]@ blocks) {
   //  blocks[0].push_back(b);
   //}
 
-  {
-    BuildBlock b(0, "building", "$building$", "Workshop\nStand in an open space\nand tap this button.");
-    AddRequirement(b.reqs, "blob", "mat_wood", "Wood", 150);
-    b.buildOnGround = true;
-    b.size.Set(40, 24);
-    blocks[0].push_back(b);
-  }
+  //{
+  //  BuildBlock b(0, "building", "$building$", "Workshop\nStand in an open space\nand tap this button.");
+  //  AddRequirement(b.reqs, "blob", "mat_wood", "Wood", 150);
+  //  b.buildOnGround = true;
+  //  b.size.Set(40, 24);
+  //  blocks[0].push_back(b);
+  //}
+  
+  //Bed
+  blocks[0].push_back(BedBuildBlock());
   
   { //Vanilla fireplace
     BuildBlock b(0, "fireplace", "$fireplace$", "Fireplace\nKeeps ghosts away");
@@ -106,19 +110,21 @@ void addCommonBuilderBlocks(BuildBlock[][]@ blocks) {
     b.size.Set(16, 16);
     blocks[0].push_back(b);
   }
-  /*
-  { //Vanilla workbench
-    BuildBlock b(0, "workbench", "$workbench$", "Workbench\nBasic build options");
-    AddRequirement(b.reqs, "blob", "mat_wood", "Wood", 40);
-    b.buildOnGround = true;
-    b.size.Set(32, 16);
-    blocks[0].push_back(b);
-  }*/
+  
+  //Bonfire
+  
+  //{ //Vanilla workbench
+  //  BuildBlock b(0, "workbench", "$workbench$", "Workbench\nBasic build options");
+  //  AddRequirement(b.reqs, "blob", "mat_wood", "Wood", 40);
+  //  b.buildOnGround = true;
+  //  b.size.Set(32, 16);
+  //  blocks[0].push_back(b);
+  //
   
   //Workbench
   blocks[0].push_back(WorkbenchBuildBlock());
   
-  //Bed
-  blocks[0].push_back(BedBuildBlock());
+  //Forge
+  blocks[0].push_back(ForgeBuildBlock());
   
 }

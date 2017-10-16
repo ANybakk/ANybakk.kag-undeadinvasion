@@ -17,6 +17,8 @@
 #include "BasePNGLoader.as";
 
 #include "[UndeadInvasion]DefaultPNGLoaderVariables.as";
+#include "[UndeadInvasion]Map.as";
+#include "[UndeadInvasion]MapVariables.as";
 
 
 
@@ -167,37 +169,43 @@ namespace UndeadInvasion {
       //Call super class' version of this method, to make sure we don't miss out on any default behaviour
       PNGLoader::handlePixel(color_pixel, offset);
       
-      //Keep a handle for any blob that might be spawned
       CBlob@ spawnedBlob;
       
-      //Check if the color value of the map matches undead spawn
-      if(color_pixel == UndeadInvasion::DefaultPNGLoaderVariables::COLOR_MAUSOLEUM) {
+      if(color_pixel == UndeadInvasion::DefaultPNGLoaderVariables::COLOR_TILE_IRON) {
+      
+        map.SetTile(offset, UndeadInvasion::MapVariables::TILE_OFFSETS_IRON[0]);
+        map.AddTileFlag(offset, UndeadInvasion::MapVariables::TILE_FLAGS_IRON);
         
-          @spawnedBlob = spawnBlob(map, "Mausoleum", offset, -1);     //Spawn blob
-          //@spawnedBlob.AddScript("abc.as");                         //Add behaviour through a script
-          //@spawnedBlob.Tag("script added");
-          offsets[autotile_offset].push_back(offset);                 //Store offset reference, generic tile
-          
+      }
+      
+      //Check if the color value of the map matches undead spawn
+      else if(color_pixel == UndeadInvasion::DefaultPNGLoaderVariables::COLOR_MAUSOLEUM) {
+        
+        @spawnedBlob = spawnBlob(map, "Mausoleum", offset, -1);     //Spawn blob
+        //@spawnedBlob.AddScript("abc.as");                         //Add behaviour through a script
+        //@spawnedBlob.Tag("script added");
+        offsets[autotile_offset].push_back(offset);                 //Store offset reference, generic tile
+        
       }
       
       //Check if the color value of the map matches survivor spawn
       else if(color_pixel == UndeadInvasion::DefaultPNGLoaderVariables::COLOR_SURVIVOR_CAMP) {
         
-          @spawnedBlob = spawnBlob(map, "SurvivorCamp", offset, -1);  //Spawn blob
-          //@spawnedBlob.AddScript("abc.as");                         //Add behaviour through a script
-          //@spawnedBlob.Tag("script added");
-          offsets[autotile_offset].push_back(offset);                 //Store offset reference, generic tile
-          
-          //TODO: For some reason, the default offset handler doesn't repair the correct tile
-          
+        @spawnedBlob = spawnBlob(map, "SurvivorCamp", offset, -1);  //Spawn blob
+        //@spawnedBlob.AddScript("abc.as");                         //Add behaviour through a script
+        //@spawnedBlob.Tag("script added");
+        offsets[autotile_offset].push_back(offset);                 //Store offset reference, generic tile
+        
+        //TODO: For some reason, the default offset handler doesn't repair the correct tile
+        
       }
       
       //Check if Bed
       else if(color_pixel == UndeadInvasion::DefaultPNGLoaderVariables::COLOR_BED) {
       
-         @spawnedBlob = spawnBlob(map, "Bed", offset, -1);            //Spawn blob
-         offsets[autotile_offset].push_back(offset);                  //Store offset reference, generic tile
-         
+        @spawnedBlob = spawnBlob(map, "Bed", offset, -1);            //Spawn blob
+        offsets[autotile_offset].push_back(offset);                  //Store offset reference, generic tile
+
       }
       
       //Check if empty/sky

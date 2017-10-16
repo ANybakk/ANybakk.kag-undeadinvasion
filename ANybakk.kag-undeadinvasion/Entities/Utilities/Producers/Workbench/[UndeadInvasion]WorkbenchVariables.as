@@ -69,15 +69,15 @@ namespace ProducerVariables {
   
   //Define an array of Undead entities to spawn
   const UndeadInvasion::ProductionOption@[] PRODUCTION_OPTIONS = {
-    UndeadInvasion::ProductionOption("Lantern"    , "lantern"   , "Keeps ghosts away"         , PRODUCTION_OPTION_COST_LANTERN    , 2), //1x1 slots
-    UndeadInvasion::ProductionOption("Bucket"     , "bucket"    , "A container for liquids"   , PRODUCTION_OPTION_COST_BUCKET     , 5), //1x1 slots
-    UndeadInvasion::ProductionOption("Sponge"     , "sponge"    , "Absorbs liquids"           , PRODUCTION_OPTION_COST_SPONGE     , 2), //1x1 slots
-    UndeadInvasion::ProductionOption("Boulder"    , "boulder"   , "A heavy object"            , PRODUCTION_OPTION_COST_BOULDER    , 5), //1x1 slots
-    UndeadInvasion::ProductionOption("Trampoline" , "trampoline", "Bounces objects"           , PRODUCTION_OPTION_COST_TRAMPOLINE , 10), //2x1 slots
-    UndeadInvasion::ProductionOption("Crate"      , "crate"     , "A generic container"       , PRODUCTION_OPTION_COST_CRATE      , 10), //2x1 slots
-    UndeadInvasion::ProductionOption("Dinghy"     , "dinghy"    , "A simple floatation device", PRODUCTION_OPTION_COST_DINGHY     , 15), //2x2 slots
-    UndeadInvasion::ProductionOption("Saw"        , "saw"       , "Tool for granulating stuff", PRODUCTION_OPTION_COST_SAW        , 20), //2x2 slots
-    UndeadInvasion::ProductionOption("Drill"      , "drill"     , "Tool for digging faster"   , PRODUCTION_OPTION_COST_DRILL      , 15)  //2x1 slots
+      UndeadInvasion::ProductionOption("Lantern"    , "lantern"   , "Keeps ghosts away"           , 2   , PRODUCTION_OPTION_COST_LANTERN    ) //1x1 slots
+    , UndeadInvasion::ProductionOption("Bucket"     , "bucket"    , "A container for liquids"     , 5   , PRODUCTION_OPTION_COST_BUCKET     ) //1x1 slots
+    , UndeadInvasion::ProductionOption("Sponge"     , "sponge"    , "Absorbs liquids"             , 2   , PRODUCTION_OPTION_COST_SPONGE     ) //1x1 slots
+    , UndeadInvasion::ProductionOption("Boulder"    , "boulder"   , "A heavy object"              , 5   , PRODUCTION_OPTION_COST_BOULDER    ) //1x1 slots
+    , UndeadInvasion::ProductionOption("Trampoline" , "trampoline", "Bounces objects"             , 10  , PRODUCTION_OPTION_COST_TRAMPOLINE ) //2x1 slots
+    , UndeadInvasion::ProductionOption("Crate"      , "crate"     , "A generic container"         , 10  , PRODUCTION_OPTION_COST_CRATE      ) //2x1 slots
+    , UndeadInvasion::ProductionOption("Dinghy"     , "dinghy"    , "A simple floatation device"  , 15  , PRODUCTION_OPTION_COST_DINGHY     ) //2x2 slots
+    , UndeadInvasion::ProductionOption("Saw"        , "saw"       , "Tool for granulating stuff"  , 20  , PRODUCTION_OPTION_COST_SAW        ) //2x2 slots
+    , UndeadInvasion::ProductionOption("Drill"      , "drill"     , "Tool for digging faster"     , 15  , PRODUCTION_OPTION_COST_DRILL      )  //2x1 slots
   };
   
   //Define a flag for whether this producer should have storage enabled

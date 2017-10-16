@@ -1,5 +1,5 @@
 /*
- * Producer variables.
+ * Forge variables.
  * 
  * Author: ANybakk
  */
@@ -10,7 +10,7 @@
 
 
 namespace BlobVariables {
-
+  
 }
 
 namespace UtilityVariables {
@@ -22,27 +22,21 @@ namespace UtilityVariables {
 
 namespace ProducerVariables {
 
-  const UndeadInvasion::ProductionOptionCost@[] PRODUCTION_OPTION_COST_LANTERN = {
-    //Vanilla: 10 Wood
-    UndeadInvasion::ProductionOptionCost("Wood", "mat_wood", 10)
-  };
-
-  const UndeadInvasion::ProductionOptionCost@[] PRODUCTION_OPTION_COST_BUCKET = {
-    //Vanilla: 10 Wood
-    UndeadInvasion::ProductionOptionCost("Wood", "mat_wood", 30)
+  const UndeadInvasion::ProductionOptionCost@[] PRODUCTION_OPTION_COST_DRILL = {
+    //Vanilla: 100 Stone
+    UndeadInvasion::ProductionOptionCost("Stone", "mat_stone", 90)
   };
   
   //Define an array of Undead entities to spawn
   const UndeadInvasion::ProductionOption@[] PRODUCTION_OPTIONS = {
-      UndeadInvasion::ProductionOption("Lantern"    , "lantern"   , "Keeps ghosts away"         , 1, PRODUCTION_OPTION_COST_LANTERN ) //1x1 slots
-    , UndeadInvasion::ProductionOption("Bucket"     , "bucket"    , "A container for liquids"   , 1, PRODUCTION_OPTION_COST_BUCKET  ) //1x1 slots
+    UndeadInvasion::ProductionOption("Drill"      , "drill"     , "Tool for digging faster"   , 15  , PRODUCTION_OPTION_COST_DRILL  )  //2x1 slots
   };
   
   //Define a flag for whether this producer should have storage enabled
   const bool hasMaterialStorage = true;
   
   //Define a menu size vector
-  const Vec2f PRODUCTION_MENU_SIZE(2.0f, 1.0f);
+  const Vec2f PRODUCTION_MENU_SIZE(4.0f, 5.0f);
   
   //Define a flag for enabling the tool menu
   const bool TOOL_MENU_ENABLED = true;
@@ -56,5 +50,9 @@ namespace ProducerVariables {
   //Define a progress bar width (x: number of world pixels, y: number of screen pixels)
   const Vec2f PROGRESS_BAR_SIZE(16.0f, 6.0f);
   
-  
+}
+
+
+namespace ForgeVariables {
+
 }
