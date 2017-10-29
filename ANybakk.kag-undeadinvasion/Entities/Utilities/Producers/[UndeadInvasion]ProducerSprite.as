@@ -29,7 +29,6 @@ namespace UndeadInvasion {
     
     void onRender(CSprite@ this) {
     
-      //Obtain a reference to the blob object
       CBlob@ blob = this.getBlob();
     
       //Check if producing something
@@ -45,14 +44,15 @@ namespace UndeadInvasion {
         if(currentProductionTime <= fullProductionTime) {
         
           //Calculate left and right positions
-          Vec2f barLeftPosition = getDriver().getScreenPosFromWorldPos(blob.getPosition() + Vec2f(-ProducerVariables::PROGRESS_BAR_SIZE.x/2, blob.getHeight()/2 - 1.0f));
-          Vec2f barRightPosition = getDriver().getScreenPosFromWorldPos(blob.getPosition() + Vec2f(ProducerVariables::PROGRESS_BAR_SIZE.x/2, blob.getHeight()/2 - 1.0f));
+          Vec2f barLeftPosition = getDriver().getScreenPosFromWorldPos(blob.getPosition() + Vec2f(-ProducerVariables::PROGRESS_BAR_SIZE.x/2, blob.getHeight()/2 + 2.0f));
+          Vec2f barRightPosition = getDriver().getScreenPosFromWorldPos(blob.getPosition() + Vec2f(ProducerVariables::PROGRESS_BAR_SIZE.x/2, blob.getHeight()/2 + 2.0f));
           
           //Draw progress bar
           GUI::DrawProgressBar(
-              barLeftPosition + Vec2f(0.0f, -ProducerVariables::PROGRESS_BAR_SIZE.y)
-              , barRightPosition
-              , (0.0f + currentProductionTime) / (0.0f + fullProductionTime));
+                barLeftPosition
+              , barRightPosition + Vec2f(0.0f, ProducerVariables::PROGRESS_BAR_SIZE.y)
+              , (0.0f + currentProductionTime) / (0.0f + fullProductionTime)
+            );
           
         }
         

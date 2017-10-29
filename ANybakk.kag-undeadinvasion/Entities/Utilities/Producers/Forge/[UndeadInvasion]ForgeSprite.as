@@ -5,6 +5,7 @@
  */
 
 #include "[UndeadInvasion]ProducerSprite.as";
+#include "[UndeadInvasion]ForgeFuelType.as";
 
 
 
@@ -17,6 +18,9 @@ namespace UndeadInvasion {
     void onInit(CSprite@ this) {
     
       UndeadInvasion::ProducerSprite::onInit(this);
+      
+      this.SetAnimation("fuel");
+      this.animation.frame = 0;
       
       //Get fire animation
       Animation@ fireAnimation = this.getAnimation("fire");
@@ -47,7 +51,7 @@ namespace UndeadInvasion {
       //Set fire sound volume
       //this.SetEmitSoundVolume(0.5f);
       
-    }
+    } //End function
     
     
     
@@ -55,19 +59,8 @@ namespace UndeadInvasion {
     
       CBlob@ blob = this.getBlob();
       
-      //Check if fuel present
-      if(blob.get_bool("fuelled")) {
-      
-        this.animation.frame = 1;
-        
-      }
-      
-      //Otherwise, no fuel present
-      else {
-      
-        this.animation.frame = 0;
-        
-      }
+      //Set frame depending on fuel
+      this.animation.frame = blob.get_u8("fuelState");
       
       //Obtain reference to fire layer
       CSpriteLayer@ fireLayer = this.getSpriteLayer("fire");
@@ -99,10 +92,10 @@ namespace UndeadInvasion {
         
       }
       
-    }
+    } //End function
     
     
     
-  }
+  } //End namespace
    
-}
+} //End namespace

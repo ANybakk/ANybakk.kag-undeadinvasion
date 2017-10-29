@@ -5,7 +5,7 @@ void LoadDefaultMapLoaders()
 	if (sv_gamemode == "TTH" || sv_gamemode == "WAR" ||
 	        sv_gamemode == "tth" || sv_gamemode == "war")
 	{
-		RegisterFileExtensionScript("Scripts/MapLoaders/LoadWarPNG.as", "png");
+    RegisterFileExtensionScript("Scripts/MapLoaders/LoadWarPNG.as", "png");
 	}
 	else if (sv_gamemode == "Challenge" || sv_gamemode == "challenge")
 	{
@@ -23,7 +23,6 @@ void LoadDefaultMapLoaders()
 	{
 		RegisterFileExtensionScript("Scripts/MapLoaders/LoadPNGMap.as", "png");
 	}
-
-
+  
 	RegisterFileExtensionScript("Scripts/MapLoaders/GenerateFromKAGGen.as", "kaggen.cfg");
 }

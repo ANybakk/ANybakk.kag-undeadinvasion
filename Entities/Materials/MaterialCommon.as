@@ -207,43 +207,38 @@ namespace Material
     CMap@ map = getMap();
     
     //UndeadInvasion
-    {
+    //Iterate through all custom tile types
+    for(int i=0; i<UndeadInvasion::MapVariables::TILE_HARVEST_BLOB_NAMES.length; i++) {
+    
+      //Check if right type (row)
+      if(Maths::Ceil(type / 16) == UndeadInvasion::MapVariables::TILE_ROW_NUMBERS[i]) {
       
-      //Iron
-      for(int i=0; i<UndeadInvasion::MapVariables::TILE_OFFSETS_IRON.length; i++) {
-        if(UndeadInvasion::MapVariables::TILE_OFFSETS_IRON[i] == type) {
-          createFor(this, "mat_iron", damage * UndeadInvasion::MapVariables::TILE_HARVEST_RATIO_IRON);
-          break;
-        }
-      }
-      
-      //Aluminium
-      for(int i=0; i<UndeadInvasion::MapVariables::TILE_OFFSETS_ALUMINIUM.length; i++) {
-        if(UndeadInvasion::MapVariables::TILE_OFFSETS_ALUMINIUM[i] == type) {
-          createFor(this, "mat_aluminium", damage * UndeadInvasion::MapVariables::TILE_HARVEST_RATIO_ALUMINIUM);
-          break;
-        }
-      }
-      
-      //Coal
-      for(int i=0; i<UndeadInvasion::MapVariables::TILE_OFFSETS_COAL.length; i++) {
-        if(UndeadInvasion::MapVariables::TILE_OFFSETS_COAL[i] == type) {
-          createFor(this, "mat_coal", damage * UndeadInvasion::MapVariables::TILE_HARVEST_RATIO_COAL);
-          break;
-        }
+        //Create material
+        createFor(
+              this
+            , UndeadInvasion::MapVariables::TILE_HARVEST_BLOB_NAMES[i]
+            , damage * UndeadInvasion::MapVariables::TILE_HARVEST_RATIOS[i]
+          );
+          
+        break;
+        
       }
       
     }
-
+    
     if (not map.isTileSolid(type)) return; //UndeadInvasion: custom tile fails here
 
     if (map.isTileThickStone(type))
     {
-      createFor(this, 'mat_stone', 6 * damage);
+      //UndeadInvasion
+      //createFor(this, 'mat_stone', 6 * damage);
+      createFor(this, 'mat_stone', damage);
     }
     else if (map.isTileStone(type))
     {
-      createFor(this, 'mat_stone', 4 * damage);
+      //UndeadInvasion
+      //createFor(this, 'mat_stone', 4 * damage);
+      createFor(this, 'mat_stone', damage);
     }
     else if (map.isTileCastle(type))
     {
@@ -255,7 +250,9 @@ namespace Material
     }
     else if (map.isTileGold(type))
     {
-      createFor(this, 'mat_gold', 4 * damage);
+      //UndeadInvasion
+      //createFor(this, 'mat_gold', 4 * damage);
+      createFor(this, 'mat_gold', damage);
     }
   }
 }

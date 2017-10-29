@@ -6,6 +6,7 @@
 
 #include "[UndeadInvasion]ProducerBlob.as";
 #include "[UndeadInvasion]ForgeBuildBlock.as";
+#include "[UndeadInvasion]ForgeFuelType.as";
 
 
 
@@ -15,9 +16,6 @@ namespace UndeadInvasion {
   
   
   
-    /**
-     * Initializes this entity
-     */
     void onInit(CBlob@ this) {
       
       UndeadInvasion::ProducerBlob::onInit(this);
@@ -26,7 +24,13 @@ namespace UndeadInvasion {
       setCommands(this);
       setHarvestMaterials(this);
       
-      this.set_bool("fuelled", !ProducerVariables::hasMaterialStorage);
+      //Check if storage enabled
+      if(ProducerVariables::hasMaterialStorage) {
+        this.set_u8("fuelState", UndeadInvasion::ForgeFuelType::NONE);
+      }
+      else {
+        this.set_u8("fuelState", UndeadInvasion::ForgeFuelType::WOOD);
+      }
       
     }
   
@@ -83,17 +87,25 @@ namespace UndeadInvasion {
         //Obtain inventory reference
         CInventory@ inventory = this.getInventory();
         
-        //Check if fuel present
-        if(inventory !is null && inventory.getCount("mat_wood") >= 0) {
+        //Check if coal fuel present
+        //TODO: Check matlock too
+        if(inventory !is null && inventory.getCount("mat_coal") >= 0) {
         
-          this.set_bool("fuelled", true);
+          this.set_u8("fuelState", UndeadInvasion::ForgeFuelType::COAL);
+          
+        }
+        
+        //Otherwise, check if log fuel present
+        else if(inventory !is null && inventory.getCount("Log") >= 0) {
+        
+          this.set_u8("fuelState", UndeadInvasion::ForgeFuelType::WOOD);
           
         }
         
         //Otherwise, no fuel present
         else {
         
-          this.set_bool("fuelled", false);
+          this.set_u8("fuelState", UndeadInvasion::ForgeFuelType::NONE);
           
         }
         

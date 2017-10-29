@@ -56,5 +56,7 @@ namespace ProducerVariables {
   //Define a progress bar width (x: number of world pixels, y: number of screen pixels)
   const Vec2f PROGRESS_BAR_SIZE(16.0f, 6.0f);
   
+  //Whether ingredients currently in use (attached) should be visible
+  const bool INGREDIENT_INVISIBLE = true;
   
 }

@@ -2,6 +2,6 @@
 
 - Let producer utilities "equip" tools to expand production options and/or quality/efficiency
 
-- Introduce iron as a material
-
 - Clock entity that shows the time
+
+- Need a place to change class. A wardrobe or somesuch.

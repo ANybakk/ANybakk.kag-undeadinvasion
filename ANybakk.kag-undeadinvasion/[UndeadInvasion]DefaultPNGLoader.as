@@ -171,14 +171,22 @@ namespace UndeadInvasion {
       
       CBlob@ spawnedBlob;
       
-      if(color_pixel == UndeadInvasion::DefaultPNGLoaderVariables::COLOR_TILE_IRON) {
+      //Blocks
       
-        map.SetTile(offset, UndeadInvasion::MapVariables::TILE_OFFSETS_IRON[0]);
-        map.AddTileFlag(offset, UndeadInvasion::MapVariables::TILE_FLAGS_IRON);
-        
+      //Iron
+      if(color_pixel == UndeadInvasion::DefaultPNGLoaderVariables::COLOR_TILE_IRON) {
+        for(int i=0; i<UndeadInvasion::MapVariables::TILE_HARVEST_BLOB_NAMES.length; i++) {
+          if(UndeadInvasion::MapVariables::TILE_HARVEST_BLOB_NAMES[i] == "mat_iron") {
+            map.SetTile(offset, (UndeadInvasion::MapVariables::TILE_ROW_NUMBERS[i] - 1) * 16);
+            //map.AddTileFlag(offset, UndeadInvasion::MapVariables::TILE_FLAGS[i]);
+            break;
+          }
+        }
       }
       
-      //Check if the color value of the map matches undead spawn
+      //Blobs
+      
+      //Undead spawn
       else if(color_pixel == UndeadInvasion::DefaultPNGLoaderVariables::COLOR_MAUSOLEUM) {
         
         @spawnedBlob = spawnBlob(map, "Mausoleum", offset, -1);     //Spawn blob
@@ -188,7 +196,7 @@ namespace UndeadInvasion {
         
       }
       
-      //Check if the color value of the map matches survivor spawn
+      //Survivor spawn
       else if(color_pixel == UndeadInvasion::DefaultPNGLoaderVariables::COLOR_SURVIVOR_CAMP) {
         
         @spawnedBlob = spawnBlob(map, "SurvivorCamp", offset, -1);  //Spawn blob
@@ -200,7 +208,7 @@ namespace UndeadInvasion {
         
       }
       
-      //Check if Bed
+      //Bed
       else if(color_pixel == UndeadInvasion::DefaultPNGLoaderVariables::COLOR_BED) {
       
         @spawnedBlob = spawnBlob(map, "Bed", offset, -1);            //Spawn blob
@@ -208,7 +216,9 @@ namespace UndeadInvasion {
 
       }
       
-      //Check if empty/sky
+      //Other
+      
+      //Empty/sky
       else if(color_pixel == sky || color_pixel == color_tile_grass) {
       
         offsets[UNDEADINVASION_GRASS_CANDIDATE].push_back(offset);                //Store offset reference

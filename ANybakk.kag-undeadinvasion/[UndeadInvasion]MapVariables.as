@@ -8,54 +8,52 @@ namespace UndeadInvasion {
 
   namespace MapVariables {
   
-    const TileType TILE_OFFSET_START = 384; //Row 25
   
-    //Iron tile
-    const TileType[] TILE_OFFSETS_IRON = {
-      TILE_OFFSET_START, 385, 386, 387, 388, 389  //Variants
-      , 390, 391, 392, 393, 394     //States
-    };
-    const uint TILE_FLAGS_IRON =
-      Tile::SOLID
-      | Tile::COLLISION
-      //| Tile::BACKGROUND
-      //| Tile::LADDER
-      //| Tile::LIGHT_PASSES
-      //| Tile::WATER_PASSES
-      //| Tile::FLAMMABLE
-      //| Tile::PLATFORM
-      //| Tile::LIGHT_SOURCE
-    ;
-    const f32 TILE_HARVEST_RATIO_IRON = 1.0f; //Equal to incoming damage
   
-    //Aluminium tile
-    const TileType[] TILE_OFFSETS_ALUMINIUM = {
-      400, 401, 402, 403, 404, 405  //Variants (Row 26)
-      , 406, 407, 408, 409, 410     //States
+    const string[] TILE_HARVEST_BLOB_NAMES = {
+        "mat_iron"
+      , "mat_aluminium"
+      , "mat_coal"
     };
-    const uint TILE_FLAGS_ALUMINIUM =
-      Tile::SOLID
-      | Tile::COLLISION
-    ;
-    const f32 TILE_HARVEST_RATIO_ALUMINIUM = 1.0f; //Equal to incoming damage
-  
-    //Coal tile
-    const TileType[] TILE_OFFSETS_COAL = {
-      416, 417, 418, 419, 420, 421  //Variants (Row 27)
-      , 422, 423, 424, 425, 426     //States
-    };
-    const uint TILE_FLAGS_COAL =
-      Tile::SOLID
-      | Tile::COLLISION
-      | Tile::FLAMMABLE
-    ;
-    const f32 TILE_HARVEST_RATIO_COAL = 1.0f; //Equal to incoming damage
     
-    const TileType[][] TILE_OFFSETS = {
-      TILE_OFFSETS_IRON,
-      TILE_OFFSETS_ALUMINIUM,
-      TILE_OFFSETS_COAL
+    const string[][] TILE_HARVEST_SOUND_FILES = {
+        { "dig_stone1.ogg", "dig_stone2.ogg", "dig_stone3.ogg" }
+      , { "dig_stone1.ogg", "dig_stone2.ogg", "dig_stone3.ogg" }
+      , { "dig_stone1.ogg", "dig_stone2.ogg", "dig_stone3.ogg" }
     };
+    
+    const string[][] TILE_DEPLETED_SOUND_FILES = {
+        { "destroy_stone.ogg" }
+      , { "destroy_stone.ogg" }
+      , { "destroy_stone.ogg" }
+    };
+    
+    
+    const u16[] TILE_ROW_NUMBERS = {
+        25  //Iron
+      , 26  //Aluminium
+      , 27  //Coal
+    };
+    
+    const uint[] TILE_FLAGS = {
+        Tile::SOLID | Tile::COLLISION                     //Iron
+      , Tile::SOLID | Tile::COLLISION                     //Aluminium
+      , Tile::SOLID | Tile::COLLISION | Tile::FLAMMABLE   //Coal
+    };
+    
+    const f32[] TILE_HARVEST_RATIOS = {
+        1.0f  //Iron
+      , 1.0f  //Aluminium
+      , 1.0f  //Coal
+    };
+  
+    //Define a step time for grass growth (in seconds, zero for every tick, negative to disable)
+    const f32 GRASS_GROWTH_STEP_TIME = 0.25f;
+    
+    //Define an amount of grass to (potentially) grow per step
+    const u8 GRASS_GROWTH_STEP_AMOUNT = 1;
+    
+    
     
   }
   

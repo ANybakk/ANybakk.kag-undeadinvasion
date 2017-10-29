@@ -31,3 +31,9 @@ TileType server_onTileHit(CMap@ this, f32 damage, u32 index, TileType oldTileTyp
   return UndeadInvasion::Map::server_onTileHit(this, damage, index, oldTileType);
   
 }
+
+void onSetTile(CMap@ this, u32 index, TileType newtile, TileType oldtile) {
+
+  UndeadInvasion::Map::onSetTile_(this, index, newtile, oldtile);
+  
+}

@@ -6,9 +6,8 @@
  * Author: ANybakk
  */
 
-#include "[UndeadInvasion]Variables.as";
-#include "[UndeadInvasion]DefaultPNGLoader.as";
 #include "[UndeadInvasion]MapVariables.as";
+#include "[UndeadInvasion]DefaultPNGLoader.as";
 
 
 
@@ -32,7 +31,7 @@ namespace UndeadInvasion {
      * Loading function
      */
     bool LoadMap(CMap@ this, const string& in fileName) {
-    
+
       print("[UndeadInvasion::Map::LoadMap] fileName=" + fileName);
       
       UndeadInvasion::DefaultPNGLoader loader();
@@ -48,7 +47,7 @@ namespace UndeadInvasion {
      */
     void onTick(CMap@ this) {
     
-      f32 vGrassGrowthStepTime = UndeadInvasionVariables::GRASS_GROWTH_STEP_TIME;
+      f32 vGrassGrowthStepTime = UndeadInvasion::MapVariables::GRASS_GROWTH_STEP_TIME;
       
       //Check if zero or positive (not disabled)
       if(vGrassGrowthStepTime >= 0.0f) {
@@ -57,7 +56,7 @@ namespace UndeadInvasion {
         if(vGrassGrowthStepTime == 0.0f || getGameTime() % (vGrassGrowthStepTime * getTicksASecond()) == 0){
         
           //Grow grass
-          growGrassCandidates(this, UndeadInvasionVariables::GRASS_GROWTH_STEP_AMOUNT);
+          growGrassCandidates(this, UndeadInvasion::MapVariables::GRASS_GROWTH_STEP_AMOUNT);
           
         }
         
@@ -68,39 +67,53 @@ namespace UndeadInvasion {
     
     
     /**
-     * Hit function
+     * Tile hit function (server-side)
      */
     TileType server_onTileHit(CMap@ this, f32 damage, u32 index, TileType oldTileType) {
-      
+    
       TileType newType = oldTileType;
       
       //Check if custom tile (don't mess with vanilla stuff)
-      if(oldTileType >= UndeadInvasion::MapVariables::TILE_OFFSET_START) {
+      if(oldTileType >= (UndeadInvasion::MapVariables::TILE_ROW_NUMBERS[0] - 1) * 16) {
       
-        TileType[][] offsets = UndeadInvasion::MapVariables::TILE_OFFSETS;
-      
-        //Iterate over all custom types
-        for(int i=0; i<offsets.length; i++) {
+        //Iterate through tile types
+        for(int i=0; i<UndeadInvasion::MapVariables::TILE_ROW_NUMBERS.length; i++) {
+        
+          //Check relative to current type (row)
+          int relativeDifference = oldTileType % ((UndeadInvasion::MapVariables::TILE_ROW_NUMBERS[i] - 1) * 16);
           
-          //Iterate over all tiles of this type
-          for(int j=0; j<offsets[i].length; j++) {
+          //Check if correct type (row)
+          if(relativeDifference < 16) {
           
-            //Check if match
-            if(offsets[i][j] == oldTileType) {
+            //Check if not reduced state
+            //TODO: Move reduced state to last 8 tiles: <7
+            if(relativeDifference < 6) {
             
-              //If not last, increment (decrease "health")
-              if(j < offsets[i].length - 1) {
-                newType++;
-              }
-              
-              //Otherwise, empty ("depleted")
-              else {
-                newType = CMap::tile_empty;
-              }
-              
-              break;
+              //Reduce state (decrease "health")
+              newType = (UndeadInvasion::MapVariables::TILE_ROW_NUMBERS[i] - 1) * 16 + 6; //TODO: +7
               
             }
+            
+            //Otherwise, already reduced state
+            else {
+            
+              //Check if last state
+              if(relativeDifference == 10) { //TODO: == (16-5)
+              
+                newType = CMap::tile_empty;
+                
+              }
+              
+              else {
+              
+                newType++;
+                
+              }
+              
+            }
+            
+            //Stop checking, right type was found
+            break;
             
           }
           
@@ -109,6 +122,78 @@ namespace UndeadInvasion {
       }
       
       return newType;
+      
+    }
+    
+    
+    
+    /**
+     * Tile set function
+     */
+    void onSetTile_(CMap@ this, u32 index, TileType newTileType, TileType oldTileType) {
+    
+      TileType customType = 0;
+      u16 customTileStart = (UndeadInvasion::MapVariables::TILE_ROW_NUMBERS[0] - 1) * 16;
+      
+      //Check if old tile was custom
+      if(oldTileType >= customTileStart) {
+        customType = oldTileType;
+      }
+      
+      //Check if new tile is custom and old is not (happens when map is loaded)
+      if(newTileType >= customTileStart && oldTileType < customTileStart) {
+        customType = newTileType;
+      }
+      
+      //Check if custom tile (don't mess with vanilla stuff)
+      if(customType != 0) {
+      
+        //Iterate through tile types
+        for(int i=0; i<UndeadInvasion::MapVariables::TILE_ROW_NUMBERS.length; i++) {
+        
+          //Check relative to current type (row)
+          int relativeDifference = customType % ((UndeadInvasion::MapVariables::TILE_ROW_NUMBERS[i] - 1) * 16);
+          
+          //Check if correct type (row)
+          if(relativeDifference < 16) {
+          
+            string[] soundFiles;
+            
+            //Check if last state
+            if(relativeDifference == 10) { //TODO: == (16-5)
+            
+              //Get depleted sounds
+              soundFiles = UndeadInvasion::MapVariables::TILE_DEPLETED_SOUND_FILES[i];
+
+            }
+            
+            //Otherwise, not last state
+            else {
+            
+              //Get harvest sounds
+              soundFiles = UndeadInvasion::MapVariables::TILE_HARVEST_SOUND_FILES[i];
+              
+              //Reset flags
+              this.AddTileFlag(index, UndeadInvasion::MapVariables::TILE_FLAGS[i]);
+              
+            }
+            
+            //Recall if old is custom (not map load)
+            if(oldTileType == customType) {
+            
+              //Play sound
+              Sound::Play(soundFiles[XORRandom(soundFiles.length)], this.getTileWorldPosition(index));
+              
+            }
+            
+            //Stop checking, right type was found
+            break;
+            
+          }
+          
+        }
+        
+      }
       
     }
     

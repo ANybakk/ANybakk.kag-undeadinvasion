@@ -15,7 +15,7 @@
 
 #include "[Base]Rules.as";
 
-#include "[UndeadInvasion]Variables.as";
+#include "[UndeadInvasion]RulesVariables.as";
 #include "[UndeadInvasion]EntitySpawn.as";
 #include "[UndeadInvasion]DefaultRespawnSystem.as";
 
@@ -50,35 +50,22 @@ namespace UndeadInvasion {
     
     
     
-    /**
-     * Default constructor
-     */
     DefaultRulesCore() {
       
       super();
       
-      //Finished
-      
     } //End constructor
     
     
     
-    /**
-     * Constructor
-     */
     DefaultRulesCore(CRules@ rules, RespawnSystem@ respawnSystem) {
       
       super(rules, respawnSystem);
       
-      //Finished
-      
     } //End constructor
     
     
     
-    /**
-     * Setup method
-     */
     void Setup(CRules@ rules = null, RespawnSystem@ respawnSystem = null) override {
     
       //Call super class' version of this method
@@ -91,7 +78,7 @@ namespace UndeadInvasion {
       mStartTime = getGameTime();
       
       //Retrieve maximum undead count
-      mUndeadCountLimit = UndeadInvasionVariables::UNDEAD_SPAWN_MAX_COUNT;
+      mUndeadCountLimit = UndeadInvasion::RulesVariables::UNDEAD_SPAWN_MAX_COUNT;
       
       //Set game state
       rules.SetCurrentState(WARMUP);
@@ -102,15 +89,10 @@ namespace UndeadInvasion {
       //Create audio meta entity
       server_CreateBlob("Undead Invasion Audio");
       
-      //Finished
-      
     } //End method
     
     
     
-    /**
-     * Update method
-     */
     void Update() override {
       
       //Check if game is over
@@ -228,8 +210,6 @@ namespace UndeadInvasion {
       
       //Call super class' version of this method
       RulesCore::Update();
-      
-      //Finished
 
     } //End method
     
@@ -244,10 +224,10 @@ namespace UndeadInvasion {
       int lapsedTime = Base::Rules::getLapsedTime(rules);
       
       //Determine what factor to use depending on time of day
-      u8 dayOfTimeFactor = (Base::Rules::isNightTime(rules)) ? UndeadInvasionVariables::UNDEAD_SPAWN_NIGHTTIMEFACTOR : UndeadInvasionVariables::UNDEAD_SPAWN_DAYTIMEFACTOR;
+      u8 dayOfTimeFactor = (Base::Rules::isNightTime(rules)) ? UndeadInvasion::RulesVariables::UNDEAD_SPAWN_NIGHTTIMEFACTOR : UndeadInvasion::RulesVariables::UNDEAD_SPAWN_DAYTIMEFACTOR;
       
       //Every second
-      if(lapsedTime % (dayOfTimeFactor * UndeadInvasionVariables::UNDEAD_SPAWN_INTERVAL_4 * getTicksASecond()) == 0) {
+      if(lapsedTime % (dayOfTimeFactor * UndeadInvasion::RulesVariables::UNDEAD_SPAWN_INTERVAL_4 * getTicksASecond()) == 0) {
       
         //Create an array of blob references
         CBlob@[] undeadBlobs;
@@ -283,7 +263,7 @@ namespace UndeadInvasion {
             
             //Every 4th second, check whether the spawn site's health is 3/4 - 4/4
             if(
-                lapsedTime % (dayOfTimeFactor * UndeadInvasionVariables::UNDEAD_SPAWN_INTERVAL_1 * getTicksASecond()) == 0 
+                lapsedTime % (dayOfTimeFactor * UndeadInvasion::RulesVariables::UNDEAD_SPAWN_INTERVAL_1 * getTicksASecond()) == 0 
                 && spawnSite.getHealth() >=(spawnSite.getInitialHealth() * 3/4)) {
               
               spawnUndead(spawnSite.getPosition());
@@ -292,7 +272,7 @@ namespace UndeadInvasion {
             
             //Every 3rd second, check whether the spawn site's health is 2/4 - 3/4
             else if(
-                lapsedTime % (dayOfTimeFactor * UndeadInvasionVariables::UNDEAD_SPAWN_INTERVAL_2 * getTicksASecond()) == 0 
+                lapsedTime % (dayOfTimeFactor * UndeadInvasion::RulesVariables::UNDEAD_SPAWN_INTERVAL_2 * getTicksASecond()) == 0 
                 && spawnSite.getHealth() >=(spawnSite.getInitialHealth() * 2/4)
                 && spawnSite.getHealth() < (spawnSite.getInitialHealth() * 3/4)) {
               
@@ -302,7 +282,7 @@ namespace UndeadInvasion {
             
             //Every 2nd second, check whether the spawn site's health is 1/4 - 2/4
             else if(
-                lapsedTime % (dayOfTimeFactor * UndeadInvasionVariables::UNDEAD_SPAWN_INTERVAL_3 * getTicksASecond()) == 0 
+                lapsedTime % (dayOfTimeFactor * UndeadInvasion::RulesVariables::UNDEAD_SPAWN_INTERVAL_3 * getTicksASecond()) == 0 
                 && spawnSite.getHealth() >=(spawnSite.getInitialHealth() * 1/4)
                 && spawnSite.getHealth() < (spawnSite.getInitialHealth() * 2/4)) {
               
@@ -336,13 +316,13 @@ namespace UndeadInvasion {
     bool allTeamsHaveEnoughPlayers()	{
     
       //Retrieve minimum player count variable
-      s8 playerCountMinimum = UndeadInvasionVariables::PLAYER_COUNT_START_MINIMUM;
+      s8 playerCountMinimum = UndeadInvasion::RulesVariables::PLAYER_COUNT_START_MINIMUM;
       
       //Check if player count minimum is not disabled (negative number)
       if(playerCountMinimum >= 0) {
       
         //Finished, return result from other version of this method
-        return allTeamsHaveNumberOfPlayers(UndeadInvasionVariables::PLAYER_COUNT_START_MINIMUM);
+        return allTeamsHaveNumberOfPlayers(UndeadInvasion::RulesVariables::PLAYER_COUNT_START_MINIMUM);
         
       }
       
@@ -391,7 +371,7 @@ namespace UndeadInvasion {
     bool survivorTeamsHasEnoughPlayers() {
       
       //Finished, return result from other version of this method
-      return survivorTeamsHasEnoughPlayers(UndeadInvasionVariables::SURVIVOR_COUNT_START_MINIMUM);
+      return survivorTeamsHasEnoughPlayers(UndeadInvasion::RulesVariables::SURVIVOR_COUNT_START_MINIMUM);
     
     } //End method
     
@@ -504,7 +484,7 @@ namespace UndeadInvasion {
         u8 randomChance = XORRandom(100);
         
         //Get a reference to the spawn mix array
-        UndeadInvasion::EntitySpawn[] spawnMix = UndeadInvasionVariables::UNDEAD_ENTITY_SPAWN_MIX;
+        UndeadInvasion::EntitySpawn[] spawnMix = UndeadInvasion::RulesVariables::UNDEAD_ENTITY_SPAWN_MIX;
         
         //Create an entity spawn object handle
         UndeadInvasion::EntitySpawn spawn;
@@ -516,7 +496,7 @@ namespace UndeadInvasion {
         for(u8 i=0; i<spawnMix.length; i++) {
         
           //Keep a reference to this entity spawn object
-          spawn = UndeadInvasionVariables::UNDEAD_ENTITY_SPAWN_MIX[i];
+          spawn = UndeadInvasion::RulesVariables::UNDEAD_ENTITY_SPAWN_MIX[i];
           
           //Check if random chance value is within this window
           if(randomChance > accumulatedChance && randomChance < accumulatedChance + spawn.mSpawnChance) {
