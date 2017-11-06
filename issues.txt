@@ -2,4 +2,3 @@
 
 - Mausoleums do not change sprite frame like they should (they appear closed)
 
-- When all players die, the game ends, but next map is not started

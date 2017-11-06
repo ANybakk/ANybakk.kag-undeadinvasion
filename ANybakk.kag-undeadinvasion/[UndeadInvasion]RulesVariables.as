@@ -57,6 +57,9 @@ namespace UndeadInvasion {
       , UndeadInvasion::EntitySpawn("Devilish Zombie" ,  5)   //Devilish Zombie 5% chance
     };
     
+    //Cooldown between game over and next map (in seconds)
+    const u16 NEXT_MAP_COOLDOWN = 5;
+    
     
     
   }

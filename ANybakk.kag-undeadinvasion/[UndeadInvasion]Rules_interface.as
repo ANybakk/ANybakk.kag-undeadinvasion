@@ -21,3 +21,15 @@ void onRestart(CRules@ this) {
   UndeadInvasion::Rules::onRestart(this);
   
 }
+
+void onStateChange(CRules@ this, const u8 oldState) {
+
+  UndeadInvasion::Rules::onStateChange(this, oldState);
+  
+}
+
+void onTick(CRules@ this) {
+
+  UndeadInvasion::Rules::onTick(this);
+  
+}

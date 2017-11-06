@@ -144,6 +144,9 @@ namespace UndeadInvasion {
         
           //Show a game over message
           rules.SetGlobalMessage("The survivors have failed to defend this area. Other areas await!");
+          
+          //rules.SetTeamWon(0);
+          //sv_mapautocycle = true;
         
         }
         

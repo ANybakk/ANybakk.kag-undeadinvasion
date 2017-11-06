@@ -11,6 +11,7 @@
 
 #include "[Base]Rules.as";
 
+#include "[UndeadInvasion]RulesVariables.as";
 #include "[UndeadInvasion]DefaultRulesCore.as";
 #include "[UndeadInvasion]DefaultRespawnSystem.as";
 
@@ -23,7 +24,7 @@ namespace UndeadInvasion {
   
   
     /**
-     * Initialization event function.
+     * Initialization
      */
     void onInit(CRules@ this) {
     
@@ -42,7 +43,7 @@ namespace UndeadInvasion {
     
     
     /*
-     * Restart event function
+     * Restart
      */
     void onRestart(CRules@ this) {
     
@@ -62,6 +63,50 @@ namespace UndeadInvasion {
       
       //Finished
       return;
+      
+    }
+    
+    
+    
+    /**
+     * State change
+     */
+    void onStateChange(CRules@ this, const u8 oldState) {
+    
+      print("[UndeadInvasion::Rules::onStateChange] (oldState=" + oldState + ")");
+      
+      if(this.getCurrentState() == GAME_OVER) {
+      
+        this.set_u16("UndeadInvasion::Rules::nextMapCooldown", UndeadInvasion::RulesVariables::NEXT_MAP_COOLDOWN * getTicksASecond());
+        
+      }
+      
+    }
+    
+    
+    
+    /**
+     * Tick
+     */
+    void onTick(CRules@ this) {
+    
+      if(this.getCurrentState() == GAME_OVER) {
+      
+        u16 cooldown = this.get_u16("UndeadInvasion::Rules::nextMapCooldown");
+        
+        if(cooldown == 0) {
+        
+          LoadNextMap();
+          
+        }
+        
+        else {
+        
+          this.set_u16("UndeadInvasion::Rules::nextMapCooldown", cooldown-1);
+          
+        }
+        
+      }
       
     }
     
