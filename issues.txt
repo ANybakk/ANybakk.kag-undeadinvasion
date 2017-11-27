@@ -1,3 +1,5 @@
+- Buttons in tool menu for producers are not showing up after last game patch
+
 - Destroying all undead spawn sites does not end the game
 
 - Mausoleums do not change sprite frame like they should (they appear closed)

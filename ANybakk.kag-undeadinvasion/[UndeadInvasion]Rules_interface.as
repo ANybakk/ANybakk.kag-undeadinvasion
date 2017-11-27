@@ -33,3 +33,9 @@ void onTick(CRules@ this) {
   UndeadInvasion::Rules::onTick(this);
   
 }
+
+void onPlayerRequestSpawn(CRules@ this, CPlayer@ player) {
+
+  UndeadInvasion::Rules::onPlayerRequestSpawn(this, player);
+  
+}

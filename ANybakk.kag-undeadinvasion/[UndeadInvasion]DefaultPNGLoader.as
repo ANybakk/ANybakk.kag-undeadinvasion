@@ -164,17 +164,17 @@ namespace UndeadInvasion {
     /**
      * Handles a pixel in the map
      */
-    void handlePixel(SColor color_pixel, int offset) override {
+    void handlePixel(const SColor &in pixel, int offset) override {
     
       //Call super class' version of this method, to make sure we don't miss out on any default behaviour
-      PNGLoader::handlePixel(color_pixel, offset);
+      PNGLoader::handlePixel(pixel, offset);
       
       CBlob@ spawnedBlob;
       
       //Blocks
       
       //Iron
-      if(color_pixel == UndeadInvasion::DefaultPNGLoaderVariables::COLOR_TILE_IRON) {
+      if(pixel.color == UndeadInvasion::DefaultPNGLoaderVariables::COLOR_TILE_IRON) {
         for(int i=0; i<UndeadInvasion::MapVariables::TILE_HARVEST_BLOB_NAMES.length; i++) {
           if(UndeadInvasion::MapVariables::TILE_HARVEST_BLOB_NAMES[i] == "mat_iron") {
             map.SetTile(offset, (UndeadInvasion::MapVariables::TILE_ROW_NUMBERS[i] - 1) * 16);
@@ -187,7 +187,7 @@ namespace UndeadInvasion {
       //Blobs
       
       //Undead spawn
-      else if(color_pixel == UndeadInvasion::DefaultPNGLoaderVariables::COLOR_MAUSOLEUM) {
+      else if(pixel.color == UndeadInvasion::DefaultPNGLoaderVariables::COLOR_MAUSOLEUM) {
         
         @spawnedBlob = spawnBlob(map, "Mausoleum", offset, -1);     //Spawn blob
         //@spawnedBlob.AddScript("abc.as");                         //Add behaviour through a script
@@ -197,7 +197,7 @@ namespace UndeadInvasion {
       }
       
       //Survivor spawn
-      else if(color_pixel == UndeadInvasion::DefaultPNGLoaderVariables::COLOR_SURVIVOR_CAMP) {
+      else if(pixel.color == UndeadInvasion::DefaultPNGLoaderVariables::COLOR_SURVIVOR_CAMP) {
         
         @spawnedBlob = spawnBlob(map, "SurvivorCamp", offset, -1);  //Spawn blob
         //@spawnedBlob.AddScript("abc.as");                         //Add behaviour through a script
@@ -209,7 +209,7 @@ namespace UndeadInvasion {
       }
       
       //Bed
-      else if(color_pixel == UndeadInvasion::DefaultPNGLoaderVariables::COLOR_BED) {
+      else if(pixel.color == UndeadInvasion::DefaultPNGLoaderVariables::COLOR_BED) {
       
         @spawnedBlob = spawnBlob(map, "Bed", offset, -1);            //Spawn blob
         offsets[autotile_offset].push_back(offset);                  //Store offset reference, generic tile
@@ -219,7 +219,7 @@ namespace UndeadInvasion {
       //Other
       
       //Empty/sky
-      else if(color_pixel == sky || color_pixel == color_tile_grass) {
+      else if(pixel.color == map_colors::sky || pixel.color == map_colors::tile_grass) {
       
         offsets[UNDEADINVASION_GRASS_CANDIDATE].push_back(offset);                //Store offset reference
         
@@ -238,14 +238,14 @@ namespace UndeadInvasion {
     void handleSectorPixel(SColor pixelColor, int pixelOffset) {
     
       //Check if the color value matches no-build sector start
-      if(pixelColor == UndeadInvasion::DefaultPNGLoaderVariables::COLOR_SECTOR_NOBUILD_START) {
+      if(pixelColor.color == UndeadInvasion::DefaultPNGLoaderVariables::COLOR_SECTOR_NOBUILD_START) {
       
         mSectorOffsets[NOBUILD_START].push_back(pixelOffset); //Store offset reference, no-build start point
         
       }
 
       //Check if the color value matches no-build sector start
-      if(pixelColor == UndeadInvasion::DefaultPNGLoaderVariables::COLOR_SECTOR_NOBUILD_END) {
+      if(pixelColor.color == UndeadInvasion::DefaultPNGLoaderVariables::COLOR_SECTOR_NOBUILD_END) {
       
         mSectorOffsets[NOBUILD_END].push_back(pixelOffset); //Store offset reference, no-build end point
         
